@@ -81,6 +81,313 @@ namespace LaoCai.SoftwareManagement.Infrastructure.Migrations
                     b.ToTable("audit_logs", "audit");
                 });
 
+            modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Catalog.CatalogProposal", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<Guid?>("CreatedSoftwareId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_software_id");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<Guid>("ProposedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("proposed_by_user_id");
+
+                    b.Property<string>("RejectionReason")
+                        .HasColumnType("text")
+                        .HasColumnName("rejection_reason");
+
+                    b.Property<DateTime?>("ReviewedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("reviewed_at");
+
+                    b.Property<Guid?>("ReviewedByUserId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("reviewed_by_user_id");
+
+                    b.Property<string>("SoftwareName")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("software_name");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("character varying(30)")
+                        .HasColumnName("status");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_catalog_proposals");
+
+                    b.HasIndex("CreatedSoftwareId")
+                        .HasDatabaseName("ix_catalog_proposals_created_software_id");
+
+                    b.HasIndex("OrganizationId")
+                        .HasDatabaseName("ix_catalog_proposals_organization_id");
+
+                    b.HasIndex("ProposedByUserId")
+                        .HasDatabaseName("ix_catalog_proposals_proposed_by_user_id");
+
+                    b.HasIndex("ReviewedByUserId")
+                        .HasDatabaseName("ix_catalog_proposals_reviewed_by_user_id");
+
+                    b.ToTable("catalog_proposals", "catalog");
+                });
+
+            modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Catalog.Software", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<Guid>("CategoryId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("category_id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Description")
+                        .HasColumnType("text")
+                        .HasColumnName("description");
+
+                    b.Property<string>("LifecycleStatus")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("lifecycle_status");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<Guid>("VendorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("vendor_id");
+
+                    b.Property<long>("Version")
+                        .HasColumnType("bigint")
+                        .HasColumnName("version");
+
+                    b.HasKey("Id")
+                        .HasName("pk_software");
+
+                    b.HasIndex("CategoryId")
+                        .HasDatabaseName("ix_software_category_id");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_software_code");
+
+                    b.HasIndex("VendorId")
+                        .HasDatabaseName("ix_software_vendor_id");
+
+                    b.ToTable("software", "catalog");
+                });
+
+            modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Catalog.SoftwareCategory", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_software_categories");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_software_categories_code");
+
+                    b.ToTable("software_categories", "catalog");
+                });
+
+            modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Catalog.SoftwareRelease", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime>("ReleaseDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("release_date");
+
+                    b.Property<Guid>("SoftwareId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("software_id");
+
+                    b.Property<DateTime?>("SupportEndDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("support_end_date");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<string>("VersionName")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("version_name");
+
+                    b.HasKey("Id")
+                        .HasName("pk_software_releases");
+
+                    b.HasIndex("SoftwareId", "VersionName")
+                        .IsUnique()
+                        .HasDatabaseName("ix_software_releases_software_id_version_name");
+
+                    b.ToTable("software_releases", "catalog");
+                });
+
+            modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Catalog.Vendor", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("code");
+
+                    b.Property<string>("ContactInfo")
+                        .HasColumnType("text")
+                        .HasColumnName("contact_info");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_vendors");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_vendors_code");
+
+                    b.ToTable("vendors", "catalog");
+                });
+
             modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Iam.Permission", b =>
                 {
                     b.Property<Guid>("Id")
@@ -291,6 +598,227 @@ namespace LaoCai.SoftwareManagement.Infrastructure.Migrations
                     b.ToTable("user_role_scopes", "iam");
                 });
 
+            modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Organizations.Organization", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)")
+                        .HasColumnName("code");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("boolean")
+                        .HasColumnName("is_active");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_organizations");
+
+                    b.HasIndex("Code")
+                        .IsUnique()
+                        .HasDatabaseName("ix_organizations_code");
+
+                    b.ToTable("organizations", "organizations");
+                });
+
+            modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Organizations.OrganizationSuccession", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<DateTime>("EffectiveDate")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("effective_date");
+
+                    b.Property<string>("Note")
+                        .HasColumnType("text")
+                        .HasColumnName("note");
+
+                    b.Property<Guid>("PredecessorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("predecessor_id");
+
+                    b.Property<Guid>("SuccessorId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("successor_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.HasKey("Id")
+                        .HasName("pk_organization_successions");
+
+                    b.HasIndex("PredecessorId")
+                        .HasDatabaseName("ix_organization_successions_predecessor_id");
+
+                    b.HasIndex("SuccessorId")
+                        .HasDatabaseName("ix_organization_successions_successor_id");
+
+                    b.ToTable("organization_successions", "organizations");
+                });
+
+            modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Organizations.OrganizationVersion", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid")
+                        .HasColumnName("id");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("created_at");
+
+                    b.Property<Guid?>("CreatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("created_by");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("character varying(255)")
+                        .HasColumnName("name");
+
+                    b.Property<Guid>("OrganizationId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("organization_id");
+
+                    b.Property<Guid?>("ParentId")
+                        .HasColumnType("uuid")
+                        .HasColumnName("parent_id");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("updated_at");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uuid")
+                        .HasColumnName("updated_by");
+
+                    b.Property<DateTime>("ValidFrom")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("valid_from");
+
+                    b.Property<DateTime?>("ValidTo")
+                        .HasColumnType("timestamp with time zone")
+                        .HasColumnName("valid_to");
+
+                    b.HasKey("Id")
+                        .HasName("pk_organization_versions");
+
+                    b.HasIndex("ParentId")
+                        .HasDatabaseName("ix_organization_versions_parent_id");
+
+                    b.HasIndex("OrganizationId", "ValidFrom")
+                        .HasDatabaseName("ix_organization_versions_organization_id_valid_from");
+
+                    b.ToTable("organization_versions", "organizations");
+                });
+
+            modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Catalog.CatalogProposal", b =>
+                {
+                    b.HasOne("LaoCai.SoftwareManagement.Domain.Entities.Catalog.Software", "CreatedSoftware")
+                        .WithMany()
+                        .HasForeignKey("CreatedSoftwareId")
+                        .OnDelete(DeleteBehavior.SetNull)
+                        .HasConstraintName("fk_catalog_proposals_software_created_software_id");
+
+                    b.HasOne("LaoCai.SoftwareManagement.Domain.Entities.Organizations.Organization", "Organization")
+                        .WithMany()
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_catalog_proposals_organizations_organization_id");
+
+                    b.HasOne("LaoCai.SoftwareManagement.Domain.Entities.Iam.User", "ProposedByUser")
+                        .WithMany()
+                        .HasForeignKey("ProposedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_catalog_proposals_users_proposed_by_user_id");
+
+                    b.HasOne("LaoCai.SoftwareManagement.Domain.Entities.Iam.User", "ReviewedByUser")
+                        .WithMany()
+                        .HasForeignKey("ReviewedByUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_catalog_proposals_users_reviewed_by_user_id");
+
+                    b.Navigation("CreatedSoftware");
+
+                    b.Navigation("Organization");
+
+                    b.Navigation("ProposedByUser");
+
+                    b.Navigation("ReviewedByUser");
+                });
+
+            modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Catalog.Software", b =>
+                {
+                    b.HasOne("LaoCai.SoftwareManagement.Domain.Entities.Catalog.SoftwareCategory", "Category")
+                        .WithMany("SoftwareList")
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_software_software_categories_category_id");
+
+                    b.HasOne("LaoCai.SoftwareManagement.Domain.Entities.Catalog.Vendor", "Vendor")
+                        .WithMany("SoftwareList")
+                        .HasForeignKey("VendorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_software_vendors_vendor_id");
+
+                    b.Navigation("Category");
+
+                    b.Navigation("Vendor");
+                });
+
+            modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Catalog.SoftwareRelease", b =>
+                {
+                    b.HasOne("LaoCai.SoftwareManagement.Domain.Entities.Catalog.Software", "Software")
+                        .WithMany("Releases")
+                        .HasForeignKey("SoftwareId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_software_releases_software_software_id");
+
+                    b.Navigation("Software");
+                });
+
             modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Iam.RolePermission", b =>
                 {
                     b.HasOne("LaoCai.SoftwareManagement.Domain.Entities.Iam.Permission", "Permission")
@@ -333,6 +861,62 @@ namespace LaoCai.SoftwareManagement.Infrastructure.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Organizations.OrganizationSuccession", b =>
+                {
+                    b.HasOne("LaoCai.SoftwareManagement.Domain.Entities.Organizations.Organization", "Predecessor")
+                        .WithMany()
+                        .HasForeignKey("PredecessorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_organization_successions_organizations_predecessor_id");
+
+                    b.HasOne("LaoCai.SoftwareManagement.Domain.Entities.Organizations.Organization", "Successor")
+                        .WithMany()
+                        .HasForeignKey("SuccessorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired()
+                        .HasConstraintName("fk_organization_successions_organizations_successor_id");
+
+                    b.Navigation("Predecessor");
+
+                    b.Navigation("Successor");
+                });
+
+            modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Organizations.OrganizationVersion", b =>
+                {
+                    b.HasOne("LaoCai.SoftwareManagement.Domain.Entities.Organizations.Organization", "Organization")
+                        .WithMany("Versions")
+                        .HasForeignKey("OrganizationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired()
+                        .HasConstraintName("fk_organization_versions_organizations_organization_id");
+
+                    b.HasOne("LaoCai.SoftwareManagement.Domain.Entities.Organizations.Organization", "Parent")
+                        .WithMany()
+                        .HasForeignKey("ParentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .HasConstraintName("fk_organization_versions_organizations_parent_id");
+
+                    b.Navigation("Organization");
+
+                    b.Navigation("Parent");
+                });
+
+            modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Catalog.Software", b =>
+                {
+                    b.Navigation("Releases");
+                });
+
+            modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Catalog.SoftwareCategory", b =>
+                {
+                    b.Navigation("SoftwareList");
+                });
+
+            modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Catalog.Vendor", b =>
+                {
+                    b.Navigation("SoftwareList");
+                });
+
             modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Iam.Permission", b =>
                 {
                     b.Navigation("RolePermissions");
@@ -346,6 +930,11 @@ namespace LaoCai.SoftwareManagement.Infrastructure.Migrations
             modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Iam.User", b =>
                 {
                     b.Navigation("RoleScopes");
+                });
+
+            modelBuilder.Entity("LaoCai.SoftwareManagement.Domain.Entities.Organizations.Organization", b =>
+                {
+                    b.Navigation("Versions");
                 });
 #pragma warning restore 612, 618
         }

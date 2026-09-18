@@ -1,17 +1,20 @@
 # SPEC — Hệ thống quản lý phần mềm chuyển đổi số tại Lào Cai
 
-> Phiên bản: 1.0 | Ngày lập: 18/09/2026 | Trạng thái: đặc tả đề xuất cho MVP.
-> Nguồn: [architecture.md](./architecture.md), phiên bản 1.0 ngày 17/09/2026.
+> Phiên bản: 1.1 | Ngày lập: 18/09/2026 | Trạng thái: đặc tả đề xuất cho MVP.
+> Nguồn: [architecture.md](./architecture.md), phiên bản 1.1 cập nhật phạm vi ngày 18/09/2026.
 > Cấu trúc bắt buộc: IDEA → Requirements → Design → Tasks.
 > Tài liệu phục vụ triển khai và nghiệm thu; không khẳng định hệ thống đã được xây dựng hoặc các giả định đã được chủ quản phê duyệt.
+> Phạm vi đã xác nhận: các phần mềm được đưa vào quản lý đã hoàn thành. Các task trong tài liệu là công việc xây dựng hệ thống quản lý các phần mềm đó.
 
 ## 1. IDEA
 
 ### 1.1. Bài toán
 
-Cần một nơi tập trung để cán bộ theo dõi phần mềm, đơn vị sử dụng, các lần triển khai, tình trạng vận hành, hợp đồng và thời hạn quyền sử dụng. Dữ liệu phải có nguồn cập nhật, có quy trình duyệt, có lịch sử và chỉ được truy cập trong phạm vi được giao.
+Cần một nơi tập trung để cán bộ quản lý danh mục các phần mềm đã hoàn thành, đơn vị quản lý/sử dụng, các bản cài đặt hiện có, tình trạng khai thác và vận hành, hợp đồng, bảo trì và thời hạn quyền sử dụng. Hệ thống không quản lý dự án phát triển phần mềm hoặc theo dõi phần trăm hoàn thành. Dữ liệu phải có nguồn cập nhật, có quy trình duyệt hồ sơ, có lịch sử và chỉ được truy cập trong phạm vi được giao.
 
 Một phần mềm có thể được triển khai ở nhiều đơn vị và nhiều môi trường. Một đơn vị có thể sử dụng nhiều phần mềm. Vì vậy, danh mục phần mềm dùng chung phải tách khỏi hồ sơ triển khai tại từng đơn vị; bản đang sửa phải tách khỏi bản đã duyệt đang được dùng trong báo cáo chính thức.
+
+Trong tài liệu, `Deployment`/“hồ sơ triển khai” là hồ sơ ghi nhận việc cài đặt, sử dụng và vận hành phần mềm đã hoàn thành tại đơn vị. `Revision` là phiên bản của hồ sơ dữ liệu; Draft/Submitted/Approved/Rejected là trạng thái duyệt hồ sơ, không phải trạng thái hoàn thành hay nghiệm thu sản phẩm phần mềm. Phần mềm đã hoàn thành có thể chưa được sử dụng, đang sử dụng, tạm dừng hoặc đã ngừng sử dụng.
 
 ### 1.2. Kết quả mong muốn
 
@@ -35,11 +38,11 @@ Một phần mềm có thể được triển khai ở nhiều đơn vị và nh
 
 ### 1.4. Phạm vi
 
-**Trong MVP:** tài khoản nội bộ; quyền theo đơn vị; tổ chức có lịch sử; danh mục; deployment và revision; duyệt một cấp theo giả định; hợp đồng, license, thời hạn bảo trì; tệp riêng; dashboard; nhập/xuất Excel; thông báo trong ứng dụng; audit; công cụ vận hành và pilot.
+**Trong MVP:** tài khoản nội bộ; quyền theo đơn vị; tổ chức có lịch sử; danh mục phần mềm đã hoàn thành và các phiên bản đã phát hành; hồ sơ sử dụng/vận hành tại đơn vị (deployment) và revision; duyệt dữ liệu hồ sơ một cấp theo giả định; hợp đồng, license, thời hạn bảo trì; tệp riêng; dashboard tình trạng sử dụng; nhập/xuất Excel; thông báo trong ứng dụng; audit; công cụ vận hành và pilot hệ thống quản lý.
 
 **Sau MVP:** SSO/OIDC, email, tích hợp bên ngoài, hỗ trợ sự cố, thu thập số liệu sử dụng tự động, bản đồ. Quy trình nhiều cấp hoặc ký số phải được đặc tả bổ sung nếu được xác nhận là bắt buộc.
 
-**Ngoài phạm vi:** quản lý văn bản, nhân sự, kế toán, điều khiển máy tính từ xa, tự động cài phần mềm lên thiết bị. Không dùng trạng thái Active để suy ra số lượt truy cập hoặc mức sử dụng thực tế.
+**Ngoài phạm vi:** lập kế hoạch phát triển phần mềm, quản lý sprint/task lập trình, theo dõi tiến độ hoàn thành sản phẩm, quy trình nghiệm thu sản phẩm phần mềm; quản lý văn bản, nhân sự, kế toán, điều khiển máy tính từ xa, tự động cài phần mềm lên thiết bị. Có thể lưu tài liệu nghiệm thu/bàn giao đã có dưới dạng tệp đính kèm, không tổ chức lại quy trình nghiệm thu sản phẩm. Không dùng trạng thái Active để suy ra số lượt truy cập hoặc mức sử dụng thực tế.
 
 ### 1.5. Nguyên tắc và cách đọc
 
@@ -57,7 +60,7 @@ Các câu hỏi dưới đây không ngăn việc dựng nền tảng, bộ dữ
 
 | Mã | Nội dung cần xác nhận | Mặc định để phát triển thử | Bên xác nhận đề xuất | Ảnh hưởng |
 | --- | --- | --- | --- | --- |
-| Q-01 | Phạm vi quản lý, biểu mẫu nhập, trường bắt buộc | Phạm vi MVP tại 1.4 | Chủ quản, đại diện đơn vị | Form, validation, UAT |
+| Q-01 | Đã xác nhận quản lý phần mềm đã hoàn thành; còn chốt biểu mẫu nhập và trường bắt buộc | Hồ sơ danh mục và sử dụng/vận hành tại 1.4, không theo dõi tiến độ phát triển | Chủ quản, đại diện đơn vị | Form, validation, UAT |
 | Q-02 | Nguồn mã đơn vị, cây tổ chức, lịch sử sáp nhập/chia tách | Dữ liệu giả, không seed cơ cấu Lào Cai bằng suy đoán | Đầu mối dữ liệu tổ chức | Import dữ liệu thật, lịch sử |
 | Q-03 | Ma trận quyền, quyền hợp đồng và phạm vi con | Vai trò tại 2.2; không cấp Global ngầm | Chủ quản, quản trị truy cập | Cấp tài khoản thật, bảo mật |
 | Q-04 | Một/nhiều cấp duyệt, ký số, ngoại lệ tự duyệt | Một cấp; cấm tự duyệt; không có ngoại lệ trong MVP thử nghiệm | Chủ quy trình | Workflow, UAT |
@@ -116,6 +119,7 @@ Một người được thực hiện thao tác khi tồn tại **một bản c�
 #### FR-04 — Danh mục dùng chung
 
 - CRUD và archive nhóm phần mềm, nhà cung cấp, phần mềm; quản lý release và ngày hết hỗ trợ.
+- Chỉ đưa phần mềm đã hoàn thành và release đã phát hành vào danh mục; đề xuất bổ sung là đề xuất ghi nhận phần mềm hiện có, không phải đề xuất phát triển phần mềm mới. Trạng thái vòng đời danh mục phản ánh duy trì/ngừng hỗ trợ, không phản ánh tiến độ xây dựng.
 - Chuẩn hóa code, phát hiện trùng; release phải thuộc phần mềm tương ứng.
 - Chỉ người có quyền danh mục được sửa hồ sơ dùng chung. Đơn vị gửi đề xuất bổ sung và theo dõi kết quả; không sửa ngầm hồ sơ chung.
 - Danh mục archive vẫn hiển thị trong hồ sơ lịch sử; không được chọn cho hồ sơ mới theo thiết kế đề xuất.
@@ -125,7 +129,7 @@ Một người được thực hiện thao tác khi tồn tại **một bản c�
 #### FR-05 — Hồ sơ triển khai và revision
 
 - Deployment xác định bởi phần mềm, đơn vị, môi trường, instance; có thể có nhiều instance có chủ đích.
-- Nháp chứa release, trạng thái vận hành, tiến độ 0–100, ngày bắt đầu/vận hành, người phụ trách và milestone.
+- Nháp chứa release đã phát hành, trạng thái sử dụng/vận hành, ngày tiếp nhận/đưa vào sử dụng và người phụ trách. Không có phần trăm hoàn thành hoặc milestone phát triển phần mềm.
 - Tách `workflow_status` khỏi `operational_status`; cho phép xem bản chính thức, bản đang xử lý và lịch sử theo quyền.
 - Chỉ có một revision Draft hoặc Submitted trên một deployment; sửa hồ sơ Approved tạo revision mới.
 - Chống ghi đè đồng thời bằng `version` và `If-Match`; không tự ghi đè khi xung đột.
@@ -136,7 +140,7 @@ Một người được thực hiện thao tác khi tồn tại **một bản c�
 
 - Draft → Submitted → Approved hoặc Rejected; Rejected có thể mở lại thành Draft; Approved bất biến.
 - Submit kiểm tra dữ liệu bắt buộc, quan hệ release, ngày tháng, phạm vi và version.
-- Submitted khóa sửa cả trường, milestone và liên kết tệp.
+- Submitted khóa sửa các trường hồ sơ và liên kết tệp.
 - Reject bắt buộc lý do; approve/reject kiểm tra `submitted_by` để cấm tự duyệt và ghi quyết định.
 - Approve cập nhật revision, con trỏ bản đã duyệt, audit và job thông báo trong một transaction.
 - Dashboard chính thức dùng bản đã duyệt hiện hành; bản chờ duyệt có chỉ số riêng.
@@ -322,8 +326,7 @@ Schema đề xuất: `iam`, `organizations`, `catalog`, `deployments`, `contract
 | software | code, name, category_id, vendor_id, description, lifecycle_status | FK; code duy nhất |
 | software_releases | software_id, version_name, release_date, support_end_date | Đề xuất unique software/version_name |
 | deployments | software_id, organization_id, environment, instance_key, current_approved_revision_id | Unique bộ khóa bốn trường; con trỏ phải trỏ revision cùng deployment |
-| deployment_revisions | deployment_id, revision_no, release_id, operational_status, progress_percent, start_date, go_live_date, responsible_user_id, workflow_status, submitted_by | Unique deployment/revision_no; partial unique Draft/Submitted |
-| deployment_milestones | deployment_revision_id, name, due_date, completed_at | Thuộc revision; bất biến sau submit |
+| deployment_revisions | deployment_id, revision_no, release_id, operational_status, start_date, go_live_date, responsible_user_id, workflow_status, submitted_by | Unique deployment/revision_no; partial unique Draft/Submitted |
 | approval_decisions | deployment_revision_id, decision, reason, actor_id, decided_at | Append-only; reject có reason |
 | contracts | contract_no, owning_organization_id, vendor_id, signed_date, start_date, end_date, total_amount, currency_code | Ngày hợp lệ, tiền không âm |
 | contract_items | contract_id, software_id, description, amount | FK; tiền không âm |
@@ -337,7 +340,7 @@ Schema đề xuất: `iam`, `organizations`, `catalog`, `deployments`, `contract
 | export_jobs | requester, filters, status, document_id, expires_at | Artifact riêng tư và có hạn |
 | audit_logs | actor, action, entity_type/id, organization_id, before/after_json, occurred_at, correlation_id | Append-only; lọc dữ liệu nhạy cảm |
 
-**Thuộc tính chung:** UUID; `created_at/by`, `updated_at/by`, `version bigint` cho entity thay đổi. Thay đổi children ảnh hưởng aggregate phải tăng version của aggregate, ví dụ milestone/tệp tăng version revision. Tiền `numeric(18,2)` truyền JSON dạng chuỗi thập phân là đề xuất để tránh sai số frontend; quy định thống nhất trong OpenAPI/client. Thời điểm UTC; ngày hợp đồng không chuyển múi giờ.
+**Thuộc tính chung:** UUID; `created_at/by`, `updated_at/by`, `version bigint` cho entity thay đổi. Thay đổi children ảnh hưởng aggregate phải tăng version của aggregate, ví dụ liên kết tệp tăng version revision. Tiền `numeric(18,2)` truyền JSON dạng chuỗi thập phân là đề xuất để tránh sai số frontend; quy định thống nhất trong OpenAPI/client. Thời điểm UTC; ngày hợp đồng không chuyển múi giờ.
 
 **Bổ sung cần thiết so với bảng nguồn:**
 
@@ -361,12 +364,10 @@ Mã chuẩn hóa đề xuất `trim` + Unicode normalization + uppercase invaria
 | --- | --- |
 | software_id, organization_id | Bắt buộc khi tạo; không đổi định danh deployment qua sửa revision |
 | environment, instance_key | Bắt buộc; environment đề xuất Production/Test/Development; instance_key chuẩn hóa, UI mặc định `default` |
-| operational_status | Planned/Piloting/Active/Suspended/Retired; không áp quy trình vận hành cứng khi chưa xác nhận |
-| progress_percent | Số nguyên 0–100; không tự ép Active = 100% |
+| operational_status | NotInUse (chưa sử dụng)/Active (đang sử dụng)/Suspended (tạm dừng)/Retired (ngừng sử dụng); mọi trạng thái đều áp dụng cho phần mềm đã hoàn thành; người nhập phải chọn tình trạng thực tế |
 | release_id | Có thể thiếu khi Draft; bắt buộc khi submit theo đề xuất; luôn phải thuộc software |
 | responsible_user_id | Bắt buộc khi submit theo đề xuất; lookup giới hạn người có liên hệ/phân công phù hợp với đơn vị |
-| start_date, go_live_date | start bắt buộc khi submit; go_live không trước start; Active yêu cầu go_live theo đề xuất |
-| milestone | Tên bắt buộc, ngày hợp lệ; sửa cùng quyền/version revision |
+| start_date, go_live_date | start_date là ngày đơn vị tiếp nhận phần mềm (có thể thiếu nếu chưa có thông tin); go_live_date là ngày đưa vào sử dụng, không trước start_date nếu có cả hai; Active yêu cầu go_live_date theo đề xuất |
 | reason | Reject bắt buộc, trim không rỗng; giới hạn đề xuất 2.000 ký tự |
 
 ```mermaid
@@ -387,7 +388,7 @@ stateDiagram-v2
 | Approve | approve + Submitted + actor khác submitted_by + If-Match | Approved, approved_at, decision, con trỏ deployment, version, audit, job |
 | Reject | approve + Submitted + actor khác submitted_by + lý do + If-Match | Rejected, decision, version, audit, job |
 | Reopen | write + Rejected + If-Match + không có Draft/Submitted khác | Cùng revision thành Draft, giữ decisions lịch sử, tăng version, audit |
-| New revision | write + có Approved + không có Draft/Submitted + If-Match deployment | Khóa deployment, tăng revision_no, sao chép dữ liệu/milestone/liên kết tệp, tạo Draft, audit |
+| New revision | write + có Approved + không có Draft/Submitted + If-Match deployment | Khóa deployment, tăng revision_no, sao chép dữ liệu/liên kết tệp, tạo Draft, audit |
 
 Approved bất biến, kể cả tệp. New revision chỉ sao chép liên kết tới tệp Clean; không nhân bản blob. Tệp có nhiều liên kết tải được nếu tồn tại ít nhất một liên kết cha hiện hành mà người gọi được đọc. Rejected không sửa trực tiếp; phải reopen. Nếu đã có draft khác thì reopen trả 409. Allocation không nằm trong revision: thay đổi allocation được audit riêng và không thay dữ liệu Approved.
 
@@ -408,7 +409,7 @@ Approve kiểm tra lại release/phạm vi và trạng thái trong transaction. 
 
 Tiền tố `/api/v1`; JSON DTO riêng; danh sách mặc định `page=1&pageSize=20`, tối đa 100; từ chối sort/filter ngoài allowlist. Chuỗi ngày `YYYY-MM-DD`, timestamp ISO 8601 UTC. Danh sách trả `{ items, page, pageSize, totalCount }`; đếm và dữ liệu cùng scope. Mọi sắp xếp có tie-breaker ổn định bằng id.
 
-GET chi tiết trả ETag dạng opaque, ví dụ `"17"`; PUT và lệnh thay đổi tài nguyên có sẵn yêu cầu `If-Match` của aggregate liên quan. POST tạo mới không cần ETag. POST tạo revision dùng ETag deployment; thao tác milestone/liên kết tệp dùng ETag revision/contract. Client không suy đoán version tiếp theo.
+GET chi tiết trả ETag dạng opaque, ví dụ `"17"`; PUT và lệnh thay đổi tài nguyên có sẵn yêu cầu `If-Match` của aggregate liên quan. POST tạo mới không cần ETag. POST tạo revision dùng ETag deployment; thao tác liên kết tệp dùng ETag revision/contract. Client không suy đoán version tiếp theo.
 
 | Nhóm | Endpoint và hành vi |
 | --- | --- |
@@ -473,7 +474,9 @@ Reactive Forms hiển thị lỗi từng trường từ Problem Details. Search 
 
 ### 3.9. D-09 — Import/export và worker
 
-**Mẫu Excel deployment v1 đề xuất:** một sheet `Deployments`, hàng đầu là tên cột; các cột `organization_code`, `software_code`, `environment`, `instance_key`, `release_version`, `operational_status`, `progress_percent`, `start_date`, `go_live_date`, `responsible_username`. Hướng dẫn tiếng Việt ở sheet riêng; không nhập milestone/tệp qua mẫu v1. Ngày nhận cell Date hoặc text ISO `YYYY-MM-DD`; tránh đoán ngày mơ hồ. Không thực thi/đánh giá formula của tệp nhập; từ chối ô formula trong vùng dữ liệu. Chấp nhận `.xlsx`, không `.xlsm`.
+**Mẫu Excel deployment v1 đề xuất:** một sheet `Deployments`, hàng đầu là tên cột; các cột `organization_code`, `software_code`, `environment`, `instance_key`, `release_version`, `operational_status`, `start_date`, `go_live_date`, `responsible_username`. Hướng dẫn tiếng Việt ở sheet riêng; không nhập tệp đính kèm qua mẫu v1. Ngày nhận cell Date hoặc text ISO `YYYY-MM-DD`; tránh đoán ngày mơ hồ. Không thực thi/đánh giá formula của tệp nhập; từ chối ô formula trong vùng dữ liệu. Chấp nhận `.xlsx`, không `.xlsm`.
+
+Mẫu v1 phải phản ánh phạm vi phần mềm đã hoàn thành: không có cột tiến độ phát triển; `operational_status` chỉ nhận bốn giá trị tại D-04. Nếu mẫu v1 cũ đã được phát hành hoặc sử dụng, phải tăng phiên bản mẫu thay vì âm thầm thay đổi contract nhập.
 
 **Trạng thái import:** `Uploaded → Validating → Ready | Invalid → Committing → Committed | Failed`. Tệp chờ scanner không chuyển vào validation; scan fail giữ thông tin lỗi/chờ. Invalid yêu cầu upload batch mới; không sửa dữ liệu staging ngầm từ UI. Commit từ Ready dùng If-Match batch và Idempotency-Key, tạo job 202.
 
@@ -580,11 +583,11 @@ Tập dữ liệu kiểm chứng tối thiểu gồm hai đơn vị độc lập
 
 | ID | Vai trò | Việc làm và đầu ra cụ thể | Phụ thuộc | Hoàn thành khi |
 | --- | --- | --- | --- | --- |
-| T-06.1 | BE | [ ] Migration deployment/revision/milestone/decision, unique bộ khóa và partial unique | T-05.1, T-04.5 | DB từ chối hai revision hoạt động; con trỏ không trỏ deployment khác; test progress/ngày |
-| T-06.2 | BE | [ ] Use case/API tạo deployment, sửa Draft và milestone, list/detail theo scope | T-06.1, T-03.2, T-03.3 | Draft hợp lệ lưu được; stale ETag thất bại; Viewer không đọc nháp nếu thiếu quyền |
-| T-06.3 | BE | [ ] Use case tạo revision kế tiếp và reopen Rejected | T-06.2 | Khóa revision_no; copy dữ liệu; Approved bất biến; reopen bị chặn nếu có bản đang xử lý khác |
+| T-06.1 | BE | [ ] Migration deployment/revision/decision, unique bộ khóa và partial unique | T-05.1, T-04.5 | DB từ chối hai revision hoạt động; con trỏ không trỏ deployment khác; test trạng thái sử dụng/ngày |
+| T-06.2 | BE | [ ] Use case/API tạo deployment, sửa Draft, list/detail theo scope | T-06.1, T-03.2, T-03.3 | Draft hợp lệ lưu được; stale ETag thất bại; Viewer không đọc nháp nếu thiếu quyền |
+| T-06.3 | BE | [ ] Use case tạo revision kế tiếp và reopen Rejected | T-06.2 | Khóa revision_no; copy dữ liệu hồ sơ; Approved bất biến; reopen bị chặn nếu có bản đang xử lý khác |
 | T-06.4 | BE | [ ] Use case submit/approve/reject với audit và job transaction | T-06.3, T-07.1, T-01.3 | Submitted khóa sửa; cấm tự duyệt; reject có lý do; hai quyết định đồng thời chỉ một thành công |
-| T-06.5 | FE | [ ] Danh sách/form deployment, tab official/draft/history, milestone và xử lý 412 | T-06.2, T-06.3, T-04.6 | Không ghi đè nháp khi conflict; filter ở URL; nhãn workflow/vận hành tách biệt |
+| T-06.5 | FE | [ ] Danh sách/form deployment, tab official/draft/history và xử lý 412 | T-06.2, T-06.3, T-04.6 | Không ghi đè nháp khi conflict; filter ở URL; nhãn workflow/vận hành tách biệt |
 | T-06.6 | FE/QA | [ ] UI duyệt, so sánh bản sửa, reject/reopen; E2E editor → approver | T-06.4, T-06.5 | Báo cáo/chi tiết official vẫn giữ bản cũ cho tới approve; self-approval bị API chặn |
 
 ### 4.8. T-07 — Job, notification và khả năng chạy lại
@@ -712,6 +715,8 @@ Một task triển khai chỉ được đóng khi:
 
 Nhằm đảm bảo dự án được triển khai mạch lạc, kiểm soát rủi ro phụ thuộc và sớm có các mốc bàn giao có thể kiểm chứng (Milestones), toàn bộ 15 nhóm task được chia thành **6 giai đoạn** tuần tự:
 
+Lộ trình này dành cho việc xây dựng hệ thống quản lý; các phần mềm được ghi nhận trong danh mục đã hoàn thành và không thuộc tiến độ phát triển dưới đây.
+
 ```mermaid
 gantt
     title Lộ trình triển khai hệ thống quản lý phần mềm CĐS
@@ -751,4 +756,3 @@ gantt
 | **Giai đoạn 6** | **Kiểm thử Toàn diện, Hạ tầng Vận hành, Pilot & Bàn giao** | `T-13`, `T-14`, `T-15` | Kiểm thử bảo mật Scope, test tranh chấp đồng thời, đo tải 100 user/100k bản ghi; thiết lập Staging/Production Nginx TLS, sao lưu PITR & diễn tập Restore; UAT, đào tạo & phát hành. | • Báo cáo kiểm thử bảo mật, race condition và hiệu năng NFR-04<br>• Hạ tầng Production, cơ chế sao lưu PITR đã diễn tập<br>• Biên bản UAT, tài liệu hướng dẫn theo vai trò và bàn giao hệ thống |
 
 ---
-

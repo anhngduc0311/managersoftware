@@ -27,6 +27,10 @@ public static class DependencyInjection
 
         services.AddScoped<IAppDbContext>(provider => provider.GetRequiredService<AppDbContext>());
         services.AddSingleton<IDateTimeProvider, DateTimeProvider>();
+        services.AddSingleton<IPasswordHasherService, PasswordHasherService>();
+        services.AddScoped<IOrganizationService, LaoCai.SoftwareManagement.Application.Services.OrganizationService>();
+        services.AddScoped<IScopeAuthorizationService, LaoCai.SoftwareManagement.Application.Services.ScopeAuthorizationService>();
+        services.AddScoped<ICatalogService, LaoCai.SoftwareManagement.Application.Services.CatalogService>();
 
         return services;
     }

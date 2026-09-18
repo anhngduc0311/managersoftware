@@ -2,7 +2,9 @@ using System.Text.Json;
 using LaoCai.SoftwareManagement.Application.Common.Interfaces;
 using LaoCai.SoftwareManagement.Domain.Common;
 using LaoCai.SoftwareManagement.Domain.Entities.Audit;
+using LaoCai.SoftwareManagement.Domain.Entities.Catalog;
 using LaoCai.SoftwareManagement.Domain.Entities.Iam;
+using LaoCai.SoftwareManagement.Domain.Entities.Organizations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -29,6 +31,18 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<RolePermission> RolePermissions => Set<RolePermission>();
     public DbSet<UserRoleScope> UserRoleScopes => Set<UserRoleScope>();
     public DbSet<AuditLog> AuditLogs => Set<AuditLog>();
+
+    // Organizations Schema
+    public DbSet<Organization> Organizations => Set<Organization>();
+    public DbSet<OrganizationVersion> OrganizationVersions => Set<OrganizationVersion>();
+    public DbSet<OrganizationSuccession> OrganizationSuccessions => Set<OrganizationSuccession>();
+
+    // Catalog Schema
+    public DbSet<SoftwareCategory> SoftwareCategories => Set<SoftwareCategory>();
+    public DbSet<Vendor> Vendors => Set<Vendor>();
+    public DbSet<Software> Software => Set<Software>();
+    public DbSet<SoftwareRelease> SoftwareReleases => Set<SoftwareRelease>();
+    public DbSet<CatalogProposal> CatalogProposals => Set<CatalogProposal>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -104,6 +118,130 @@ public class AppDbContext : DbContext, IAppDbContext
             builder.Property(a => a.EntityId).HasMaxLength(100).IsRequired();
             builder.Property(a => a.CorrelationId).HasMaxLength(100);
             builder.HasIndex(a => new { a.OrganizationId, a.OccurredAt });
+        });
+
+        // Organizations Schema Configurations
+        modelBuilder.Entity<Organization>(builder =>
+        {
+            builder.ToTable("organizations", "organizations");
+            builder.HasKey(o => o.Id);
+            builder.Property(o => o.Code).HasMaxLength(50).IsRequired();
+            builder.HasIndex(o => o.Code).IsUnique();
+
+            builder.HasMany(o => o.Versions)
+                .WithOne(v => v.Organization)
+                .HasForeignKey(v => v.OrganizationId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<OrganizationVersion>(builder =>
+        {
+            builder.ToTable("organization_versions", "organizations");
+            builder.HasKey(v => v.Id);
+            builder.Property(v => v.Name).HasMaxLength(255).IsRequired();
+
+            builder.HasOne(v => v.Parent)
+                .WithMany()
+                .HasForeignKey(v => v.ParentId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasIndex(v => new { v.OrganizationId, v.ValidFrom });
+        });
+
+        modelBuilder.Entity<OrganizationSuccession>(builder =>
+        {
+            builder.ToTable("organization_successions", "organizations");
+            builder.HasKey(s => s.Id);
+
+            builder.HasOne(s => s.Predecessor)
+                .WithMany()
+                .HasForeignKey(s => s.PredecessorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(s => s.Successor)
+                .WithMany()
+                .HasForeignKey(s => s.SuccessorId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Catalog Schema Configurations
+        modelBuilder.Entity<SoftwareCategory>(builder =>
+        {
+            builder.ToTable("software_categories", "catalog");
+            builder.HasKey(c => c.Id);
+            builder.Property(c => c.Code).HasMaxLength(50).IsRequired();
+            builder.HasIndex(c => c.Code).IsUnique();
+            builder.Property(c => c.Name).HasMaxLength(255).IsRequired();
+        });
+
+        modelBuilder.Entity<Vendor>(builder =>
+        {
+            builder.ToTable("vendors", "catalog");
+            builder.HasKey(v => v.Id);
+            builder.Property(v => v.Code).HasMaxLength(50).IsRequired();
+            builder.HasIndex(v => v.Code).IsUnique();
+            builder.Property(v => v.Name).HasMaxLength(255).IsRequired();
+        });
+
+        modelBuilder.Entity<Software>(builder =>
+        {
+            builder.ToTable("software", "catalog");
+            builder.HasKey(s => s.Id);
+            builder.Property(s => s.Code).HasMaxLength(50).IsRequired();
+            builder.HasIndex(s => s.Code).IsUnique();
+            builder.Property(s => s.Name).HasMaxLength(255).IsRequired();
+            builder.Property(s => s.LifecycleStatus).HasMaxLength(50).IsRequired();
+
+            builder.HasOne(s => s.Category)
+                .WithMany(c => c.SoftwareList)
+                .HasForeignKey(s => s.CategoryId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(s => s.Vendor)
+                .WithMany(v => v.SoftwareList)
+                .HasForeignKey(s => s.VendorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(s => s.Releases)
+                .WithOne(r => r.Software)
+                .HasForeignKey(r => r.SoftwareId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<SoftwareRelease>(builder =>
+        {
+            builder.ToTable("software_releases", "catalog");
+            builder.HasKey(r => r.Id);
+            builder.Property(r => r.VersionName).HasMaxLength(50).IsRequired();
+            builder.HasIndex(r => new { r.SoftwareId, r.VersionName }).IsUnique();
+        });
+
+        modelBuilder.Entity<CatalogProposal>(builder =>
+        {
+            builder.ToTable("catalog_proposals", "catalog");
+            builder.HasKey(p => p.Id);
+            builder.Property(p => p.SoftwareName).HasMaxLength(255).IsRequired();
+            builder.Property(p => p.Status).HasMaxLength(30).IsRequired();
+
+            builder.HasOne(p => p.Organization)
+                .WithMany()
+                .HasForeignKey(p => p.OrganizationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(p => p.ProposedByUser)
+                .WithMany()
+                .HasForeignKey(p => p.ProposedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(p => p.ReviewedByUser)
+                .WithMany()
+                .HasForeignKey(p => p.ReviewedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(p => p.CreatedSoftware)
+                .WithMany()
+                .HasForeignKey(p => p.CreatedSoftwareId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 

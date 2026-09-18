@@ -1,0 +1,358 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Danh mục Phần mềm</h1>
+      <p class="page-subtitle">Quản lý danh mục phần mềm dùng chung toàn tỉnh, các phiên bản phát hành và nhà cung cấp</p>
+    </div>
+
+    <div class="header-actions">
+      @if (authService.hasPermission('catalog.manage')) {
+        <button type="button" class="btn btn-outline" (click)="openCreateCategoryModal()">
+          <span>🏷️</span> Thêm Nhóm
+        </button>
+        <button type="button" class="btn btn-outline" (click)="openCreateVendorModal()">
+          <span>🏢</span> Thêm Nhà Cung Cấp
+        </button>
+        <button type="button" class="btn btn-primary" (click)="openCreateSoftwareModal()">
+          <span>➕</span> Thêm Phần Mềm Mới
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tabs-header">
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'software'"
+      (click)="setTab('software')">
+      <span>📦 Phần mềm ({{ softwareList().length }})</span>
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'categories'"
+      (click)="setTab('categories')">
+      <span>🏷️ Nhóm phần mềm ({{ categories().length }})</span>
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'vendors'"
+      (click)="setTab('vendors')">
+      <span>🏢 Nhà cung cấp & Đối tác ({{ vendors().length }})</span>
+    </button>
+  </div>
+
+  <!-- Tab 1: Software List -->
+  @if (activeTab() === 'software') {
+    <div class="card content-card">
+      <!-- Filter Bar -->
+      <div class="filter-bar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Tìm theo mã hoặc tên phần mềm..."
+            [(ngModel)]="searchTerm"
+            (ngModelChange)="onFilterChange()"
+          />
+        </div>
+
+        <div class="filter-group">
+          <select class="form-control filter-select" [(ngModel)]="selectedCategoryId" (ngModelChange)="onFilterChange()">
+            <option value="">Tất cả Nhóm phần mềm</option>
+            @for (c of categories(); track c.id) {
+              <option [value]="c.id">{{ c.name }}</option>
+            }
+          </select>
+
+          <select class="form-control filter-select" [(ngModel)]="selectedVendorId" (ngModelChange)="onFilterChange()">
+            <option value="">Tất cả Nhà cung cấp</option>
+            @for (v of vendors(); track v.id) {
+              <option [value]="v.id">{{ v.name }}</option>
+            }
+          </select>
+
+          <select class="form-control filter-select" [(ngModel)]="selectedLifecycle" (ngModelChange)="onFilterChange()">
+            <option value="">Tất cả Trạng thái</option>
+            <option value="Active">Đang hoạt động (Active)</option>
+            <option value="Deprecated">Cảnh báo lỗi thời (Deprecated)</option>
+            <option value="Retired">Ngừng sử dụng (Retired)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Software Grid / Table -->
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Mã phần mềm</th>
+              <th>Tên phần mềm</th>
+              <th>Nhóm phân loại</th>
+              <th>Nhà cung cấp</th>
+              <th>Phiên bản mới nhất</th>
+              <th>Trạng thái</th>
+              <th class="text-right">Chi tiết</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (isLoading()) {
+              <tr>
+                <td colspan="7" class="text-center py-4">Đang tải danh mục...</td>
+              </tr>
+            } @else if (softwareList().length === 0) {
+              <tr>
+                <td colspan="7" class="text-center py-4">Không tìm thấy phần mềm nào phù hợp tiêu chí lọc.</td>
+              </tr>
+            } @else {
+              @for (item of softwareList(); track item.id) {
+                <tr class="clickable-row" (click)="openSoftwareDetail(item)">
+                  <td>
+                    <span class="code-pill">{{ item.code }}</span>
+                  </td>
+                  <td class="font-semibold">{{ item.name }}</td>
+                  <td>{{ item.categoryName }}</td>
+                  <td>{{ item.vendorName }}</td>
+                  <td>
+                    @if (item.latestRelease) {
+                      <span class="version-tag">{{ item.latestRelease }}</span>
+                    } @else {
+                      <span class="text-muted">Chưa có</span>
+                    }
+                  </td>
+                  <td>
+                    <span class="badge" [class.badge-active]="item.lifecycleStatus === 'Active'" [class.badge-deprecated]="item.lifecycleStatus === 'Deprecated'" [class.badge-retired]="item.lifecycleStatus === 'Retired'">
+                      {{ item.lifecycleStatus }}
+                    </span>
+                  </td>
+                  <td class="text-right action-cell">
+                    <button type="button" class="btn-icon" title="Xem chi tiết & phiên bản">
+                      <span>👁️</span>
+                    </button>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- Tab 2: Categories List -->
+  @if (activeTab() === 'categories') {
+    <div class="card content-card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Mã nhóm</th>
+              <th>Tên nhóm phần mềm</th>
+              <th>Trạng thái</th>
+              <th>Ngày tạo</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (c of categories(); track c.id) {
+              <tr>
+                <td><span class="code-pill">{{ c.code }}</span></td>
+                <td class="font-semibold">{{ c.name }}</td>
+                <td>
+                  <span class="badge badge-active">Hoạt động</span>
+                </td>
+                <td>{{ c.createdAt | date:'dd/MM/yyyy' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- Tab 3: Vendors List -->
+  @if (activeTab() === 'vendors') {
+    <div class="card content-card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Mã NCC</th>
+              <th>Tên Nhà cung cấp / Đối tác</th>
+              <th>Thông tin liên hệ</th>
+              <th>Trạng thái</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (v of vendors(); track v.id) {
+              <tr>
+                <td><span class="code-pill">{{ v.code }}</span></td>
+                <td class="font-semibold">{{ v.name }}</td>
+                <td>{{ v.contactInfo || '—' }}</td>
+                <td>
+                  <span class="badge badge-active">Hoạt động</span>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Drawer: Chi tiết phần mềm -->
+@if (selectedSoftware()) {
+  <app-software-detail
+    [software]="selectedSoftware()!"
+    (close)="closeSoftwareDetail()">
+  </app-software-detail>
+}
+
+<!-- Modal: Tạo Phần Mềm Mới -->
+@if (isCreateSoftwareModalOpen()) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Thêm Phần mềm mới vào Danh mục</h2>
+        <button type="button" class="btn-close" (click)="closeCreateSoftwareModal()">✕</button>
+      </div>
+
+      @if (modalError()) {
+        <div class="alert alert-error">{{ modalError() }}</div>
+      }
+
+      <form [formGroup]="softwareForm" (ngSubmit)="submitCreateSoftware()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Mã phần mềm (Code) *</label>
+            <input type="text" class="form-control" formControlName="code" placeholder="VD: VNPT_IGATE" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tên phần mềm *</label>
+            <input type="text" class="form-control" formControlName="name" placeholder="VD: Cổng Dịch vụ công" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Nhóm phân loại *</label>
+            <select class="form-control" formControlName="categoryId">
+              <option value="">-- Chọn nhóm --</option>
+              @for (c of categories(); track c.id) {
+                <option [value]="c.id">{{ c.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Nhà cung cấp *</label>
+            <select class="form-control" formControlName="vendorId">
+              <option value="">-- Chọn NCC --</option>
+              @for (v of vendors(); track v.id) {
+                <option [value]="v.id">{{ v.name }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Vòng đời sử dụng</label>
+            <select class="form-control" formControlName="lifecycleStatus">
+              <option value="Active">Đang duy trì & sử dụng (Active)</option>
+              <option value="Deprecated">Cảnh báo thay thế (Deprecated)</option>
+              <option value="Retired">Ngừng hỗ trợ (Retired)</option>
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Mô tả tóm tắt tính năng</label>
+            <textarea class="form-control" formControlName="description" rows="3" placeholder="Mô tả phạm vi ứng dụng..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeCreateSoftwareModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu Phần mềm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal: Tạo Nhóm Phần Mềm -->
+@if (isCreateCategoryModalOpen()) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Thêm Nhóm phần mềm mới</h2>
+        <button type="button" class="btn-close" (click)="closeCreateCategoryModal()">✕</button>
+      </div>
+
+      @if (modalError()) {
+        <div class="alert alert-error">{{ modalError() }}</div>
+      }
+
+      <form [formGroup]="categoryForm" (ngSubmit)="submitCreateCategory()">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Mã nhóm (Code) *</label>
+            <input type="text" class="form-control" formControlName="code" placeholder="VD: E_GOV" />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Tên nhóm *</label>
+            <input type="text" class="form-control" formControlName="name" placeholder="VD: Chính quyền số" />
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeCreateCategoryModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu Nhóm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal: Tạo Nhà Cung Cấp -->
+@if (isCreateVendorModalOpen()) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Thêm Nhà cung cấp / Đối tác mới</h2>
+        <button type="button" class="btn-close" (click)="closeCreateVendorModal()">✕</button>
+      </div>
+
+      @if (modalError()) {
+        <div class="alert alert-error">{{ modalError() }}</div>
+      }
+
+      <form [formGroup]="vendorForm" (ngSubmit)="submitCreateVendor()">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Mã NCC (Code) *</label>
+            <input type="text" class="form-control" formControlName="code" placeholder="VD: VNPT_LAOCAI" />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Tên Nhà cung cấp *</label>
+            <input type="text" class="form-control" formControlName="name" placeholder="VD: VNPT Lào Cai" />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Thông tin liên hệ / Hotline</label>
+            <textarea class="form-control" formControlName="contactInfo" rows="2" placeholder="Hotline, Email, Địa chỉ..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeCreateVendorModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu Nhà cung cấp</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

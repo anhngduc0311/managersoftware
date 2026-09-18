@@ -14,9 +14,12 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\LaoCai.SoftwareManagement.Domain\LaoCai.SoftwareManagement.Domain.csproj" />
+    <ProjectReference Include="..\..\src\LaoCai.SoftwareManagement.Application\LaoCai.SoftwareManagement.Application.csproj" />
+    <ProjectReference Include="..\..\src\LaoCai.SoftwareManagement.Infrastructure\LaoCai.SoftwareManagement.Infrastructure.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" />
     <PackageReference Include="coverlet.collector" />
     <PackageReference Include="FluentAssertions" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" />

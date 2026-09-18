@@ -60,6 +60,8 @@
 
 ## 3. Schema: `catalog` (Danh mục phần mềm dùng chung)
 
+Chỉ ghi nhận phần mềm đã hoàn thành và phiên bản đã phát hành. Đề xuất danh mục là bổ sung phần mềm hiện có vào hệ thống, không phải đề xuất xây dựng sản phẩm mới.
+
 ### Bảng `software_categories` & `vendors`
 - `software_categories`: `id` (UUID, PK), `code` (VARCHAR(50), UNIQUE), `name` (VARCHAR(255)), `is_active` (BOOLEAN).
 - `vendors`: `id` (UUID, PK), `code` (VARCHAR(50), UNIQUE), `name` (VARCHAR(255)), `contact_info` (TEXT), `is_active` (BOOLEAN).
@@ -94,7 +96,9 @@
 
 ---
 
-## 4. Schema: `deployments` (Hồ sơ Triển khai & Phê duyệt)
+## 4. Schema: `deployments` (Hồ sơ Sử dụng/Vận hành & Phê duyệt dữ liệu)
+
+Deployment là hồ sơ sử dụng phần mềm đã hoàn thành tại đơn vị; revision là bản sửa dữ liệu hồ sơ. Workflow không biểu diễn tiến độ phát triển hoặc nghiệm thu sản phẩm.
 
 ### Bảng `deployments`
 - `id` (UUID, PK).
@@ -111,9 +115,8 @@
 - `deployment_id` (UUID, FK -> deployments.id, NOT NULL).
 - `revision_no` (INT, NOT NULL): Số thứ tự revision (1, 2, 3...).
 - `release_id` (UUID, FK -> software_releases.id, NULL khi Draft, NOT NULL khi Submit).
-- `operational_status` (VARCHAR(50), NOT NULL, DEFAULT 'Planned'): `Planned | Piloting | Active | Suspended | Retired`.
-- `progress_percent` (INT, NOT NULL, DEFAULT 0, CHECK 0 <= progress_percent <= 100).
-- `start_date` (DATE, NULL khi Draft, NOT NULL khi Submit).
+- `operational_status` (VARCHAR(50), NOT NULL): `NotInUse | Active | Suspended | Retired`; người nhập chọn trạng thái sử dụng thực tế, không mặc định là đang sử dụng.
+- `start_date` (DATE, NULL): Ngày đơn vị tiếp nhận phần mềm nếu biết; không phải ngày bắt đầu phát triển.
 - `go_live_date` (DATE, NULL): Bắt buộc khi `operational_status = Active`.
 - `responsible_user_id` (UUID, FK -> users.id, NULL khi Draft, NOT NULL khi Submit).
 - `workflow_status` (VARCHAR(30), NOT NULL, DEFAULT 'Draft'): `Draft | Submitted | Approved | Rejected`.
@@ -121,11 +124,6 @@
 - `approved_at` (TIMESTAMPTZ, NULL).
 - `version` (BIGINT, NOT NULL, DEFAULT 1).
 - Unique Constraint: `(deployment_id, revision_no)`.
-
-### Bảng `deployment_milestones`
-- `id` (UUID, PK).
-- `deployment_revision_id` (UUID, FK -> deployment_revisions.id, NOT NULL).
-- `name` (VARCHAR(255), NOT NULL), `due_date` (DATE, NOT NULL), `completed_at` (TIMESTAMPTZ, NULL).
 
 ### Bảng `approval_decisions`
 - `id` (UUID, PK).

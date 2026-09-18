@@ -1,12 +1,14 @@
 # Kiến trúc hệ thống quản lý phần mềm chuyển đổi số tại Lào Cai
 
-> Phiên bản tài liệu: 1.0 — Ngày: 17/09/2026.
+> Phiên bản tài liệu: 1.1 — Cập nhật phạm vi ngày: 18/09/2026.
 > Stack đã chốt: Angular + ASP.NET Core (.NET) + PostgreSQL.
 > Trạng thái: thiết kế đề xuất để phát triển MVP; chưa phải kiến trúc đã nghiệm thu hoặc hệ thống đã triển khai.
 
 ## 1. Mục tiêu và phạm vi
 
-Xây dựng web tập trung để quản lý danh mục phần mềm, các đơn vị sử dụng, tình trạng triển khai, hợp đồng, bản quyền và báo cáo phục vụ theo dõi chuyển đổi số tại Lào Cai.
+Xây dựng web tập trung để quản lý danh mục các phần mềm đã hoàn thành, các đơn vị sử dụng, tình trạng khai thác/vận hành, hợp đồng, bản quyền, bảo trì và báo cáo phục vụ theo dõi chuyển đổi số tại Lào Cai. Không quản lý tiến độ phát triển hay tổ chức nghiệm thu sản phẩm phần mềm.
+
+Các phần mềm được quản lý đã hoàn thành; hệ thống quản lý mô tả trong tài liệu này vẫn là dự án cần xây dựng. Deployment ghi nhận bản cài đặt/việc sử dụng tại đơn vị. Draft/Submitted/Approved/Rejected là trạng thái duyệt dữ liệu hồ sơ, không phải trạng thái hoàn thành sản phẩm.
 
 ### 1.1. Giả định thiết kế
 
@@ -99,7 +101,7 @@ Trong mỗi lớp, tổ chức theo module. Một `AppDbContext` phục vụ MVP
 | Identity & Access | Tài khoản, vai trò, quyền, phạm vi đơn vị | User, Role, Permission, UserRoleScope |
 | Organizations | Đơn vị, cơ cấu, lịch sử tên và quan hệ | Organization, OrganizationVersion |
 | Catalog | Phần mềm, nhóm, phiên bản, nhà cung cấp | Software, SoftwareRelease, Category, Vendor |
-| Deployments | Ghi nhận triển khai, tiến độ, người phụ trách | Deployment, DeploymentRevision, DeploymentMilestone |
+| Deployments | Ghi nhận sử dụng/vận hành phần mềm đã hoàn thành, người phụ trách | Deployment, DeploymentRevision |
 | Contracts & Licenses | Hợp đồng, hạng mục, quyền sử dụng, phân bổ | Contract, ContractItem, LicenseEntitlement, LicenseAllocation |
 | Documents | Tải lên, kiểm tra, tải xuống tệp | Document và bảng liên kết tệp |
 | Reporting | Dashboard, báo cáo, import/export | ImportBatch, ImportRowError, ExportJob |
@@ -163,8 +165,7 @@ Danh mục phần mềm dùng chung do người có quyền quản lý danh mụ
 | software | code, name, category_id, vendor_id, description, lifecycle_status |
 | software_releases | software_id, version_name, release_date, support_end_date |
 | deployments | software_id, organization_id, environment, instance_key, current_approved_revision_id |
-| deployment_revisions | deployment_id, revision_no, release_id, operational_status, progress_percent, start_date, go_live_date, responsible_user_id, workflow_status, submitted_by, version |
-| deployment_milestones | deployment_revision_id, name, due_date, completed_at |
+| deployment_revisions | deployment_id, revision_no, release_id, operational_status, start_date (ngày tiếp nhận nếu biết), go_live_date (ngày đưa vào sử dụng), responsible_user_id, workflow_status, submitted_by, version |
 | approval_decisions | deployment_revision_id, decision, reason, actor_id, decided_at |
 | contracts | contract_no, owning_organization_id, vendor_id, signed_date, start_date, end_date, total_amount, currency_code |
 | contract_items | contract_id, software_id, description, amount |
@@ -201,7 +202,7 @@ erDiagram
 - Unique code cho đơn vị, phần mềm và nhóm phần mềm; chuẩn hóa khoảng trắng/case trước khi lưu.
 - Unique `(software_id, organization_id, environment, instance_key)` cho deployment; cho phép một phần mềm có nhiều instance có chủ đích.
 - Unique `(deployment_id, revision_no)`; chỉ một revision đang `Draft` hoặc `Submitted` trên mỗi deployment.
-- `progress_percent` nằm trong 0–100; số lượng license không âm; ngày kết thúc không trước ngày bắt đầu.
+- Số lượng license không âm; ngày kết thúc không trước ngày bắt đầu; ngày đưa vào sử dụng không trước ngày tiếp nhận nếu có cả hai. Không lưu phần trăm hoàn thành hoặc milestone phát triển phần mềm.
 - Tổng phân bổ license không vượt entitlement có giới hạn; kiểm tra trong transaction và khóa bản ghi entitlement để tránh cấp vượt khi đồng thời.
 - Không cho cây đơn vị có chu trình; các khoảng hiệu lực của cùng đơn vị không chồng nhau.
 - Khi duyệt, `release_id` phải thuộc đúng phần mềm của deployment.
@@ -219,7 +220,7 @@ Tách **trạng thái duyệt của revision** khỏi **trạng thái vận hàn
 | Loại | Giá trị |
 | --- | --- |
 | Workflow | Draft, Submitted, Approved, Rejected |
-| Vận hành | Planned, Piloting, Active, Suspended, Retired |
+| Sử dụng/vận hành | NotInUse (chưa sử dụng), Active (đang sử dụng), Suspended (tạm dừng), Retired (ngừng sử dụng); đều là phần mềm đã hoàn thành |
 
 ```mermaid
 stateDiagram-v2
@@ -458,7 +459,7 @@ Không ấn định thời lượng khi chưa biết quy mô nhóm và mức tí
 
 ## 16. Các điểm cần xác nhận trước khi viết mã nghiệp vụ
 
-1. Phạm vi thực tế có đúng là quản lý danh mục và tình trạng triển khai phần mềm không?
+1. Phạm vi đã xác nhận là quản lý phần mềm đã hoàn thành và tình trạng sử dụng/vận hành; cần chốt biểu mẫu và trường thông tin của hồ sơ.
 2. Danh sách, mã và lịch sử cơ cấu đơn vị do nguồn nào cung cấp?
 3. Ai được quản lý danh mục chung, duyệt triển khai, xem hợp đồng và xuất dữ liệu?
 4. Quy trình duyệt một cấp hay nhiều cấp? Có yêu cầu ký số không?

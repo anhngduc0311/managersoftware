@@ -1,0 +1,127 @@
+<div class="drawer-backdrop" (click)="close.emit()">
+  <div class="drawer-panel" (click)="$event.stopPropagation()">
+    <div class="drawer-header">
+      <div class="header-main">
+        <span class="code-pill">{{ software.code }}</span>
+        <h2 class="title">{{ software.name }}</h2>
+      </div>
+      <button type="button" class="btn-close" (click)="close.emit()">✕</button>
+    </div>
+
+    <div class="drawer-body">
+      <!-- Info Grid -->
+      <div class="info-section">
+        <div class="info-grid">
+          <div class="info-item">
+            <span class="info-label">Nhóm phân loại:</span>
+            <span class="info-value font-semibold">{{ software.categoryName }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Nhà cung cấp / Đối tác:</span>
+            <span class="info-value font-semibold">{{ software.vendorName }}</span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Vòng đời sử dụng:</span>
+            <span class="badge" [class.badge-active]="software.lifecycleStatus === 'Active'" [class.badge-deprecated]="software.lifecycleStatus === 'Deprecated'" [class.badge-retired]="software.lifecycleStatus === 'Retired'">
+              {{ software.lifecycleStatus }}
+            </span>
+          </div>
+
+          <div class="info-item">
+            <span class="info-label">Phiên bản dữ liệu (Version):</span>
+            <span class="info-value">#{{ software.version }}</span>
+          </div>
+        </div>
+
+        @if (software.description) {
+          <div class="description-box">
+            <span class="info-label">Mô tả chức năng:</span>
+            <p>{{ software.description }}</p>
+          </div>
+        }
+      </div>
+
+      <!-- Releases Section -->
+      <div class="releases-section">
+        <div class="section-header">
+          <h3>Các Phiên bản Phát hành ({{ releases().length }})</h3>
+          @if (authService.hasPermission('catalog.manage')) {
+            <button type="button" class="btn btn-sm btn-primary" (click)="openAddReleaseModal()">
+              <span>➕</span> Thêm Phiên bản
+            </button>
+          }
+        </div>
+
+        @if (releases().length === 0) {
+          <div class="empty-releases">
+            <p>Chưa có thông tin phiên bản phát hành nào cho phần mềm này.</p>
+          </div>
+        } @else {
+          <div class="release-timeline">
+            @for (rel of releases(); track rel.id) {
+              <div class="release-card">
+                <div class="release-header">
+                  <span class="version-name">🏷️ {{ rel.versionName }}</span>
+                  <span class="release-date">Phát hành: {{ rel.releaseDate | date:'dd/MM/yyyy' }}</span>
+                </div>
+                <div class="release-meta">
+                  @if (rel.supportEndDate) {
+                    <span class="support-date">Hết hạn hỗ trợ: {{ rel.supportEndDate | date:'dd/MM/yyyy' }}</span>
+                  } @else {
+                    <span class="support-unlimited">Hỗ trợ dài hạn</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
+    <div class="drawer-footer">
+      <button type="button" class="btn btn-secondary" (click)="close.emit()">Đóng</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Thêm Phiên Bản Phát Hành -->
+@if (isAddReleaseModalOpen()) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Thêm Phiên bản Phát hành mới</h2>
+        <button type="button" class="btn-close" (click)="closeAddReleaseModal()">✕</button>
+      </div>
+
+      @if (modalError()) {
+        <div class="alert alert-error">{{ modalError() }}</div>
+      }
+
+      <form [formGroup]="releaseForm" (ngSubmit)="submitAddRelease()">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Tên phiên bản phát hành (Version) *</label>
+            <input type="text" class="form-control" formControlName="versionName" placeholder="VD: v3.2.0" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ngày phát hành *</label>
+            <input type="date" class="form-control" formControlName="releaseDate" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ngày kết thúc hỗ trợ</label>
+            <input type="date" class="form-control" formControlName="supportEndDate" placeholder="Tùy chọn" />
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeAddReleaseModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu Phiên bản</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

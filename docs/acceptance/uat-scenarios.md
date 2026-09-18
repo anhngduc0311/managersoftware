@@ -19,10 +19,11 @@
 - **Kịch bản 2**: Cập nhật đơn vị cha tạo chu trình (A là con B, đặt B làm con A) → Bị hệ thống từ chối `400 Bad Request`.
 
 ### UAT-04: Danh mục & Luồng Đề xuất (FR-04)
-- **Kịch bản 1**: `UnitEditor` gửi đề xuất phần mềm mới kèm mô tả → Trạng thái đề xuất là `Pending`.
+- **Kịch bản 1**: `UnitEditor` gửi đề xuất bổ sung một phần mềm đã hoàn thành, chưa có trong danh mục, kèm mô tả → Trạng thái đề xuất là `Pending`; đây không phải yêu cầu phát triển phần mềm mới.
 - **Kịch bản 2**: `CatalogManager` phê duyệt đề xuất (`Accept`) → Tự động tạo phần mềm mới trong danh mục chung và cập nhật trạng thái đề xuất thành `Accepted`.
 
 ### UAT-05: Hồ sơ Triển khai, Revision & Chống Ghi đè Đồng thời (FR-05, FR-06)
+- **Kịch bản phạm vi**: Tạo hồ sơ sử dụng phần mềm đã hoàn thành → Form và mẫu Excel không có phần trăm hoàn thành/milestone phát triển; chọn `NotInUse`, `Active`, `Suspended` hoặc `Retired` theo tình trạng thực tế. API từ chối `Planned`/`Piloting` là trạng thái không được hỗ trợ. Hồ sơ Draft không làm phần mềm trở thành sản phẩm chưa hoàn thành.
 - **Kịch bản 1**: Cán bộ tạo hồ sơ nháp (`Draft`), điền thông tin và tiến hành `Submit` → Trạng thái chuyển thành `Submitted`, các trường thông tin và tệp đính kèm bị khóa không cho chỉnh sửa trực tiếp.
 - **Kịch bản 2 (Cấm tự duyệt)**: Người gửi (`submitted_by`) đăng nhập bằng tài khoản duyệt và cố tình gọi API `/approve` → Hệ thống chặn lại với lỗi nghiệp vụ.
 - **Kịch bản 3 (Từ chối & Mở lại)**: Người duyệt bấm `Reject` và nhập lý do → Hồ sơ chuyển thành `Rejected`. Cán bộ tạo nháp bấm `Reopen` → Hồ sơ mở lại thành `Draft` để sửa.

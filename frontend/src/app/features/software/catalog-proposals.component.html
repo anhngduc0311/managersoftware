@@ -1,0 +1,251 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Đề xuất Bổ sung Danh mục Phần mềm</h1>
+      <p class="page-subtitle">Luồng tiếp nhận đề xuất bổ sung phần mềm đã hoàn thành từ các đơn vị và thẩm định từ cấp quản trị danh mục (Sở TTTT)</p>
+    </div>
+
+    <div class="header-actions">
+      @if (authService.hasPermission('catalog.propose')) {
+        <button type="button" class="btn btn-primary" (click)="openCreateModal()">
+          <span>💡</span> Gửi Đề xuất Phần mềm Mới
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Filter & List Card -->
+  <div class="card content-card">
+    <div class="filter-bar">
+      <div class="filter-group">
+        <select class="form-control" [(ngModel)]="selectedStatus" (ngModelChange)="onStatusFilterChange()">
+          <option value="">Tất cả Trạng thái</option>
+          <option value="Pending">Đang chờ thẩm định (Pending)</option>
+          <option value="Accepted">Đã chấp thuận (Accepted)</option>
+          <option value="Rejected">Đã từ chối (Rejected)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Tên phần mềm đề xuất</th>
+            <th>Đơn vị đề xuất</th>
+            <th>Người gửi</th>
+            <th>Ngày gửi</th>
+            <th>Trạng thái</th>
+            <th>Kết quả thẩm định</th>
+            <th class="text-right">Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (isLoading()) {
+            <tr>
+              <td colspan="7" class="text-center py-4">Đang tải danh sách đề xuất...</td>
+            </tr>
+          } @else if (proposals().length === 0) {
+            <tr>
+              <td colspan="7" class="text-center py-4">Chưa có đề xuất nào phù hợp.</td>
+            </tr>
+          } @else {
+            @for (p of proposals(); track p.id) {
+              <tr>
+                <td>
+                  <div class="font-semibold text-primary">{{ p.softwareName }}</div>
+                  @if (p.description) {
+                    <div class="table-desc">{{ p.description }}</div>
+                  }
+                </td>
+                <td>
+                  <span class="code-pill">{{ p.organizationName || 'N/A' }}</span>
+                </td>
+                <td>{{ p.proposedByUserName }}</td>
+                <td>{{ p.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td>
+                  <span class="badge" [class.badge-pending]="p.status === 'Pending'" [class.badge-accepted]="p.status === 'Accepted'" [class.badge-rejected]="p.status === 'Rejected'">
+                    @if (p.status === 'Pending') { ⏳ Đang chờ duyệt }
+                    @else if (p.status === 'Accepted') { ✅ Đã chấp thuận }
+                    @else if (p.status === 'Rejected') { ❌ Đã từ chối }
+                  </span>
+                </td>
+                <td>
+                  @if (p.status === 'Accepted') {
+                    <span class="text-success font-semibold">Phần mềm: {{ p.createdSoftwareName || 'Đã tạo/liên kết' }}</span>
+                  } @else if (p.status === 'Rejected') {
+                    <span class="text-danger" [title]="p.rejectionReason">Lý do: {{ p.rejectionReason }}</span>
+                  } @else {
+                    <span class="text-muted">Chưa xử lý</span>
+                  }
+                </td>
+                <td class="text-right action-cell">
+                  @if (authService.hasPermission('catalog.manage') && p.status === 'Pending') {
+                    <button type="button" class="btn btn-sm btn-success" (click)="openAcceptModal(p)">
+                      <span>Duyệt</span>
+                    </button>
+                    <button type="button" class="btn btn-sm btn-danger" (click)="openRejectModal(p)">
+                      <span>Từ chối</span>
+                    </button>
+                  } @else {
+                    <span class="text-muted">—</span>
+                  }
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Gửi Đề Xuất Mới -->
+@if (isCreateModalOpen()) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Gửi Đề xuất Bổ sung Phần mềm mới</h2>
+        <button type="button" class="btn-close" (click)="closeCreateModal()">✕</button>
+      </div>
+
+      @if (modalError()) {
+        <div class="alert alert-error">{{ modalError() }}</div>
+      }
+
+      <form [formGroup]="proposalForm" (ngSubmit)="submitCreateProposal()">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Đơn vị đề xuất *</label>
+            <select class="form-control" formControlName="organizationId">
+              <option value="">-- Chọn đơn vị --</option>
+              @for (org of organizations(); track org.id) {
+                <option [value]="org.id">{{ org.name }} ({{ org.code }})</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Tên phần mềm đề xuất *</label>
+            <input type="text" class="form-control" formControlName="softwareName" placeholder="VD: Phần mềm Quản lý Tiêm chủng Mở rộng" />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Mô tả tóm tắt tính năng & phạm vi sử dụng</label>
+            <textarea class="form-control" formControlName="description" rows="3" placeholder="Mô tả chức năng chính của phần mềm..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Gửi Đề xuất</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal: Duyệt Đề Xuất (CatalogManager) -->
+@if (isAcceptModalOpen()) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Phê duyệt Đề xuất: {{ selectedProposal()?.softwareName }}</h2>
+        <button type="button" class="btn-close" (click)="closeAcceptModal()">✕</button>
+      </div>
+
+      @if (modalError()) {
+        <div class="alert alert-error">{{ modalError() }}</div>
+      }
+
+      <form [formGroup]="acceptForm" (ngSubmit)="submitAccept()">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Phương thức phê duyệt *</label>
+            <div class="radio-group">
+              <label class="radio-label">
+                <input type="radio" value="create" formControlName="actionType" />
+                <span>Tạo phần mềm mới vào danh mục dùng chung</span>
+              </label>
+              <label class="radio-label">
+                <input type="radio" value="link" formControlName="actionType" />
+                <span>Liên kết với phần mềm đã có sẵn trong danh mục</span>
+              </label>
+            </div>
+          </div>
+
+          @if (acceptForm.get('actionType')?.value === 'create') {
+            <div class="form-group full-width">
+              <label class="form-label">Mã phần mềm mới (Code) *</label>
+              <input type="text" class="form-control" formControlName="newSoftwareCode" placeholder="VD: HEALTH_VACCINE" />
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Nhóm phân loại *</label>
+              <select class="form-control" formControlName="categoryId">
+                @for (c of categories(); track c.id) {
+                  <option [value]="c.id">{{ c.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label class="form-label">Nhà cung cấp *</label>
+              <select class="form-control" formControlName="vendorId">
+                @for (v of vendors(); track v.id) {
+                  <option [value]="v.id">{{ v.name }}</option>
+                }
+              </select>
+            </div>
+          } @else {
+            <div class="form-group full-width">
+              <label class="form-label">Chọn phần mềm có sẵn trong danh mục *</label>
+              <select class="form-control" formControlName="existingSoftwareId">
+                <option value="">-- Chọn phần mềm --</option>
+                @for (s of softwareList(); track s.id) {
+                  <option [value]="s.id">{{ s.name }} ({{ s.code }})</option>
+                }
+              </select>
+            </div>
+          }
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeAcceptModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Xác nhận Phê duyệt</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal: Từ Chối Đề Xuất (CatalogManager) -->
+@if (isRejectModalOpen()) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Từ chối Đề xuất: {{ selectedProposal()?.softwareName }}</h2>
+        <button type="button" class="btn-close" (click)="closeRejectModal()">✕</button>
+      </div>
+
+      @if (modalError()) {
+        <div class="alert alert-error">{{ modalError() }}</div>
+      }
+
+      <form [formGroup]="rejectForm" (ngSubmit)="submitReject()">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Lý do từ chối đề xuất *</label>
+            <textarea class="form-control" formControlName="reason" rows="4" placeholder="Nêu rõ lý do không tiếp nhận vào danh mục dùng chung..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeRejectModal()">Hủy</button>
+          <button type="submit" class="btn btn-danger">Xác nhận Từ chối</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

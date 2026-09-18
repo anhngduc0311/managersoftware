@@ -1,0 +1,391 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Quản lý Tài khoản & Phân quyền Người dùng</h1>
+      <p class="page-subtitle">Quản trị danh sách người dùng, gán vai trò và cấu hình phạm vi truy cập (Global / Đơn vị & trực thuộc)</p>
+    </div>
+
+    <div class="header-actions">
+      @if (authService.hasPermission('access.manage')) {
+        <button type="button" class="btn btn-primary" (click)="openCreateModal()">
+          <span>➕</span> Thêm Người dùng Mới
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Content Card -->
+  <div class="content-card">
+    <div class="filter-bar">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Tìm tên đăng nhập, họ tên, email..."
+          [(ngModel)]="searchQuery"
+          (keyup.enter)="onSearch()"
+        />
+      </div>
+
+      <div class="filter-group">
+        <select class="form-control" [(ngModel)]="statusFilter" (ngModelChange)="onFilterChange()">
+          <option value="">Tất cả trạng thái</option>
+          <option value="true">Đang hoạt động (Active)</option>
+          <option value="false">Đang bị khóa (Locked)</option>
+        </select>
+        <button type="button" class="btn btn-outline" (click)="onSearch()">Lọc</button>
+      </div>
+    </div>
+
+    <!-- Users Table -->
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Tên đăng nhập</th>
+            <th>Họ và tên</th>
+            <th>Email</th>
+            <th>Trạng thái</th>
+            <th>Ngày tạo</th>
+            <th class="text-right">Hành động</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (isLoading()) {
+            <tr>
+              <td colspan="6" class="text-center py-4">Đang tải danh sách người dùng...</td>
+            </tr>
+          } @else if (users().length === 0) {
+            <tr>
+              <td colspan="6" class="text-center py-4">Không tìm thấy người dùng phù hợp.</td>
+            </tr>
+          } @else {
+            @for (u of users(); track u.id) {
+              <tr>
+                <td>
+                  <span class="font-mono font-semibold">{{ u.userName }}</span>
+                </td>
+                <td>
+                  <div class="font-semibold text-main">{{ u.displayName }}</div>
+                </td>
+                <td>
+                  <span class="text-muted">{{ u.email || '—' }}</span>
+                </td>
+                <td>
+                  <span class="badge" [class.badge-active]="u.isActive" [class.badge-locked]="!u.isActive">
+                    {{ u.isActive ? '🟢 Hoạt động' : '🔒 Đã khóa' }}
+                  </span>
+                </td>
+                <td>{{ u.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
+                <td class="text-right action-cell">
+                  <button type="button" class="btn btn-sm btn-outline" (click)="openGrantsModal(u)" title="Quản lý Phân quyền">
+                    <span>🛡️ Phân quyền</span>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline" (click)="openEditModal(u)" title="Chỉnh sửa thông tin">
+                    <span>✏️ Sửa</span>
+                  </button>
+                  <button type="button" class="btn btn-sm btn-outline" (click)="openResetPasswordModal(u)" title="Đặt lại mật khẩu">
+                    <span>🔑 Đặt lại MK</span>
+                  </button>
+                  <button
+                    type="button"
+                    class="btn btn-sm"
+                    [class.btn-danger]="u.isActive"
+                    [class.btn-success]="!u.isActive"
+                    (click)="toggleLock(u)"
+                    [title]="u.isActive ? 'Khóa tài khoản' : 'Mở khóa tài khoản'"
+                  >
+                    <span>{{ u.isActive ? '🔒 Khóa' : '🔓 Mở' }}</span>
+                  </button>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Summary -->
+    <div class="pagination-bar">
+      <span class="text-muted">Tổng số: <strong>{{ totalCount() }}</strong> tài khoản</span>
+    </div>
+  </div>
+</div>
+
+<!-- Modal: Tạo Người Dùng Mới -->
+@if (isCreateModalOpen()) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Thêm Người dùng Mới</h2>
+        <button type="button" class="btn-close" (click)="closeCreateModal()">✕</button>
+      </div>
+
+      @if (modalError()) {
+        <div class="alert alert-error">{{ modalError() }}</div>
+      }
+
+      <form [formGroup]="createForm" (ngSubmit)="submitCreate()">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Tên đăng nhập (Username) *</label>
+            <input type="text" class="form-control" formControlName="username" placeholder="VD: nguyen_van_a" />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Họ và tên hiển thị *</label>
+            <input type="text" class="form-control" formControlName="displayName" placeholder="VD: Nguyễn Văn A" />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Email liên hệ</label>
+            <input type="email" class="form-control" formControlName="email" placeholder="VD: nva@laocai.gov.vn" />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Mật khẩu khởi tạo * (tối thiểu 6 ký tự)</label>
+            <input type="password" class="form-control" formControlName="password" placeholder="••••••••" />
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Tạo Tài khoản</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal: Chỉnh Sửa Thông Tin -->
+@if (isEditModalOpen()) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Chỉnh sửa Tài khoản: {{ selectedUser()?.userName }}</h2>
+        <button type="button" class="btn-close" (click)="closeEditModal()">✕</button>
+      </div>
+
+      @if (modalError()) {
+        <div class="alert alert-error">{{ modalError() }}</div>
+      }
+
+      <form [formGroup]="editForm" (ngSubmit)="submitEdit()">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Họ và tên hiển thị *</label>
+            <input type="text" class="form-control" formControlName="displayName" />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Email</label>
+            <input type="email" class="form-control" formControlName="email" />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="isActive" />
+              <span>Đang hoạt động (cho phép đăng nhập)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeEditModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu Thay đổi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal: Đặt Lại Mật Khẩu -->
+@if (isResetPasswordModalOpen()) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Đặt lại Mật khẩu: {{ selectedUser()?.userName }}</h2>
+        <button type="button" class="btn-close" (click)="closeResetPasswordModal()">✕</button>
+      </div>
+
+      @if (modalError()) {
+        <div class="alert alert-error">{{ modalError() }}</div>
+      }
+
+      <form [formGroup]="resetPasswordForm" (ngSubmit)="submitResetPassword()">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Mật khẩu mới * (tối thiểu 6 ký tự)</label>
+            <input type="password" class="form-control" formControlName="newPassword" placeholder="Nhập mật khẩu mới..." />
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeResetPasswordModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Xác nhận Đổi Mật khẩu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal: Quản Lý Phân Quyền (Grants) -->
+@if (isGrantsModalOpen()) {
+  <div class="modal-backdrop">
+    <div class="modal-card modal-lg">
+      <div class="modal-header">
+        <div>
+          <h2>Phân quyền cho: {{ selectedUser()?.displayName }} ({{ selectedUser()?.userName }})</h2>
+          <p class="modal-subtitle">Gán vai trò và phạm vi hoạt động theo đơn vị hoặc toàn tỉnh</p>
+        </div>
+        <button type="button" class="btn-close" (click)="closeGrantsModal()">✕</button>
+      </div>
+
+      <div class="modal-toolbar">
+        <button type="button" class="btn btn-primary btn-sm" (click)="openAddGrantModal()">
+          <span>➕</span> Thêm Vai trò & Phạm vi
+        </button>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Vai trò (Role)</th>
+              <th>Phạm vi (Scope)</th>
+              <th>Đơn vị áp dụng</th>
+              <th>Bao gồm cấp dưới?</th>
+              <th>Thời hạn hiệu lực</th>
+              <th>Trạng thái</th>
+              <th class="text-right">Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (userGrants().length === 0) {
+              <tr>
+                <td colspan="7" class="text-center py-3 text-muted">Người dùng chưa được cấp vai trò nào.</td>
+              </tr>
+            } @else {
+              @for (g of userGrants(); track g.id) {
+                <tr>
+                  <td>
+                    <div class="font-semibold text-main">{{ g.roleName }}</div>
+                    <span class="code-pill">{{ g.roleCode }}</span>
+                  </td>
+                  <td>
+                    <span class="badge" [class.badge-global]="g.scopeType === 'Global'" [class.badge-org]="g.scopeType === 'Organization'">
+                      {{ g.scopeType === 'Global' ? '🌐 Toàn tỉnh' : '🏢 Cấp Đơn vị' }}
+                    </span>
+                  </td>
+                  <td>{{ getOrgName(g.organizationId) }}</td>
+                  <td>
+                    @if (g.scopeType === 'Organization') {
+                      <span [class.text-success]="g.includeDescendants" [class.text-muted]="!g.includeDescendants">
+                        {{ g.includeDescendants ? '✅ Có (+ Cấp dưới)' : '❌ Chỉ đơn vị này' }}
+                      </span>
+                    } @else {
+                      <span class="text-muted">—</span>
+                    }
+                  </td>
+                  <td>
+                    <div class="text-xs">
+                      <div>Từ: {{ g.validFrom | date:'dd/MM/yyyy' }}</div>
+                      <div>Đến: {{ g.validTo ? (g.validTo | date:'dd/MM/yyyy') : 'Vô thời hạn' }}</div>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="badge" [class.badge-active]="g.isActive" [class.badge-locked]="!g.isActive">
+                      {{ g.isActive ? 'Hiệu lực' : 'Hết hạn' }}
+                    </span>
+                  </td>
+                  <td class="text-right action-cell">
+                    <button type="button" class="btn btn-sm btn-danger" (click)="revokeGrant(g.id)" title="Thu hồi quyền">
+                      <span>Thu hồi</span>
+                    </button>
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="modal-actions" style="margin-top: 1.5rem;">
+        <button type="button" class="btn btn-secondary" (click)="closeGrantsModal()">Đóng</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal Con: Thêm Bản Cấp Quyền -->
+@if (isAddGrantModalOpen()) {
+  <div class="modal-backdrop" style="z-index: 1010;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Gán Vai trò & Cấu hình Phạm vi</h2>
+        <button type="button" class="btn-close" (click)="closeAddGrantModal()">✕</button>
+      </div>
+
+      @if (modalError()) {
+        <div class="alert alert-error">{{ modalError() }}</div>
+      }
+
+      <form [formGroup]="grantForm" (ngSubmit)="submitAddGrant()">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Chọn Vai trò (Role) *</label>
+            <select class="form-control" formControlName="roleId">
+              @for (r of roles(); track r.id) {
+                <option [value]="r.id">{{ r.name }} ({{ r.code }})</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Loại Phạm vi (Scope Type) *</label>
+            <select class="form-control" formControlName="scopeType">
+              <option value="Organization">🏢 Cấp Đơn vị (Organization)</option>
+              <option value="Global">🌐 Toàn tỉnh (Global)</option>
+            </select>
+          </div>
+
+          @if (grantForm.get('scopeType')?.value === 'Organization') {
+            <div class="form-group full-width">
+              <label class="form-label">Đơn vị trực thuộc *</label>
+              <select class="form-control" formControlName="organizationId">
+                <option value="">-- Chọn đơn vị --</option>
+                @for (org of organizations(); track org.id) {
+                  <option [value]="org.id">{{ org.name }} ({{ org.code }})</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group full-width">
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="includeDescendants" />
+                <span>Bao gồm tất cả đơn vị cấp dưới trực thuộc (Include Descendants)</span>
+              </label>
+            </div>
+          }
+
+          <div class="form-group">
+            <label class="form-label">Ngày bắt đầu hiệu lực *</label>
+            <input type="datetime-local" class="form-control" formControlName="validFrom" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ngày kết thúc hiệu lực</label>
+            <input type="datetime-local" class="form-control" formControlName="validTo" />
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeAddGrantModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Xác nhận Gán Quyền</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

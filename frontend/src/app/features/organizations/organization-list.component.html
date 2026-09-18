@@ -1,0 +1,373 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Cơ quan & Đơn vị</h1>
+      <p class="page-subtitle">Quản lý định danh cơ quan, cây phân cấp tổ chức và lịch sử sáp nhập/chia tách</p>
+    </div>
+
+    <div class="header-actions">
+      @if (authService.hasPermission('organizations.manage')) {
+        <button type="button" class="btn btn-outline" (click)="openSuccessionModal()">
+          <span>🔄</span> Ghi nhận Sáp nhập / Kế nhiệm
+        </button>
+        <button type="button" class="btn btn-primary" (click)="openCreateModal()">
+          <span>➕</span> Thêm Đơn vị Mới
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Tab Navigation -->
+  <div class="tabs-header">
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'tree'"
+      (click)="setTab('tree')">
+      <span>🌳 Cây phân cấp cơ cấu</span>
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'table'"
+      (click)="setTab('table')">
+      <span>📋 Danh sách đơn vị</span>
+    </button>
+    <button
+      type="button"
+      class="tab-btn"
+      [class.active]="activeTab() === 'successions'"
+      (click)="setTab('successions')">
+      <span>🔄 Lịch sử sáp nhập & kế nhiệm ({{ successions().length }})</span>
+    </button>
+  </div>
+
+  <!-- Tab Content: Tree View -->
+  @if (activeTab() === 'tree') {
+    <div class="card content-card">
+      <app-organization-tree></app-organization-tree>
+    </div>
+  }
+
+  <!-- Tab Content: Table View -->
+  @if (activeTab() === 'table') {
+    <div class="card content-card">
+      <div class="table-toolbar">
+        <div class="search-box">
+          <span class="search-icon">🔍</span>
+          <input
+            type="text"
+            class="form-control"
+            placeholder="Tìm theo mã hoặc tên đơn vị..."
+            (input)="onSearch($event)"
+          />
+        </div>
+      </div>
+
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Mã đơn vị</th>
+              <th>Tên cơ quan / Đơn vị</th>
+              <th>Hiệu lực từ</th>
+              <th>Hiệu lực đến</th>
+              <th>Trạng thái</th>
+              <th class="text-right">Hành động</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (isLoading()) {
+              <tr>
+                <td colspan="6" class="text-center py-4">Đang tải dữ liệu...</td>
+              </tr>
+            } @else if (organizations().length === 0) {
+              <tr>
+                <td colspan="6" class="text-center py-4">Không tìm thấy đơn vị nào phù hợp.</td>
+              </tr>
+            } @else {
+              @for (org of organizations(); track org.id) {
+                <tr>
+                  <td>
+                    <span class="code-pill">{{ org.code }}</span>
+                  </td>
+                  <td class="font-semibold">{{ org.name }}</td>
+                  <td>{{ org.validFrom | date:'dd/MM/yyyy' }}</td>
+                  <td>
+                    @if (org.validTo) {
+                      {{ org.validTo | date:'dd/MM/yyyy' }}
+                    } @else {
+                      <span class="text-muted">Hiện hành</span>
+                    }
+                  </td>
+                  <td>
+                    @if (org.isActive) {
+                      <span class="badge badge-active">Hoạt động</span>
+                    } @else {
+                      <span class="badge badge-inactive">Tạm khóa</span>
+                    }
+                  </td>
+                  <td class="text-right action-cell">
+                    <button type="button" class="btn-icon" (click)="openHistoryModal(org)" title="Xem lịch sử thay đổi">
+                      <span>📜</span>
+                    </button>
+                    @if (authService.hasPermission('organizations.manage')) {
+                      <button type="button" class="btn-icon" (click)="openEditModal(org)" title="Chỉnh sửa đơn vị">
+                        <span>✏️</span>
+                      </button>
+                    }
+                  </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- Tab Content: Successions View -->
+  @if (activeTab() === 'successions') {
+    <div class="card content-card">
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Đơn vị Tiền nhiệm</th>
+              <th>Đơn vị Kế nhiệm</th>
+              <th>Ngày sáp nhập / Chuyển giao</th>
+              <th>Ghi chú & Căn cứ</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (successions().length === 0) {
+              <tr>
+                <td colspan="4" class="text-center py-4">Chưa có bản ghi sáp nhập/kế nhiệm nào.</td>
+              </tr>
+            } @else {
+              @for (s of successions(); track s.id) {
+                <tr>
+                  <td>
+                    <span class="code-pill pred-pill">{{ s.predecessorCode }}</span>
+                  </td>
+                  <td>
+                    <span class="code-pill succ-pill">{{ s.successorCode }}</span>
+                  </td>
+                  <td class="font-semibold">{{ s.effectiveDate | date:'dd/MM/yyyy' }}</td>
+                  <td>{{ s.note || '—' }}</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Modal: Tạo Đơn Vị Mới -->
+@if (isCreateModalOpen()) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Thêm Cơ quan / Đơn vị Mới</h2>
+        <button type="button" class="btn-close" (click)="closeCreateModal()">✕</button>
+      </div>
+
+      @if (modalError()) {
+        <div class="alert alert-error">{{ modalError() }}</div>
+      }
+
+      <form [formGroup]="orgForm" (ngSubmit)="submitCreateOrg()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Mã định danh (Code) *</label>
+            <input type="text" class="form-control" formControlName="code" placeholder="VD: UBND_BAOTHANG" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tên cơ quan / Đơn vị *</label>
+            <input type="text" class="form-control" formControlName="name" placeholder="VD: UBND Huyện Bảo Thắng" />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Đơn vị cấp trên trực tiếp</label>
+            <select class="form-control" formControlName="parentId">
+              <option value="">-- Không có (Cấp tỉnh/Độc lập) --</option>
+              @for (item of organizations(); track item.id) {
+                <option [value]="item.id">{{ item.name }} ({{ item.code }})</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ngày bắt đầu hiệu lực *</label>
+            <input type="date" class="form-control" formControlName="validFrom" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ngày kết thúc hiệu lực</label>
+            <input type="date" class="form-control" formControlName="validTo" placeholder="Để trống nếu vô hạn" />
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu Đơn vị</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal: Chỉnh Sửa Đơn Vị -->
+@if (isEditModalOpen()) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Cập nhật Cơ quan / Đơn vị ({{ selectedOrg()?.code }})</h2>
+        <button type="button" class="btn-close" (click)="closeEditModal()">✕</button>
+      </div>
+
+      @if (modalError()) {
+        <div class="alert alert-error">{{ modalError() }}</div>
+      }
+
+      <form [formGroup]="editOrgForm" (ngSubmit)="submitEditOrg()">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Tên cơ quan / Đơn vị *</label>
+            <input type="text" class="form-control" formControlName="name" />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Đơn vị cấp trên trực tiếp</label>
+            <select class="form-control" formControlName="parentId">
+              <option value="">-- Không có (Cấp tỉnh/Độc lập) --</option>
+              @for (item of organizations(); track item.id) {
+                @if (item.id !== selectedOrg()?.id) {
+                  <option [value]="item.id">{{ item.name }} ({{ item.code }})</option>
+                }
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ngày bắt đầu hiệu lực *</label>
+            <input type="date" class="form-control" formControlName="validFrom" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ngày kết thúc hiệu lực</label>
+            <input type="date" class="form-control" formControlName="validTo" />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="isActive" />
+              <span>Đang hoạt động (Active)</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeEditModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu Thay đổi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal: Lịch Sử Phiên Bản Đơn Vị -->
+@if (isHistoryModalOpen()) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Lịch sử Thay đổi: {{ selectedOrg()?.name }}</h2>
+        <button type="button" class="btn-close" (click)="closeHistoryModal()">✕</button>
+      </div>
+
+      <div class="timeline-container">
+        @if (orgHistory().length === 0) {
+          <p class="text-center text-muted">Chưa có thông tin lịch sử phiên bản.</p>
+        } @else {
+          <ul class="timeline">
+            @for (h of orgHistory(); track h.id) {
+              <li class="timeline-item">
+                <div class="timeline-point"></div>
+                <div class="timeline-content">
+                  <div class="timeline-header">
+                    <span class="timeline-name">{{ h.name }}</span>
+                    <span class="timeline-date">{{ h.validFrom | date:'dd/MM/yyyy' }} — {{ h.validTo ? (h.validTo | date:'dd/MM/yyyy') : 'Hiện hành' }}</span>
+                  </div>
+                  <div class="timeline-meta">Ghi nhận lúc: {{ h.createdAt | date:'dd/MM/yyyy HH:mm' }}</div>
+                </div>
+              </li>
+            }
+          </ul>
+        }
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeHistoryModal()">Đóng</button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- Modal: Ghi Nhận Sáp Nhập / Kế Nhiệm -->
+@if (isSuccessionModalOpen()) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Ghi nhận Sáp nhập / Kế nhiệm Đơn vị</h2>
+        <button type="button" class="btn-close" (click)="closeSuccessionModal()">✕</button>
+      </div>
+
+      @if (modalError()) {
+        <div class="alert alert-error">{{ modalError() }}</div>
+      }
+
+      <form [formGroup]="successionForm" (ngSubmit)="submitSuccession()">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Đơn vị Tiền nhiệm (Cũ) *</label>
+            <select class="form-control" formControlName="predecessorId">
+              <option value="">-- Chọn đơn vị tiền nhiệm --</option>
+              @for (item of organizations(); track item.id) {
+                <option [value]="item.id">{{ item.name }} ({{ item.code }})</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Đơn vị Kế nhiệm (Mới) *</label>
+            <select class="form-control" formControlName="successorId">
+              <option value="">-- Chọn đơn vị kế nhiệm --</option>
+              @for (item of organizations(); track item.id) {
+                <option [value]="item.id">{{ item.name }} ({{ item.code }})</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Ngày sáp nhập / Chuyển giao có hiệu lực *</label>
+            <input type="date" class="form-control" formControlName="effectiveDate" />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Ghi chú / Quyết định căn cứ</label>
+            <textarea class="form-control" formControlName="note" rows="3" placeholder="Số quyết định, lý do sáp nhập..."></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeSuccessionModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu Ghi nhận</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

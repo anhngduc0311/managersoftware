@@ -1,0 +1,143 @@
+<div class="page-container">
+  <!-- Page Header -->
+  <div class="page-header">
+    <div>
+      <h1 class="page-title">Quản lý Vai trò & Ma trận Phân quyền</h1>
+      <p class="page-subtitle">Xem cấu hình 7 vai trò chuẩn hệ thống và danh mục 18 quyền hạn chi tiết (Access Matrix)</p>
+    </div>
+
+    <div class="header-actions">
+      <div class="view-toggle">
+        <button
+          type="button"
+          class="toggle-btn"
+          [class.active]="activeTab() === 'cards'"
+          (click)="activeTab.set('cards')"
+        >
+          <span>📋 Chi tiết Vai trò</span>
+        </button>
+        <button
+          type="button"
+          class="toggle-btn"
+          [class.active]="activeTab() === 'matrix'"
+          (click)="activeTab.set('matrix')"
+        >
+          <span>📊 Ma trận Phân quyền</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  @if (isLoading()) {
+    <div class="content-card text-center py-4">
+      <p>Đang tải dữ liệu vai trò và quyền hạn...</p>
+    </div>
+  } @else {
+    <!-- Tab 1: Role Detail Cards -->
+    @if (activeTab() === 'cards') {
+      <div class="roles-layout">
+        <!-- Sidebar: Roles List -->
+        <div class="roles-sidebar content-card">
+          <h3 class="sidebar-title">Danh sách Vai trò Hệ thống ({{ roles().length }})</h3>
+          <div class="role-items-list">
+            @for (r of roles(); track r.id) {
+              <div
+                class="role-item"
+                [class.selected]="selectedRole()?.id === r.id"
+                (click)="selectRole(r)"
+              >
+                <div class="role-item-header">
+                  <span class="role-item-name">{{ r.name }}</span>
+                  <span class="badge badge-primary">{{ r.permissions.length }} quyền</span>
+                </div>
+                <div class="role-item-code font-mono">{{ r.code }}</div>
+                <div class="role-item-desc">{{ r.description }}</div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Main: Selected Role Permissions -->
+        <div class="role-details content-card">
+          @if (selectedRole()) {
+            <div class="role-details-header">
+              <div>
+                <h2>{{ selectedRole()?.name }}</h2>
+                <span class="code-pill">{{ selectedRole()?.code }}</span>
+                <p class="role-desc-full">{{ selectedRole()?.description }}</p>
+              </div>
+            </div>
+
+            <div class="permissions-section">
+              <h4 class="section-title">Danh sách Quyền hạn Được gán ({{ selectedRole()?.permissions?.length }} quyền)</h4>
+
+              <div class="permission-chips-grid">
+                @for (p of selectedRole()?.permissions; track p.id) {
+                  <div class="permission-chip">
+                    <div class="p-header">
+                      <span class="p-code font-mono">{{ p.code }}</span>
+                      <span class="p-group">{{ p.groupName }}</span>
+                    </div>
+                    <div class="p-name">{{ p.name }}</div>
+                  </div>
+                }
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    }
+
+    <!-- Tab 2: Full Access Matrix Grid -->
+    @if (activeTab() === 'matrix') {
+      <div class="content-card">
+        <h3 class="matrix-title">Ma trận Phân quyền Toàn hệ thống (Access Control Matrix)</h3>
+        <p class="matrix-subtitle">Quy tắc phân định trách nhiệm rõ ràng: SystemAdmin quản trị IAM/Đơn vị, CatalogManager quản trị Danh mục phần mềm, Đơn vị nhập liệu và phê duyệt nội bộ.</p>
+
+        <div class="table-responsive matrix-table-container">
+          <table class="data-table matrix-table">
+            <thead>
+              <tr>
+                <th class="sticky-col">Nhóm / Mã Quyền hạn</th>
+                <th>Tên Quyền</th>
+                @for (r of roles(); track r.id) {
+                  <th class="text-center role-header">
+                    <div class="role-name">{{ r.name }}</div>
+                    <div class="role-code font-mono">{{ r.code }}</div>
+                  </th>
+                }
+              </tr>
+            </thead>
+            <tbody>
+              @for (group of getPermissionGroups(); track group.groupName) {
+                <tr class="group-header-row">
+                  <td [attr.colspan]="roles().length + 2">
+                    📁 <strong>Nhóm: {{ group.groupName }}</strong> ({{ group.permissions.length }} quyền)
+                  </td>
+                </tr>
+
+                @for (p of group.permissions; track p.id) {
+                  <tr>
+                    <td class="sticky-col">
+                      <span class="font-mono font-semibold">{{ p.code }}</span>
+                    </td>
+                    <td>{{ p.name }}</td>
+                    @for (r of roles(); track r.id) {
+                      <td class="text-center">
+                        @if (hasRolePermission(r, p.code)) {
+                          <span class="check-icon" title="Có quyền">✅</span>
+                        } @else {
+                          <span class="cross-icon" title="Không có quyền">—</span>
+                        }
+                      </td>
+                    }
+                  </tr>
+                }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    }
+  }
+</div>

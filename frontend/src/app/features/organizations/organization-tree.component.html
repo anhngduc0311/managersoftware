@@ -1,0 +1,67 @@
+<div class="tree-container">
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Đang tải cây tổ chức đơn vị...</p>
+    </div>
+  } @else if (treeNodes().length === 0) {
+    <div class="empty-state">
+      <span class="empty-icon">🏢</span>
+      <p>Chưa có dữ liệu cơ cấu đơn vị.</p>
+    </div>
+  } @else {
+    <div class="tree-root">
+      <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: treeNodes() }"></ng-container>
+    </div>
+  }
+</div>
+
+<ng-template #nodeTemplate let-nodes>
+  <ul class="tree-list">
+    @for (node of nodes; track node.id) {
+      <li class="tree-item">
+        <div class="node-card" [class.has-children]="node.children?.length > 0">
+          <button
+            type="button"
+            class="toggle-btn"
+            [class.expanded]="isExpanded(node.id)"
+            [disabled]="!node.children || node.children.length === 0"
+            (click)="toggleNode(node.id)">
+            @if (node.children?.length > 0) {
+              <span>{{ isExpanded(node.id) ? '▼' : '▶' }}</span>
+            } @else {
+              <span class="dot">•</span>
+            }
+          </button>
+
+          <div class="node-content">
+            <div class="node-header">
+              <span class="node-name">{{ node.name }}</span>
+              <span class="node-code">{{ node.code }}</span>
+              @if (node.isActive) {
+                <span class="badge badge-active">Đang hoạt động</span>
+              } @else {
+                <span class="badge badge-inactive">Ngừng hoạt động</span>
+              }
+            </div>
+
+            <div class="node-meta">
+              <span>Hiệu lực từ: {{ node.validFrom | date:'dd/MM/yyyy' }}</span>
+              @if (node.validTo) {
+                <span> — đến: {{ node.validTo | date:'dd/MM/yyyy' }}</span>
+              } @else {
+                <span> (Hiện hành)</span>
+              }
+            </div>
+          </div>
+        </div>
+
+        @if (node.children?.length > 0 && isExpanded(node.id)) {
+          <div class="children-container">
+            <ng-container *ngTemplateOutlet="nodeTemplate; context: { $implicit: node.children }"></ng-container>
+          </div>
+        }
+      </li>
+    }
+  </ul>
+</ng-template>

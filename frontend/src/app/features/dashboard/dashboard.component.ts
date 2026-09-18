@@ -1,70 +1,65 @@
-import { Component } from '@angular/core';
+import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { RouterModule } from '@angular/router';
+import { AuthService } from '@core/services/auth.service';
 
 @Component({
   selector: 'app-dashboard',
   standalone: true,
-  imports: [CommonModule],
+  imports: [CommonModule, RouterModule],
   template: `
     <div class="dashboard-container">
       <div class="page-header">
-        <h2>Tổng quan Hệ thống Quản lý Phần mềm CĐS</h2>
-        <p class="subtitle">Trung tâm theo dõi tình trạng triển khai phần mềm, hợp đồng và bản quyền tại tỉnh Lào Cai</p>
+        <h2>Tổng quan Hệ thống Quản trị Phần mềm Chuyển đổi số</h2>
+        <p class="subtitle">Trung tâm điều hành danh mục phần mềm dùng chung và quản lý phân cấp đơn vị tỉnh Lào Cai</p>
       </div>
 
       <div class="kpi-grid">
-        <div class="kpi-card">
-          <div class="kpi-icon blue">
-            <span class="material-icons-outlined">apps</span>
-          </div>
+        <div class="kpi-card" routerLink="/software">
+          <div class="kpi-icon blue">💻</div>
           <div class="kpi-content">
-            <span class="kpi-label">Phần mềm sử dụng</span>
-            <span class="kpi-value">24</span>
-            <span class="kpi-trend positive">+2 phần mềm mới</span>
+            <span class="kpi-label">Danh mục phần mềm</span>
+            <span class="kpi-value">6+</span>
+            <span class="kpi-trend positive">Phần mềm nền tảng dùng chung</span>
           </div>
         </div>
 
-        <div class="kpi-card">
-          <div class="kpi-icon green">
-            <span class="material-icons-outlined">rocket_launch</span>
-          </div>
+        <div class="kpi-card" routerLink="/organizations">
+          <div class="kpi-icon green">🏢</div>
           <div class="kpi-content">
-            <span class="kpi-label">Lượt triển khai hoạt động</span>
-            <span class="kpi-value">158</span>
-            <span class="kpi-trend">Tại 32 cơ quan/đơn vị</span>
+            <span class="kpi-label">Đơn vị trên toàn tỉnh</span>
+            <span class="kpi-value">5+</span>
+            <span class="kpi-trend">Cấp Tỉnh, Sở/Ban/Ngành, Huyện & Xã</span>
           </div>
         </div>
 
-        <div class="kpi-card">
-          <div class="kpi-icon amber">
-            <span class="material-icons-outlined">pending_actions</span>
-          </div>
+        <div class="kpi-card" routerLink="/software/proposals">
+          <div class="kpi-icon amber">💡</div>
           <div class="kpi-content">
-            <span class="kpi-label">Hồ sơ chờ phê duyệt</span>
-            <span class="kpi-value">7</span>
-            <span class="kpi-trend warning">Cần xử lý trong tuần</span>
+            <span class="kpi-label">Đề xuất bổ sung danh mục</span>
+            <span class="kpi-value">Quy trình</span>
+            <span class="kpi-trend warning">Đơn vị gửi -> Sở TTTT thẩm định</span>
           </div>
         </div>
 
-        <div class="kpi-card">
-          <div class="kpi-icon purple">
-            <span class="material-icons-outlined">history_edu</span>
-          </div>
+        <div class="kpi-card" routerLink="/admin/roles">
+          <div class="kpi-icon purple">🛡️</div>
           <div class="kpi-content">
-            <span class="kpi-label">Hợp đồng sắp hết hạn</span>
-            <span class="kpi-value">3</span>
-            <span class="kpi-trend warning">Trong vòng 30 ngày</span>
+            <span class="kpi-label">Phân quyền IAM & Vai trò</span>
+            <span class="kpi-value">7 Vai trò</span>
+            <span class="kpi-trend">18 Quyền hạn ma trận nghiêm ngặt</span>
           </div>
         </div>
       </div>
 
       <div class="welcome-banner">
-        <div class="banner-icon">
-          <span class="material-icons-outlined">verified</span>
-        </div>
+        <div class="banner-icon">🚀</div>
         <div class="banner-text">
-          <h3>Giai đoạn 1: Nền tảng Kỹ thuật đã khởi tạo thành công!</h3>
-          <p>Hệ thống sẵn sàng cho việc triển khai Giai đoạn 2 (IAM, Quản lý đơn vị & Danh mục dùng chung).</p>
+          <h3>Giai đoạn 2: Quản trị Hạt nhân (IAM, Tổ chức & Danh mục dùng chung)</h3>
+          <p>
+            Hệ thống hỗ trợ quản lý lịch sử đơn vị (temporal versioning), phân quyền đa tầng (Global vs Organization + bao gồm cấp dưới),
+            và quy trình thẩm định đề xuất phần mềm với kiểm soát phiên bản độc nhất.
+          </p>
         </div>
       </div>
     </div>
@@ -80,11 +75,11 @@ import { CommonModule } from '@angular/common';
       h2 {
         font-size: 20px;
         font-weight: 700;
-        color: var(--text-main);
+        color: #0f172a;
       }
       .subtitle {
         font-size: 13.5px;
-        color: var(--text-muted);
+        color: #64748b;
         margin-top: 4px;
       }
     }
@@ -97,18 +92,20 @@ import { CommonModule } from '@angular/common';
 
     .kpi-card {
       background: #ffffff;
-      border: 1px solid var(--border-color);
-      border-radius: var(--radius-md);
+      border: 1px solid #e2e8f0;
+      border-radius: 0.75rem;
       padding: 20px;
       display: flex;
       align-items: center;
       gap: 16px;
-      box-shadow: var(--shadow-sm);
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+      cursor: pointer;
       transition: transform 0.2s, box-shadow 0.2s;
 
       &:hover {
         transform: translateY(-2px);
-        box-shadow: var(--shadow-md);
+        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        border-color: #cbd5e1;
       }
 
       .kpi-icon {
@@ -118,10 +115,7 @@ import { CommonModule } from '@angular/common';
         display: flex;
         align-items: center;
         justify-content: center;
-
-        .material-icons-outlined {
-          font-size: 24px;
-        }
+        font-size: 24px;
 
         &.blue { background: #e0f2fe; color: #0284c7; }
         &.green { background: #dcfce7; color: #16a34a; }
@@ -135,21 +129,21 @@ import { CommonModule } from '@angular/common';
 
         .kpi-label {
           font-size: 12.5px;
-          color: var(--text-muted);
+          color: #64748b;
           font-weight: 500;
         }
 
         .kpi-value {
-          font-size: 24px;
+          font-size: 20px;
           font-weight: 700;
-          color: var(--text-main);
+          color: #0f172a;
           line-height: 1.2;
           margin: 2px 0;
         }
 
         .kpi-trend {
           font-size: 11.5px;
-          color: var(--text-muted);
+          color: #64748b;
 
           &.positive { color: #16a34a; font-weight: 600; }
           &.warning { color: #d97706; font-weight: 600; }
@@ -158,9 +152,9 @@ import { CommonModule } from '@angular/common';
     }
 
     .welcome-banner {
-      background: linear-gradient(135deg, #0d5f9e, #0284c7);
+      background: linear-gradient(135deg, #1e3a8a, #2563eb);
       color: white;
-      border-radius: var(--radius-md);
+      border-radius: 0.75rem;
       padding: 24px;
       display: flex;
       align-items: center;
@@ -174,14 +168,18 @@ import { CommonModule } from '@angular/common';
         h3 {
           font-size: 16px;
           font-weight: 700;
-          margin-bottom: 4px;
+          margin: 0 0 6px;
         }
         p {
           font-size: 13.5px;
-          opacity: 0.9;
+          opacity: 0.95;
+          margin: 0;
+          line-height: 1.5;
         }
       }
     }
   `]
 })
-export class DashboardComponent {}
+export class DashboardComponent {
+  public authService = inject(AuthService);
+}

@@ -5,7 +5,7 @@
 
 | Mã | Nội dung cần xác nhận | Trạng thái | Mặc định để phát triển thử nghiệm | Bên xác nhận đề xuất | Ngày cập nhật |
 | --- | --- | --- | --- | --- | --- |
-| **Q-01** | Phạm vi quản lý, biểu mẫu nhập, trường bắt buộc | Tạm khóa theo SPEC | Áp dụng form chuẩn tại D-04 và mẫu Excel v1 | Chủ quản, đại diện đơn vị | 18/09/2026 |
+| **Q-01** | Quản lý phần mềm đã hoàn thành; biểu mẫu nhập và trường bắt buộc | Người dùng đã xác nhận phạm vi; biểu mẫu còn cần chốt | Quản lý danh mục, sử dụng/vận hành; bỏ progress_percent và milestone phát triển; D-04 và Excel v1 theo phạm vi mới | Người dùng xác nhận phạm vi; chủ quản, đại diện đơn vị chốt biểu mẫu | 18/09/2026 |
 | **Q-02** | Nguồn mã đơn vị, cây tổ chức, lịch sử sáp nhập/chia tách | Dữ liệu giả lập | Sinh dữ liệu fixture A/B/C có quan hệ cha-con và sáp nhập; không seed phỏng đoán | Đầu mối dữ liệu tổ chức | 18/09/2026 |
 | **Q-03** | Ma trận quyền, quyền hợp đồng và phạm vi con | Tạm khóa theo SPEC | 7 vai trò chuẩn + ma trận vai trò tại `docs/access-matrix.md`; cấm cấp Global ngầm | Chủ quản, Quản trị truy cập | 18/09/2026 |
 | **Q-04** | Quy trình duyệt 1 hay nhiều cấp, ký số, tự duyệt | Tạm khóa theo SPEC | Phê duyệt 1 cấp; cấm tự duyệt (`actor != submitted_by`); không ngoại lệ trong MVP | Chủ quy trình | 18/09/2026 |

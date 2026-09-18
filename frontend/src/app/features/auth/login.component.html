@@ -1,0 +1,96 @@
+<div class="login-page">
+  <div class="background-decorations">
+    <div class="circle circle-1"></div>
+    <div class="circle circle-2"></div>
+    <div class="circle circle-3"></div>
+  </div>
+
+  <div class="login-card-container">
+    <div class="login-card">
+      <div class="brand-header">
+        <div class="emblem-wrapper">
+          <div class="gov-emblem">🏛️</div>
+        </div>
+        <h1 class="portal-title">UBND TỈNH LÀO CAI</h1>
+        <h2 class="system-subtitle">Hệ thống Quản lý Phần mềm Chuyển đổi số</h2>
+        <p class="tagline">Nền tảng quản lý tập trung danh mục, hồ sơ vận hành và bản quyền phần mềm</p>
+      </div>
+
+      @if (errorMessage()) {
+        <div class="alert alert-error">
+          <span class="alert-icon">⚠️</span>
+          <span class="alert-text">{{ errorMessage() }}</span>
+        </div>
+      }
+
+      <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+        <div class="form-group">
+          <label for="username" class="form-label">Tên đăng nhập</label>
+          <div class="input-wrapper">
+            <span class="input-icon">👤</span>
+            <input
+              id="username"
+              type="text"
+              class="form-control"
+              placeholder="Nhập tên đăng nhập (VD: admin)"
+              formControlName="username"
+              autocomplete="username"
+            />
+          </div>
+          @if (loginForm.get('username')?.touched && loginForm.get('username')?.errors?.['required']) {
+            <span class="field-error">Vui lòng nhập tên đăng nhập.</span>
+          }
+        </div>
+
+        <div class="form-group">
+          <label for="password" class="form-label">Mật khẩu</label>
+          <div class="input-wrapper">
+            <span class="input-icon">🔒</span>
+            <input
+              id="password"
+              type="password"
+              class="form-control"
+              placeholder="Nhập mật khẩu"
+              formControlName="password"
+              autocomplete="current-password"
+            />
+          </div>
+          @if (loginForm.get('password')?.touched && loginForm.get('password')?.errors?.['required']) {
+            <span class="field-error">Vui lòng nhập mật khẩu.</span>
+          }
+        </div>
+
+        <button type="submit" class="btn-submit" [disabled]="isLoading()">
+          @if (isLoading()) {
+            <span class="spinner"></span>
+            <span>Đang xác thực...</span>
+          } @else {
+            <span>Đăng nhập hệ thống</span>
+            <span class="arrow-icon">➔</span>
+          }
+        </button>
+      </form>
+
+      <div class="quick-accounts-section">
+        <p class="quick-title">Tài khoản thử nghiệm theo vai trò nghiệp vụ:</p>
+        <div class="quick-tags">
+          @for (acc of quickAccounts; track acc.username) {
+            <button
+              type="button"
+              class="tag-btn"
+              (click)="fillAccount(acc.username, acc.pass)"
+              [title]="'Vai trò: ' + acc.role">
+              <span class="tag-role">{{ acc.label }}</span>
+              <span class="tag-user">({{ acc.username }})</span>
+            </button>
+          }
+        </div>
+      </div>
+
+      <div class="card-footer">
+        <p>© 2026 Sở Thông tin và Truyền thông tỉnh Lào Cai</p>
+        <p class="security-note">Bảo mật phiên đăng nhập qua Cookie HttpOnly & CSRF Protection</p>
+      </div>
+    </div>
+  </div>
+</div>

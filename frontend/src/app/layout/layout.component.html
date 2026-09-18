@@ -3,31 +3,53 @@
   <header class="app-header">
     <div class="header-left">
       <button class="toggle-btn" (click)="toggleSidebar()" title="Đóng/mở Menu">
-        <span class="material-icons-outlined">menu</span>
+        <span>☰</span>
       </button>
       <div class="brand">
-        <span class="material-icons-outlined brand-icon">hub</span>
+        <span class="brand-icon">🏛️</span>
         <div class="brand-text">
-          <h1>QUẢN LÝ PHẦN MỀM CHUYỂN ĐỔI SỐ</h1>
+          <h1>HỆ THỐNG QUẢN LÝ PHẦN MỀM CHUYỂN ĐỔI SỐ</h1>
           <span class="province-badge">Tỉnh Lào Cai</span>
         </div>
       </div>
     </div>
 
     <div class="header-right">
-      <div class="notification-badge" title="Thông báo hệ thống">
-        <span class="material-icons-outlined">notifications</span>
-        <span class="badge-count">3</span>
-      </div>
+      <div class="user-profile-wrapper">
+        <button type="button" class="user-profile-btn" (click)="toggleUserMenu()">
+          <div class="user-avatar">
+            {{ currentUser()?.displayName?.charAt(0) || currentUser()?.username?.charAt(0) || 'U' }}
+          </div>
+          <div class="user-info">
+            <span class="user-name">{{ currentUser()?.displayName || currentUser()?.username }}</span>
+            <span class="user-role">{{ currentUser()?.roles?.[0] || 'Người dùng' }}</span>
+          </div>
+          <span class="dropdown-arrow">▼</span>
+        </button>
 
-      <div class="user-profile">
-        <div class="user-avatar">
-          {{ currentUser()?.displayName?.charAt(0) || 'A' }}
-        </div>
-        <div class="user-info">
-          <span class="user-name">{{ currentUser()?.displayName }}</span>
-          <span class="user-role">{{ currentUser()?.roles?.[0] }}</span>
-        </div>
+        @if (isUserMenuOpen()) {
+          <div class="user-dropdown-menu">
+            <div class="menu-user-header">
+              <div class="menu-user-name">{{ currentUser()?.displayName }}</div>
+              <div class="menu-user-username">&#64;{{ currentUser()?.username }}</div>
+              <div class="menu-roles-badges">
+                @for (role of currentUser()?.roles; track role) {
+                  <span class="role-badge">{{ role }}</span>
+                }
+              </div>
+            </div>
+
+            <div class="menu-divider"></div>
+
+            <button type="button" class="menu-item" (click)="openChangePasswordModal()">
+              <span>🔑</span> Đổi mật khẩu
+            </button>
+
+            <button type="button" class="menu-item text-danger" (click)="logout()">
+              <span>🚪</span> Đăng xuất
+            </button>
+          </div>
+        }
       </div>
     </div>
   </header>
@@ -36,35 +58,50 @@
     <!-- Sidebar Navigation -->
     <aside class="app-sidebar" [class.collapsed]="!isSidebarOpen">
       <nav class="sidebar-nav">
+        <!-- Tổng quan -->
         <div class="nav-section-title" *ngIf="isSidebarOpen">TỔNG QUAN</div>
         <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
-          <span class="material-icons-outlined">dashboard</span>
+          <span class="nav-icon">📊</span>
           <span class="nav-label" *ngIf="isSidebarOpen">Dashboard & Báo cáo</span>
         </a>
 
-        <div class="nav-section-title" *ngIf="isSidebarOpen">NGHIỆP VỤ</div>
-        <a routerLink="/deployments" routerLinkActive="active" class="nav-item">
-          <span class="material-icons-outlined">rocket_launch</span>
-          <span class="nav-label" *ngIf="isSidebarOpen">Hồ sơ Triển khai</span>
-        </a>
-        <a routerLink="/contracts" routerLinkActive="active" class="nav-item">
-          <span class="material-icons-outlined">history_edu</span>
-          <span class="nav-label" *ngIf="isSidebarOpen">Hợp đồng & License</span>
-        </a>
-        <a routerLink="/software" routerLinkActive="active" class="nav-item">
-          <span class="material-icons-outlined">apps</span>
-          <span class="nav-label" *ngIf="isSidebarOpen">Danh mục Phần mềm</span>
-        </a>
-        <a routerLink="/organizations" routerLinkActive="active" class="nav-item">
-          <span class="material-icons-outlined">account_balance</span>
-          <span class="nav-label" *ngIf="isSidebarOpen">Cơ quan & Đơn vị</span>
-        </a>
+        <!-- Nghiệp vụ hạt nhân -->
+        <div class="nav-section-title" *ngIf="isSidebarOpen">QUẢN LÝ DANH MỤC</div>
 
-        <div class="nav-section-title" *ngIf="isSidebarOpen">HỆ THỐNG</div>
-        <a routerLink="/admin" routerLinkActive="active" class="nav-item">
-          <span class="material-icons-outlined">admin_panel_settings</span>
-          <span class="nav-label" *ngIf="isSidebarOpen">Quản trị & Phân quyền</span>
-        </a>
+        @if (authService.hasPermission('catalog.read')) {
+          <a routerLink="/software" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
+            <span class="nav-icon">💻</span>
+            <span class="nav-label" *ngIf="isSidebarOpen">Danh mục Phần mềm</span>
+          </a>
+        }
+
+        @if (authService.hasPermission('catalog.propose') || authService.hasPermission('catalog.manage')) {
+          <a routerLink="/software/proposals" routerLinkActive="active" class="nav-item">
+            <span class="nav-icon">💡</span>
+            <span class="nav-label" *ngIf="isSidebarOpen">Đề xuất Bổ sung DM</span>
+          </a>
+        }
+
+        @if (authService.hasPermission('organizations.read')) {
+          <div class="nav-section-title" *ngIf="isSidebarOpen">TỔ CHỨC & ĐƠN VỊ</div>
+          <a routerLink="/organizations" routerLinkActive="active" class="nav-item">
+            <span class="nav-icon">🏢</span>
+            <span class="nav-label" *ngIf="isSidebarOpen">Cơ quan & Đơn vị</span>
+          </a>
+        }
+
+        <!-- Quản trị hệ thống (SystemAdmin) -->
+        @if (authService.hasPermission('access.manage')) {
+          <div class="nav-section-title" *ngIf="isSidebarOpen">QUẢN TRỊ HỆ THỐNG</div>
+          <a routerLink="/admin/users" routerLinkActive="active" class="nav-item">
+            <span class="nav-icon">👥</span>
+            <span class="nav-label" *ngIf="isSidebarOpen">Tài khoản & Phân quyền</span>
+          </a>
+          <a routerLink="/admin/roles" routerLinkActive="active" class="nav-item">
+            <span class="nav-icon">🛡️</span>
+            <span class="nav-label" *ngIf="isSidebarOpen">Vai trò & Ma trận Quyền</span>
+          </a>
+        }
       </nav>
     </aside>
 
@@ -74,3 +111,42 @@
     </main>
   </div>
 </div>
+
+<!-- Modal: Đổi Mật Khẩu -->
+@if (isChangePasswordModalOpen()) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Đổi Mật khẩu Cá nhân</h2>
+        <button type="button" class="btn-close" (click)="closeChangePasswordModal()">✕</button>
+      </div>
+
+      @if (passwordModalError()) {
+        <div class="alert alert-error">{{ passwordModalError() }}</div>
+      }
+
+      @if (passwordModalSuccess()) {
+        <div class="alert alert-success">{{ passwordModalSuccess() }}</div>
+      }
+
+      <form [formGroup]="changePasswordForm" (ngSubmit)="submitChangePassword()">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Mật khẩu hiện tại *</label>
+            <input type="password" class="form-control" formControlName="oldPassword" placeholder="••••••••" />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Mật khẩu mới * (tối thiểu 6 ký tự)</label>
+            <input type="password" class="form-control" formControlName="newPassword" placeholder="••••••••" />
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeChangePasswordModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Xác nhận Đổi Mật khẩu</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
