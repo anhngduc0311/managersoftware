@@ -707,3 +707,48 @@ Một task triển khai chỉ được đóng khi:
 3. DTO/OpenAPI/client, migration và hướng dẫn cấu hình được cập nhật nếu bị ảnh hưởng.
 4. CI liên quan chạy qua; không đưa secret/dữ liệu thật vào code/test/log; không tự tuyên bố đạt mục tiêu chưa đo.
 5. Có ghi chú kiểm chứng ngắn: kịch bản, kết quả và giới hạn còn lại; blocker nghiệp vụ chưa giải quyết không được che bằng giá trị mặc định.
+
+### 4.19. Lộ trình triển khai theo từng giai đoạn (Phased Implementation Roadmap)
+
+Nhằm đảm bảo dự án được triển khai mạch lạc, kiểm soát rủi ro phụ thuộc và sớm có các mốc bàn giao có thể kiểm chứng (Milestones), toàn bộ 15 nhóm task được chia thành **6 giai đoạn** tuần tự:
+
+```mermaid
+gantt
+    title Lộ trình triển khai hệ thống quản lý phần mềm CĐS
+    dateFormat  YYYY-MM-DD
+    section Giai đoạn 1
+    T-01 Nghiệp vụ & Quyết định       :p1_1, 2026-10-01, 7d
+    T-02 Khởi tạo repo, Solution, CI  :p1_2, after p1_1, 5d
+    T-03 Nền tảng DB, API, Audit      :p1_3, after p1_2, 7d
+    section Giai đoạn 2
+    T-04 Identity, Đơn vị & Scope     :p2_1, after p1_3, 10d
+    T-05 Danh mục & Đề xuất           :p2_2, after p2_1, 7d
+    section Giai đoạn 3
+    T-07 Job Worker & Notification     :p3_1, after p2_2, 8d
+    T-06 Deployment & Workflow Duyệt   :p3_2, after p3_1, 10d
+    section Giai đoạn 4
+    T-08 Hợp đồng & License Quota     :p4_1, after p3_2, 8d
+    T-09 Tài liệu riêng & Scanner      :p4_2, after p4_1, 7d
+    section Giai đoạn 5
+    T-10 Dashboard & Báo cáo asOf      :p5_1, after p4_2, 7d
+    T-11 Nhập / Xuất Excel            :p5_2, after p5_1, 8d
+    T-12 Nhắc hạn & Audit UI           :p5_3, after p5_2, 5d
+    section Giai đoạn 6
+    T-13 Kiểm thử Tải, Race & E2E     :p6_1, after p5_3, 10d
+    T-14 Hạ tầng Staging & PITR       :p6_2, after p6_1, 7d
+    T-15 Pilot, UAT & Bàn giao         :p6_3, after p6_2, 10d
+```
+
+#### Bảng tổng hợp các giai đoạn triển khai:
+
+| Giai đoạn | Tên giai đoạn | Nhóm Task | Mục tiêu trọng tâm | Sản phẩm bàn giao chính (Deliverables) |
+| --- | --- | --- | --- | --- |
+| **Giai đoạn 1** | **Chuẩn bị Nghiệp vụ & Thiết lập Nền tảng Kỹ thuật** | `T-01`, `T-02`, `T-03` | Chốt ma trận quyền, từ điển dữ liệu; dựng khung Monolith .NET 10 + Angular 22, CI/CD, cơ sở dữ liệu PostgreSQL 18, schema cơ sở, Problem Details, AuditLog, TestContainers. | • Tài liệu BA: `access-matrix.md`, `data-dictionary.md`<br>• Khung dự án BE/FE build thành công, CI xanh<br>• Base migration DB & Transaction audit helper |
+| **Giai đoạn 2** | **Quản trị Hạt nhân: IAM, Tổ chức & Danh mục** | `T-04`, `T-05` | Triển khai xác thực Identity Cookie/CSRF, phân quyền Scope đa tầng (Global/Org/Descendants); quản lý cây đơn vị có lịch sử sáp nhập; danh mục phần mềm và luồng đề xuất. | • Đăng nhập, phân quyền Scope theo đơn vị<br>• Cây tổ chức quản lý hiệu lực theo thời gian<br>• Danh mục phần mềm, release, nhà cung cấp & API/UI đề xuất |
+| **Giai đoạn 3** | **Nghiệp vụ Cốt lõi: Triển khai, Quy trình Duyệt & Job/Thông báo** | `T-06`, `T-07` | Xây dựng nghiệp vụ Deployment/Revision (Draft → Submitted → Approved / Rejected); chống xung đột ETag/If-Match; nền tảng Worker PostgreSQL (Skip Locked) & Notification in-app. | • Luồng tạo hồ sơ, sửa nháp, submit & phê duyệt/từ chối<br>• Tách biệt dữ liệu nháp và bản chính thức Approved<br>• Worker xử lý job nền, trung tâm thông báo người dùng |
+| **Giai đoạn 4** | **Quản lý Hợp đồng, License & Tài liệu đính kèm** | `T-08`, `T-09` | Quản lý hợp đồng, bảo trì; phân bổ License (Seat/Unlimited) với khóa bi quan chống vượt quota; hệ thống lưu trữ tệp cách ly (Quarantine) và quét mã độc (Scanner). | • Module hợp đồng, hạng mục & phân bổ license vào deployment<br>• Cơ chế khóa entitlement chống race-condition<br>• Upload/Download tài liệu an toàn qua scanner |
+| **Giai đoạn 5** | **Dashboard Báo cáo, Nhập/Xuất Excel & Tiện ích Vận hành** | `T-10`, `T-11`, `T-12` | Xây dựng Dashboard KPI theo scope/asOf; nhập Excel hàng loạt (all-or-nothing, tối đa 5.000 dòng); xuất Excel chạy nền; tự động nhắc hạn hợp đồng 30/15/7 ngày; Audit Log UI. | • Dashboard KPI tổng quan với ECharts lazy loading<br>• Luồng Import/Export Excel an toàn, có tiến độ<br>• Job quét nhắc hạn định kỳ & màn hình tra cứu Audit Log |
+| **Giai đoạn 6** | **Kiểm thử Toàn diện, Hạ tầng Vận hành, Pilot & Bàn giao** | `T-13`, `T-14`, `T-15` | Kiểm thử bảo mật Scope, test tranh chấp đồng thời, đo tải 100 user/100k bản ghi; thiết lập Staging/Production Nginx TLS, sao lưu PITR & diễn tập Restore; UAT, đào tạo & phát hành. | • Báo cáo kiểm thử bảo mật, race condition và hiệu năng NFR-04<br>• Hạ tầng Production, cơ chế sao lưu PITR đã diễn tập<br>• Biên bản UAT, tài liệu hướng dẫn theo vai trò và bàn giao hệ thống |
+
+---
+
