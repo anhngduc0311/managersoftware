@@ -1,0 +1,22 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: laocai_software_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-laocai_software_db}
+      POSTGRES_USER: ${POSTGRES_USER:-laocai_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-laocai_secret_dev_pass_2026}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-laocai_user} -d ${POSTGRES_DB:-laocai_software_db}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  pgdata:
+    driver: local

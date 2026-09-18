@@ -1,0 +1,14 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/LaoCai.SoftwareManagement.Api/LaoCai.SoftwareManagement.Api.csproj" />
+    <Project Path="src/LaoCai.SoftwareManagement.Application/LaoCai.SoftwareManagement.Application.csproj" />
+    <Project Path="src/LaoCai.SoftwareManagement.Domain/LaoCai.SoftwareManagement.Domain.csproj" />
+    <Project Path="src/LaoCai.SoftwareManagement.Infrastructure/LaoCai.SoftwareManagement.Infrastructure.csproj" />
+    <Project Path="src/LaoCai.SoftwareManagement.Worker/LaoCai.SoftwareManagement.Worker.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/LaoCai.SoftwareManagement.Application.Tests/LaoCai.SoftwareManagement.Application.Tests.csproj" />
+    <Project Path="tests/LaoCai.SoftwareManagement.Domain.Tests/LaoCai.SoftwareManagement.Domain.Tests.csproj" />
+    <Project Path="tests/LaoCai.SoftwareManagement.IntegrationTests/LaoCai.SoftwareManagement.IntegrationTests.csproj" />
+  </Folder>
+</Solution>

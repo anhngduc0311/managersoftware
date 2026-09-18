@@ -1,0 +1,76 @@
+<div class="app-container">
+  <!-- Top Navigation Header -->
+  <header class="app-header">
+    <div class="header-left">
+      <button class="toggle-btn" (click)="toggleSidebar()" title="Đóng/mở Menu">
+        <span class="material-icons-outlined">menu</span>
+      </button>
+      <div class="brand">
+        <span class="material-icons-outlined brand-icon">hub</span>
+        <div class="brand-text">
+          <h1>QUẢN LÝ PHẦN MỀM CHUYỂN ĐỔI SỐ</h1>
+          <span class="province-badge">Tỉnh Lào Cai</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="header-right">
+      <div class="notification-badge" title="Thông báo hệ thống">
+        <span class="material-icons-outlined">notifications</span>
+        <span class="badge-count">3</span>
+      </div>
+
+      <div class="user-profile">
+        <div class="user-avatar">
+          {{ currentUser()?.displayName?.charAt(0) || 'A' }}
+        </div>
+        <div class="user-info">
+          <span class="user-name">{{ currentUser()?.displayName }}</span>
+          <span class="user-role">{{ currentUser()?.roles?.[0] }}</span>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <div class="app-body">
+    <!-- Sidebar Navigation -->
+    <aside class="app-sidebar" [class.collapsed]="!isSidebarOpen">
+      <nav class="sidebar-nav">
+        <div class="nav-section-title" *ngIf="isSidebarOpen">TỔNG QUAN</div>
+        <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
+          <span class="material-icons-outlined">dashboard</span>
+          <span class="nav-label" *ngIf="isSidebarOpen">Dashboard & Báo cáo</span>
+        </a>
+
+        <div class="nav-section-title" *ngIf="isSidebarOpen">NGHIỆP VỤ</div>
+        <a routerLink="/deployments" routerLinkActive="active" class="nav-item">
+          <span class="material-icons-outlined">rocket_launch</span>
+          <span class="nav-label" *ngIf="isSidebarOpen">Hồ sơ Triển khai</span>
+        </a>
+        <a routerLink="/contracts" routerLinkActive="active" class="nav-item">
+          <span class="material-icons-outlined">history_edu</span>
+          <span class="nav-label" *ngIf="isSidebarOpen">Hợp đồng & License</span>
+        </a>
+        <a routerLink="/software" routerLinkActive="active" class="nav-item">
+          <span class="material-icons-outlined">apps</span>
+          <span class="nav-label" *ngIf="isSidebarOpen">Danh mục Phần mềm</span>
+        </a>
+        <a routerLink="/organizations" routerLinkActive="active" class="nav-item">
+          <span class="material-icons-outlined">account_balance</span>
+          <span class="nav-label" *ngIf="isSidebarOpen">Cơ quan & Đơn vị</span>
+        </a>
+
+        <div class="nav-section-title" *ngIf="isSidebarOpen">HỆ THỐNG</div>
+        <a routerLink="/admin" routerLinkActive="active" class="nav-item">
+          <span class="material-icons-outlined">admin_panel_settings</span>
+          <span class="nav-label" *ngIf="isSidebarOpen">Quản trị & Phân quyền</span>
+        </a>
+      </nav>
+    </aside>
+
+    <!-- Main Content Area -->
+    <main class="app-main">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

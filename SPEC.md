@@ -530,30 +530,30 @@ Tập dữ liệu kiểm chứng tối thiểu gồm hai đơn vị độc lập
 
 | ID | Vai trò | Việc làm và đầu ra cụ thể | Phụ thuộc | Hoàn thành khi |
 | --- | --- | --- | --- | --- |
-| T-01.1 | BA | [ ] Tạo `docs/decisions.md` từ Q-01…Q-10, mỗi mục có người xác nhận, trạng thái, quyết định, ngày | Không | Tất cả Q có đầu mối hoặc được đánh dấu chưa xác định; không ghi giả là đã duyệt |
-| T-01.2 | BA/BE | [ ] Viết `docs/access-matrix.md`: role × permission × scope × trạng thái, quyền nháp/hợp đồng/export | T-01.1 | Bao phủ FR-01/02 và Q-03/Q-10; có ví dụ A-write/B-read; quyết định được xác nhận trước seed nghiệp vụ thật |
-| T-01.3 | BA | [ ] Chốt dictionary trường, biểu mẫu deployment/hợp đồng, workflow và license vào `docs/data-dictionary.md` | T-01.1 | Q-01/Q-04/Q-09 có kết quả; ghi rõ bắt buộc lúc draft/submit và thông báo lỗi |
-| T-01.4 | BA/QA | [ ] Tạo mẫu Excel v1, danh sách báo cáo/KPI và kịch bản UAT trong `docs/acceptance/` | T-01.1 | Q-02/Q-07 có nguồn hoặc blocker rõ; công thức, kỳ lọc, asOf và giới hạn báo cáo hợp đồng được xác nhận |
+| T-01.1 | BA | [x] Tạo `docs/decisions.md` từ Q-01…Q-10, mỗi mục có người xác nhận, trạng thái, quyết định, ngày | Không | Tất cả Q có đầu mối hoặc được đánh dấu chưa xác định; không ghi giả là đã duyệt |
+| T-01.2 | BA/BE | [x] Viết `docs/access-matrix.md`: role × permission × scope × trạng thái, quyền nháp/hợp đồng/export | T-01.1 | Bao phủ FR-01/02 và Q-03/Q-10; có ví dụ A-write/B-read; quyết định được xác nhận trước seed nghiệp vụ thật |
+| T-01.3 | BA | [x] Chốt dictionary trường, biểu mẫu deployment/hợp đồng, workflow và license vào `docs/data-dictionary.md` | T-01.1 | Q-01/Q-04/Q-09 có kết quả; ghi rõ bắt buộc lúc draft/submit và thông báo lỗi |
+| T-01.4 | BA/QA | [x] Tạo mẫu Excel v1, danh sách báo cáo/KPI và kịch bản UAT trong `docs/acceptance/` | T-01.1 | Q-02/Q-07 có nguồn hoặc blocker rõ; công thức, kỳ lọc, asOf và giới hạn báo cáo hợp đồng được xác nhận |
 
 ### 4.3. T-02 — Khởi tạo repository và CI
 
 | ID | Vai trò | Việc làm và đầu ra cụ thể | Phụ thuộc | Hoàn thành khi |
 | --- | --- | --- | --- | --- |
-| T-02.1 | BE/FE | [ ] Kiểm tra tương thích stack bằng nguồn chính thức; ghi phiên bản/package/license vào ADR và khóa SDK/runtime | Không | Có `global.json`, cấu hình NuGet tập trung, lockfile, Node version; lệch kiến trúc có lý do/ADR |
-| T-02.2 | BE | [ ] Tạo solution Domain/Application/Infrastructure/Api/Worker và test projects | T-02.1 | Build được; project references đúng D-01; Domain không kéo EF/HTTP |
-| T-02.3 | FE | [ ] Tạo Angular strict, Material theme tiếng Việt, routes lazy và layout khung | T-02.1 | Build được, route rỗng có layout và trạng thái not-found |
-| T-02.4 | OPS | [ ] Tạo Compose phát triển PostgreSQL, cấu hình mẫu không secret và hướng dẫn chạy local | T-02.2 | Máy sạch chạy được DB/API bằng hướng dẫn; volume tồn tại qua restart |
-| T-02.5 | OPS | [ ] Tạo CI restore khóa phiên bản, lint/build FE, build/test BE, scan dependency/secret | T-02.2, T-02.3 | Pipeline fail khi build/test lỗi; không chứa thông tin xác thực thật |
+| T-02.1 | BE/FE | [x] Kiểm tra tương thích stack bằng nguồn chính thức; ghi phiên bản/package/license vào ADR và khóa SDK/runtime | Không | Có `global.json`, cấu hình NuGet tập trung, lockfile, Node version; lệch kiến trúc có lý do/ADR |
+| T-02.2 | BE | [x] Tạo solution Domain/Application/Infrastructure/Api/Worker và test projects | T-02.1 | Build được; project references đúng D-01; Domain không kéo EF/HTTP |
+| T-02.3 | FE | [x] Tạo Angular strict, Material theme tiếng Việt, routes lazy và layout khung | T-02.1 | Build được, route rỗng có layout và trạng thái not-found |
+| T-02.4 | OPS | [x] Tạo Compose phát triển PostgreSQL, cấu hình mẫu không secret và hướng dẫn chạy local | T-02.2 | Máy sạch chạy được DB/API bằng hướng dẫn; volume tồn tại qua restart |
+| T-02.5 | OPS | [x] Tạo CI restore khóa phiên bản, lint/build FE, build/test BE, scan dependency/secret | T-02.2, T-02.3 | Pipeline fail khi build/test lỗi; không chứa thông tin xác thực thật |
 
 ### 4.4. T-03 — Nền tảng dữ liệu, API và audit
 
 | ID | Vai trò | Việc làm và đầu ra cụ thể | Phụ thuộc | Hoàn thành khi |
 | --- | --- | --- | --- | --- |
-| T-03.1 | BE | [ ] Cấu hình AppDbContext, schema, UUID, snake_case, UTC, version và migration đầu | T-02.2, T-02.4 | Migration chạy trên PostgreSQL sạch; kiểm tra kiểu cột/ràng buộc cơ bản |
-| T-03.2 | BE | [ ] Implement Problem Details, correlation ID, pagination/sort allowlist, ETag/If-Match dùng chung | T-03.1 | Test chứng minh 400/428/412, pageSize tối đa 100 và không lộ stack trace |
-| T-03.3 | BE | [ ] Tạo AuditLog, bộ lọc snapshot và transaction helper theo use case | T-03.1 | Integration test commit/rollback audit cùng dữ liệu; không ghi trường secret |
-| T-03.4 | BE/FE | [ ] Sinh OpenAPI và Angular client; cấu hình CI phát hiện contract lệch | T-03.2, T-02.3 | Client được sinh lặp lại nhất quán; FE gọi thử endpoint có DTO/Problem Details |
-| T-03.5 | QA | [ ] Tạo fixture PostgreSQL container, test clock, seed giả A/B và factory API | T-03.1 | Test độc lập dữ liệu/múi giờ; teardown không ảnh hưởng DB phát triển |
+| T-03.1 | BE | [x] Cấu hình AppDbContext, schema, UUID, snake_case, UTC, version và migration đầu | T-02.2, T-02.4 | Migration chạy trên PostgreSQL sạch; kiểm tra kiểu cột/ràng buộc cơ bản |
+| T-03.2 | BE | [x] Implement Problem Details, correlation ID, pagination/sort allowlist, ETag/If-Match dùng chung | T-03.1 | Test chứng minh 400/428/412, pageSize tối đa 100 và không lộ stack trace |
+| T-03.3 | BE | [x] Tạo AuditLog, bộ lọc snapshot và transaction helper theo use case | T-03.1 | Integration test commit/rollback audit cùng dữ liệu; không ghi trường secret |
+| T-03.4 | BE/FE | [x] Sinh OpenAPI và Angular client; cấu hình CI phát hiện contract lệch | T-03.2, T-02.3 | Client được sinh lặp lại nhất quán; FE gọi thử endpoint có DTO/Problem Details |
+| T-03.5 | QA | [x] Tạo fixture PostgreSQL container, test clock, seed giả A/B và factory API | T-03.1 | Test độc lập dữ liệu/múi giờ; teardown không ảnh hưởng DB phát triển |
 
 ### 4.5. T-04 — Đơn vị, đăng nhập và scope
 

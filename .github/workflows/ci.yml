@@ -1,0 +1,51 @@
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ main, develop ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  backend-ci:
+    name: Backend Build & Test (.NET 10)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup .NET 10 SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore Dependencies
+        run: dotnet restore backend/LaoCai.SoftwareManagement.sln
+
+      - name: Build Solution
+        run: dotnet build backend/LaoCai.SoftwareManagement.sln --no-restore --configuration Release
+
+      - name: Run Unit & Integration Tests
+        run: dotnet test backend/LaoCai.SoftwareManagement.sln --no-build --configuration Release --verbosity normal
+
+  frontend-ci:
+    name: Frontend Lint & Build (Angular 22)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js 24 LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: 24
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Dependencies
+        working-directory: frontend
+        run: npm ci
+
+      - name: Build Frontend Application
+        working-directory: frontend
+        run: npm run build -- --configuration production
