@@ -84,10 +84,15 @@ a {
 /* Global Icon-Only Action Button Styles */
 .action-cell {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
   align-items: center;
   gap: 0.4rem;
   white-space: nowrap;
+  margin: 0 auto;
+}
+
+.text-center {
+  text-align: center;
 }
 
 .btn-action {

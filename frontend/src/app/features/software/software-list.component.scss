@@ -166,14 +166,28 @@
     background: #f8fafc;
     color: #475569;
     font-weight: 600;
-    padding: 0.75rem 1rem;
+    padding: 0.85rem 1rem;
     border-bottom: 1px solid #e2e8f0;
+    white-space: nowrap;
+
+    &.text-center {
+      text-align: center;
+      min-width: 140px;
+      width: 140px;
+    }
   }
 
   td {
     padding: 0.85rem 1rem;
     border-bottom: 1px solid #f1f5f9;
     color: #334155;
+    vertical-align: middle;
+
+    &.action-cell {
+      min-width: 140px;
+      width: 140px;
+      text-align: center;
+    }
   }
 
   .clickable-row {
@@ -196,6 +210,7 @@
   font-family: monospace;
   font-weight: 600;
   font-size: 0.78rem;
+  white-space: nowrap;
 }
 
 .version-tag {
@@ -206,14 +221,19 @@
   border-radius: 0.3rem;
   font-size: 0.75rem;
   font-weight: 600;
+  white-space: nowrap;
 }
 
 .badge {
-  display: inline-block;
-  font-size: 0.72rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.75rem;
   font-weight: 600;
-  padding: 0.2rem 0.55rem;
+  padding: 0.25rem 0.65rem;
   border-radius: 9999px;
+  white-space: nowrap;
+  line-height: 1.2;
 
   &.badge-active {
     background: #dcfce7;
@@ -233,8 +253,12 @@
 
 .action-cell {
   display: flex;
-  justify-content: flex-end;
+  justify-content: center;
+  align-items: center;
   gap: 0.35rem;
+  flex-wrap: nowrap;
+  white-space: nowrap;
+  margin: 0 auto;
 }
 
 .btn-icon {

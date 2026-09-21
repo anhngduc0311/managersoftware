@@ -85,23 +85,6 @@
         </button>
       </form>
 
-      <div class="quick-accounts-section">
-        <p class="quick-title">Tài khoản thử nghiệm theo vai trò nghiệp vụ:</p>
-        <div class="quick-tags">
-          @for (acc of quickAccounts; track acc.username) {
-            <button
-              type="button"
-              class="tag-btn"
-              (click)="fillAccount(acc.username, acc.pass)"
-              [title]="'Vai trò: ' + acc.role">
-              <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
-              <span class="tag-role">{{ acc.label }}</span>
-              <span class="tag-user">({{ acc.username }})</span>
-            </button>
-          }
-        </div>
-      </div>
-
       <div class="card-footer">
         <p>© 2026 Sở Thông tin và Truyền thông tỉnh Lào Cai</p>
         <p class="security-note">Bảo mật phiên đăng nhập qua Cookie HttpOnly & CSRF Protection</p>

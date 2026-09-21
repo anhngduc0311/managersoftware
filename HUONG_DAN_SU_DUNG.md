@@ -1,63 +1,75 @@
-# TÀI LIỆU HƯỚNG DẪN SỬ DỤNG TỪNG CHỨC NĂNG
-## HỆ THỐNG QUẢN LÝ PHẦN MỀM CHUYỂN ĐỔI SỐ TỈNH LÀO CAI
-
-Tài liệu hướng dẫn chi tiết và đầy đủ nhất đã được biên soạn và cập nhật tại:
-👉 **[docs/manuals/user-guide.md](file:///d:/Project/managersoftware/docs/manuals/user-guide.md)**
+# TÀI LIỆU HƯỚNG DẪN SỬ DỤNG
+## HỆ THỐNG QUẢN LÝ PHẦN MỀM - TỈNH LÀO CAI
 
 ---
 
-### Tóm tắt các phân hệ chức năng & Đường dẫn nhanh:
+### 1. Thông tin Đăng nhập & Cấu hình Hệ thống
+- **Địa chỉ truy cập**: `http://localhost:4200` (hoặc cổng cấu hình nội bộ).
+- **Tài khoản Quản trị viên Mặc định (System Admin)**:
+  - **Tên đăng nhập**: `admin`
+  - **Mật khẩu**: `Admin@123456`
+  - **Email**: `admin@laocai.gov.vn`
+  - *(Thông tin đã được lưu trữ an toàn trong tệp `.env` và `.env.example`).*
 
-1. **[Tài khoản Kiểm thử & Đăng nhập](file:///d:/Project/managersoftware/docs/manuals/user-guide.md#1-tổng-quan-hệ-thống--tài-khoản-truy-cập)**
-   - Tài khoản Admin: `admin` / `Admin@123456`
-   - Tài khoản Cán bộ Đơn vị: `editor_baothang` / `User@123456`
-   - Tài khoản Lãnh đạo duyệt: `approver_baothang` / `User@123456`
-   - Tài khoản Quản lý hợp đồng & License: `coordinator` / `User@123456`
-   - Tài khoản Quản lý danh mục: `catalog_mgr` / `User@123456`
-   - Tài khoản Kiểm toán viên: `auditor` / `User@123456`
+---
 
-2. **[Dashboard & Trung tâm Báo cáo](file:///d:/Project/managersoftware/docs/manuals/user-guide.md#3-chức-năng-1-dashboard--trung-tâm-báo-cáo-chỉ-số)** (`/dashboard`):
-   - 4 chỉ số KPI thời gian thực.
-   - Biểu đồ độ phủ, cơ cấu phần mềm, trạng thái triển khai.
+### 2. Các Phân hệ Chức năng Cốt lõi
 
-3. **[Quản lý Danh mục Phần mềm Dùng chung](file:///d:/Project/managersoftware/docs/manuals/user-guide.md#4-chức-năng-2-quản-lý-danh-mục-phần-mềm-dùng-chung)** (`/software`):
-   - Tra cứu, tìm kiếm phần mềm theo danh mục và nhà sản xuất.
-   - Quản lý phiên bản phát hành (Releases & Changelog).
+#### 2.1. Quản lý Danh mục Phần mềm Dùng chung (`/software`)
+Hệ thống được thiết kế tập trung 100% cho công tác quản trị phần mềm của tỉnh với 3 tab chính:
+1. **Tab Phần mềm**:
+   - Tra cứu, lọc theo Nhóm phần mềm, Nhà cung cấp, Trạng thái vòng đời (*Đang duy trì*, *Cảnh báo thay thế*, *Ngừng hỗ trợ*).
+   - Tìm kiếm nhanh tức thì theo tên hoặc mã phần mềm.
+   - Bấm **Thêm Phần mềm mới** để mở Form thông minh:
+     - *Gợi ý mẫu 1-click*: Điền nhanh dữ liệu mẫu các phần mềm dùng chung phổ biến (Hệ thống QLVB, Dịch vụ công, Một cửa điện tử,...).
+     - *Tự động sinh mã (Code)*: Chuẩn hóa mã phần mềm theo Tên và Nhà cung cấp.
+     - *Thêm nhanh Nhóm / NCC*: Bổ sung tức thì nhóm hoặc nhà cung cấp mới ngay trong form mà không cần tải lại trang.
+     - *Tạo kèm Phiên bản phát hành ban đầu*: Khởi tạo số hiệu phiên bản v1.0.0, ngày phát hành và hạn hỗ trợ.
+2. **Tab Nhóm phân loại**:
+   - Quản lý danh mục nhóm phân loại phần mềm (Chính quyền số, Kinh tế số, Xã hội số,...).
+   - Thao tác: Thêm nhóm mới, Chỉnh sửa, Xoá nhóm (có kiểm tra ràng buộc dữ liệu an toàn).
+3. **Tab Nhà cung cấp & Đối tác**:
+   - Quản lý thông tin các nhà cung cấp / đối tác công nghệ (VNPT, Viettel, FPT, MISA,...).
+   - Lưu trữ mã NCC, tên đơn vị, thông tin hotline/email hỗ trợ.
 
-4. **[Đề xuất Bổ sung Phần mềm Mới](file:///d:/Project/managersoftware/docs/manuals/user-guide.md#5-chức-năng-3-đề-xuất-bổ-sung-phần-mềm-mới)** (`/software/proposals`):
-   - Cán bộ đơn vị gửi đề xuất phần mềm mới.
-   - Sở TT&TT thẩm định, duyệt tự động tạo phần mềm hoặc từ chối kèm lý do.
+#### 2.2. Ngăn Chi tiết Phần mềm & Quản lý Phiên bản (Drawer Timeline)
+- Bấm vào một dòng hoặc nút **Xem** (`👁`) để mở ngăn chi tiết bên phải.
+- Xem tổng quan thông tin phân loại, nhà sản xuất, mô tả chức năng.
+- **Quản lý Phiên bản Phát hành (Releases)**:
+  - Xem danh sách phiên bản theo dòng thời gian (Timeline).
+  - Thêm phiên bản mới (`+ Thêm Phiên bản`): Số hiệu version (v1.0.0, v2.1.0), ngày phát hành, hạn hỗ trợ kỹ thuật.
+  - Xoá phiên bản cũ không còn hiệu lực.
 
-5. **[Quản lý Hồ sơ Triển khai & Cài đặt](file:///d:/Project/managersoftware/docs/manuals/user-guide.md#6-chức-năng-4-quản-lý-hồ-sơ-triển-khai--cài-đặt)** (`/deployments`):
-   - Tạo hồ sơ triển khai tại các môi trường `Production`, `Staging`, `DR`.
-   - Vòng đời phê duyệt: `Draft` ➔ `Submitted` ➔ `Approved` / `Rejected` (kèm `Reopen`) ➔ `Decommissioned`.
-   - Đính kèm biên bản nghiệm thu, quyết định (hỗ trợ quét virus an toàn).
-   - Xem lịch sử sửa đổi (Revisions Before/After Diff).
+#### 2.3. Quản lý Tài khoản & Phân quyền Người dùng (`/admin/users`)
+- Xem danh sách toàn bộ cán bộ, quản trị viên sử dụng hệ thống.
+- **Thêm Người dùng Mới**: Khởi tạo tài khoản với username, họ tên, email và mật khẩu khởi tạo.
+- **Phân quyền Phạm vi (Scope-based Access Control)**:
+  - Gán vai trò (`SystemAdmin`, `CatalogManager`, `Coordinator`, `UnitEditor`, `Viewer`,...).
+  - Cấu hình phạm vi áp dụng: Toàn tỉnh (`Global`) hoặc Cấp Đơn vị (`Organization` kèm tùy chọn kế thừa cấp dưới).
+  - Đặt thời hạn hiệu lực từ ngày - đến ngày hoặc vô thời hạn.
+- **Thao tác nhanh**: Đặt lại mật khẩu, Khóa / Mở khóa tài khoản chỉ với 1 click.
 
-6. **[Tiện ích Nhập / Xuất Excel Chuẩn](file:///d:/Project/managersoftware/docs/manuals/user-guide.md#7-chức-năng-5-tiện-ích-nhập--xuất-dữ-liệu-excel-all-or-nothing)** (`/deployments/excel`):
-   - Tải file mẫu `.xlsx` tích hợp danh mục chuẩn của tỉnh.
-   - Kiểm tra lỗi trước khi nhập (Validation Preview).
-   - Cơ chế cam kết an toàn **All-or-Nothing Transaction** (chỉ nhập khi 100% dòng hợp lệ).
-   - Xuất dữ liệu báo cáo toàn tỉnh.
+---
 
-7. **[Quản lý Hợp đồng & Phân bổ Bản quyền (License)](file:///d:/Project/managersoftware/docs/manuals/user-guide.md#8-chức-năng-6-quản-lý-hợp-đồng--bản-quyền-license)** (`/contracts`):
-   - Quản lý số hợp đồng, đối tác, giá trị, hạn bảo hành.
-   - Thiết lập gói bản quyền dạng `Seat` hoặc `Unlimited`.
-   - Cấp phát bản quyền và kiểm soát Quota chống cấp phát vượt quá số lượng.
+### 3. Quy ước Biểu tượng Thao tác (Icon-Only Actions)
+Tất cả các bảng dữ liệu sử dụng nút thao tác dạng icon chuẩn 32x32px với tooltip hướng dẫn khi rê chuột:
+- `[ 👁 ]` **Xem**: Mở ngăn trượt xem chi tiết thông tin và phiên bản phát hành.
+- `[ ✏️ ]` **Sửa**: Mở hộp thoại chỉnh sửa thông tin phần mềm, nhóm, nhà cung cấp hoặc tài khoản.
+- `[ 🗑️ ]` **Xoá**: Mở hộp thoại xác nhận xoá an toàn (màu đỏ cảnh báo).
+- `[ 🛡️ ]` **Phân quyền**: Quản lý gán vai trò và phạm vi thẩm quyền của người dùng.
+- `[ 🔒 / 🔓 ]` **Khóa / Mở khóa**: Tạm dừng hoặc kích hoạt lại quyền đăng nhập tài khoản.
 
-8. **[Quản lý Cơ quan & Đơn vị Hành chính](file:///d:/Project/managersoftware/docs/manuals/user-guide.md#9-chức-năng-7-quản-lý-cơ-quan--đơn-vị-hành-chính)** (`/organizations`):
-   - Danh sách và sơ đồ cây tổ chức (Organization Tree view) từ cấp tỉnh đến cấp xã.
+---
 
-9. **[Quản trị Tài khoản & Phân quyền Thẩm quyền](file:///d:/Project/managersoftware/docs/manuals/user-guide.md#10-chức-năng-8-quản-trị-người-dùng--phân-quyền-phạm-vi-scope-based)** (`/admin/users`, `/admin/roles`):
-   - Quản lý người dùng, khóa/mở khóa, đặt lại mật khẩu.
-   - Gán quyền theo phạm vi: Toàn cục (`Global`) hoặc Đơn vị (`Organization`) có/không kế thừa cấp dưới (`IncludeDescendants`).
+### 4. Hướng dẫn Khởi chạy Dự án
 
-10. **[Nhật ký Kiểm toán Hệ thống](file:///d:/Project/managersoftware/docs/manuals/user-guide.md#11-chức-năng-9-nhật-ký-kiểm-toán-hệ-thống-audit-logs)** (`/admin/audit`):
-    - Tra cứu dấu vết mọi thao tác thay đổi dữ liệu.
-    - So sánh chi tiết Trước / Sau (Before / After) có che mờ dữ liệu nhạy cảm (Data Masking).
+```bash
+# 1. Khởi chạy Backend (.NET 8 Web API)
+cd backend/src/LaoCai.SoftwareManagement.Api
+dotnet run
 
-11. **[Quản trị Tiến trình Nền Worker Jobs](file:///d:/Project/managersoftware/docs/manuals/user-guide.md#12-chức-năng-10-quản-trị-tiến-trình-nền-worker-background-jobs)** (`/admin/jobs`):
-    - Giám sát trạng thái, nhật ký và kích hoạt chạy ngay các tác vụ định kỳ.
-
-12. **[Ma trận Phân quyền theo Vai trò](file:///d:/Project/managersoftware/docs/manuals/user-guide.md#13-phụ-lục-ma-trận-phân-quyền-thao-tác-theo-vai-trò)**:
-    - Bảng tổng hợp quyền hạn của từng nhóm người dùng.
+# 2. Khởi chạy Frontend (Angular 19)
+cd frontend
+npm start
+```
+Truy cập trình duyệt: **`http://localhost:4200`** và đăng nhập bằng tài khoản `admin` / `Admin@123456`.

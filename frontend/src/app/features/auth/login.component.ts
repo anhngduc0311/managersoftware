@@ -32,20 +32,6 @@ export class LoginComponent implements OnInit {
     }
   }
 
-
-  quickAccounts = [
-    { label: 'Quản trị hệ thống', username: 'admin', pass: 'Admin@123456', role: 'SystemAdmin' },
-    { label: 'Quản trị danh mục Sở', username: 'catalog_mgr', pass: 'User@123456', role: 'CatalogManager' },
-    { label: 'Cán bộ CNTT Bảo Thắng', username: 'editor_baothang', pass: 'User@123456', role: 'UnitEditor' },
-    { label: 'Lãnh đạo UBND Bảo Thắng', username: 'approver_baothang', pass: 'User@123456', role: 'UnitApprover' },
-    { label: 'Giám sát Tỉnh', username: 'viewer_prov', pass: 'User@123456', role: 'Viewer' }
-  ];
-
-  fillAccount(username: string, pass: string) {
-    this.loginForm.patchValue({ username, password: pass });
-    this.errorMessage.set(null);
-  }
-
   onSubmit() {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
