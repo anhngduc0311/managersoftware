@@ -31,6 +31,9 @@ public static class DependencyInjection
         services.AddScoped<IOrganizationService, LaoCai.SoftwareManagement.Application.Services.OrganizationService>();
         services.AddScoped<IScopeAuthorizationService, LaoCai.SoftwareManagement.Application.Services.ScopeAuthorizationService>();
         services.AddScoped<ICatalogService, LaoCai.SoftwareManagement.Application.Services.CatalogService>();
+        services.AddScoped<IBackgroundJobService, LaoCai.SoftwareManagement.Application.Services.BackgroundJobService>();
+        services.AddScoped<INotificationService, LaoCai.SoftwareManagement.Application.Services.NotificationService>();
+        services.AddScoped<IDeploymentService, LaoCai.SoftwareManagement.Application.Services.DeploymentService>();
 
         return services;
     }

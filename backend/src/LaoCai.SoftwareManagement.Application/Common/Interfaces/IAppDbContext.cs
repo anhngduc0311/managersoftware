@@ -1,6 +1,9 @@
 using LaoCai.SoftwareManagement.Domain.Entities.Audit;
 using LaoCai.SoftwareManagement.Domain.Entities.Catalog;
+using LaoCai.SoftwareManagement.Domain.Entities.Deployments;
 using LaoCai.SoftwareManagement.Domain.Entities.Iam;
+using LaoCai.SoftwareManagement.Domain.Entities.Jobs;
+using LaoCai.SoftwareManagement.Domain.Entities.Notifications;
 using LaoCai.SoftwareManagement.Domain.Entities.Organizations;
 using Microsoft.EntityFrameworkCore;
 
@@ -26,6 +29,18 @@ public interface IAppDbContext
     DbSet<Software> Software { get; }
     DbSet<SoftwareRelease> SoftwareReleases { get; }
     DbSet<CatalogProposal> CatalogProposals { get; }
+
+    // Deployments Schema
+    DbSet<Deployment> Deployments { get; }
+    DbSet<DeploymentRevision> DeploymentRevisions { get; }
+    DbSet<ApprovalDecision> ApprovalDecisions { get; }
+
+    // Jobs & Idempotency Schema
+    DbSet<BackgroundJob> BackgroundJobs { get; }
+    DbSet<IdempotencyRecord> IdempotencyRecords { get; }
+
+    // Notifications Schema
+    DbSet<Notification> Notifications { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

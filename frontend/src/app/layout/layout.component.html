@@ -15,6 +15,68 @@
     </div>
 
     <div class="header-right">
+      <!-- Notification Center Bell -->
+      <div class="notification-wrapper">
+        <button type="button" class="notification-btn" (click)="toggleNotificationMenu()" title="Thông báo hệ thống">
+          <span class="bell-icon">🔔</span>
+          @if (notificationService.unreadCount() > 0) {
+            <span class="notification-badge">{{ notificationService.unreadCount() > 99 ? '99+' : notificationService.unreadCount() }}</span>
+          }
+        </button>
+
+        @if (isNotificationMenuOpen()) {
+          <div class="notification-dropdown-menu">
+            <div class="notif-header">
+              <div class="notif-title">
+                <strong>Thông báo</strong>
+                @if (notificationService.unreadCount() > 0) {
+                  <span class="unread-pill">{{ notificationService.unreadCount() }} mới</span>
+                }
+              </div>
+              @if (notificationService.unreadCount() > 0) {
+                <button type="button" class="mark-all-btn" (click)="markAllNotificationsAsRead()">
+                  Đánh dấu đã đọc
+                </button>
+              }
+            </div>
+
+            <div class="notif-body">
+              @if (notificationService.isLoading()) {
+                <div class="notif-loading">Đang tải thông báo...</div>
+              } @else if (notificationService.recentNotifications().length === 0) {
+                <div class="notif-empty">
+                  <span class="empty-icon">📭</span>
+                  <p>Không có thông báo nào</p>
+                </div>
+              } @else {
+                <div class="notif-list">
+                  @for (item of notificationService.recentNotifications(); track item.id) {
+                    <div class="notif-item" [class.unread]="!item.readAt" (click)="onNotificationClick(item)">
+                      <div class="notif-icon">
+                        @switch (item.type) {
+                          @case ('WorkflowApproved') { <span>✅</span> }
+                          @case ('WorkflowRejected') { <span>❌</span> }
+                          @case ('WorkflowSubmitted') { <span>📋</span> }
+                          @default { <span>ℹ️</span> }
+                        }
+                      </div>
+                      <div class="notif-content">
+                        <div class="notif-item-title">{{ item.title }}</div>
+                        <div class="notif-item-msg">{{ item.message }}</div>
+                        <div class="notif-item-time">{{ item.createdAt | date:'HH:mm dd/MM/yyyy' }}</div>
+                      </div>
+                      @if (!item.readAt) {
+                        <div class="unread-dot" title="Chưa đọc"></div>
+                      }
+                    </div>
+                  }
+                </div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+
       <div class="user-profile-wrapper">
         <button type="button" class="user-profile-btn" (click)="toggleUserMenu()">
           <div class="user-avatar">
@@ -82,6 +144,15 @@
           </a>
         }
 
+        <!-- Quản lý Triển khai -->
+        @if (authService.hasPermission('deployments.read')) {
+          <div class="nav-section-title" *ngIf="isSidebarOpen">TRIỂN KHAI & CÀI ĐẶT</div>
+          <a routerLink="/deployments" routerLinkActive="active" class="nav-item">
+            <span class="nav-icon">🚀</span>
+            <span class="nav-label" *ngIf="isSidebarOpen">Hồ sơ Triển khai</span>
+          </a>
+        }
+
         @if (authService.hasPermission('organizations.read')) {
           <div class="nav-section-title" *ngIf="isSidebarOpen">TỔ CHỨC & ĐƠN VỊ</div>
           <a routerLink="/organizations" routerLinkActive="active" class="nav-item">
@@ -91,16 +162,24 @@
         }
 
         <!-- Quản trị hệ thống (SystemAdmin) -->
-        @if (authService.hasPermission('access.manage')) {
+        @if (authService.hasPermission('access.manage') || authService.hasPermission('jobs.manage')) {
           <div class="nav-section-title" *ngIf="isSidebarOpen">QUẢN TRỊ HỆ THỐNG</div>
-          <a routerLink="/admin/users" routerLinkActive="active" class="nav-item">
-            <span class="nav-icon">👥</span>
-            <span class="nav-label" *ngIf="isSidebarOpen">Tài khoản & Phân quyền</span>
-          </a>
-          <a routerLink="/admin/roles" routerLinkActive="active" class="nav-item">
-            <span class="nav-icon">🛡️</span>
-            <span class="nav-label" *ngIf="isSidebarOpen">Vai trò & Ma trận Quyền</span>
-          </a>
+          @if (authService.hasPermission('access.manage')) {
+            <a routerLink="/admin/users" routerLinkActive="active" class="nav-item">
+              <span class="nav-icon">👥</span>
+              <span class="nav-label" *ngIf="isSidebarOpen">Tài khoản & Phân quyền</span>
+            </a>
+            <a routerLink="/admin/roles" routerLinkActive="active" class="nav-item">
+              <span class="nav-icon">🛡️</span>
+              <span class="nav-label" *ngIf="isSidebarOpen">Vai trò & Ma trận Quyền</span>
+            </a>
+          }
+          @if (authService.hasPermission('jobs.manage')) {
+            <a routerLink="/admin/jobs" routerLinkActive="active" class="nav-item">
+              <span class="nav-icon">⚙️</span>
+              <span class="nav-label" *ngIf="isSidebarOpen">Tiến trình Nền (Worker Jobs)</span>
+            </a>
+          }
         }
       </nav>
     </aside>

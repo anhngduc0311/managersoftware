@@ -1,0 +1,428 @@
+<div class="page-container">
+  <!-- Breadcrumb -->
+  <div class="page-header">
+    <div class="title-area">
+      <div class="breadcrumb">
+        <a routerLink="/deployments">← Quay lại danh sách hồ sơ</a>
+      </div>
+      @if (deployment(); as dep) {
+        <h1>{{ dep.softwareName }}</h1>
+        <div class="header-meta">
+          <span class="meta-tag org-tag">🏛️ {{ dep.organizationName }} ({{ dep.organizationCode }})</span>
+          <span class="meta-tag env-tag env-{{ dep.environment | lowercase }}">{{ dep.environment }}</span>
+          <span class="meta-tag instance-tag">#{{ dep.instanceKey }}</span>
+          <span class="meta-tag version-tag">v{{ dep.version }}</span>
+        </div>
+      }
+    </div>
+
+    <div class="action-area">
+      @if (deployment()?.currentApprovedRevisionId && !deployment()?.activeRevision && authService.hasPermission('deployments.write')) {
+        <button type="button" class="btn btn-primary" (click)="createNextRevision()">
+          <span>📝</span> Tạo Revision Mới (Sửa hồ sơ)
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Notifications & Alerts -->
+  @if (concurrencyWarning()) {
+    <div class="alert alert-warning">
+      <div class="alert-icon">⚠️</div>
+      <div class="alert-content">
+        <strong>Xung đột phiên bản (Concurrency Conflict):</strong> Dữ liệu hồ sơ này đã được cập nhật bởi một phiên làm việc khác. Dữ liệu bạn vừa nhập vẫn được giữ lại tại form này. Vui lòng kiểm tra lại và tải lại trang để đối soát.
+        <button type="button" class="btn btn-outline btn-sm mt-2" (click)="loadDeployment(deploymentId())">
+          Tải lại dữ liệu mới nhất
+        </button>
+      </div>
+    </div>
+  }
+
+  @if (actionSuccess()) {
+    <div class="alert alert-success">
+      <span>✅</span> {{ actionSuccess() }}
+    </div>
+  }
+
+  @if (actionError()) {
+    <div class="alert alert-error">
+      <span>❌</span> {{ actionError() }}
+    </div>
+  }
+
+  <!-- Main Card -->
+  @if (isLoading()) {
+    <div class="loading-box">
+      <div class="spinner"></div>
+      <p>Đang tải thông tin hồ sơ triển khai...</p>
+    </div>
+  } @else if (deployment(); as dep) {
+    <div class="content-card">
+      <!-- Tabs Navigation -->
+      <div class="tabs-header">
+        @if (dep.activeRevision) {
+          <button
+            type="button"
+            class="tab-btn"
+            [class.active]="activeTab() === 'active'"
+            (click)="setTab('active')">
+            @if (dep.activeRevision.workflowStatus === 'Draft') {
+              📝 Bản nháp (Revision {{ dep.activeRevision.revisionNo }})
+            } @else if (dep.activeRevision.workflowStatus === 'Submitted') {
+              ⏳ Đang chờ duyệt (Revision {{ dep.activeRevision.revisionNo }})
+            } @else if (dep.activeRevision.workflowStatus === 'Rejected') {
+              ❌ Bị từ chối (Revision {{ dep.activeRevision.revisionNo }})
+            }
+          </button>
+        }
+
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="activeTab() === 'approved'"
+          (click)="setTab('approved')">
+          ✅ Bản chính thức đã duyệt
+          @if (dep.currentApprovedRevision) {
+            (Rev {{ dep.currentApprovedRevision.revisionNo }})
+          }
+        </button>
+
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="activeTab() === 'history'"
+          (click)="setTab('history')">
+          📜 Lịch sử Revisions & Quyết định
+        </button>
+      </div>
+
+      <!-- Tab Content: Active Revision (Draft / Submitted / Rejected) -->
+      @if (activeTab() === 'active' && dep.activeRevision; as activeRev) {
+        <div class="tab-body">
+          <div class="status-banner banner-{{ activeRev.workflowStatus | lowercase }}">
+            <div class="banner-title">
+              @if (activeRev.workflowStatus === 'Draft') {
+                <span>✏️ Hồ sơ ở trạng thái Bản Nháp (Draft)</span>
+              } @else if (activeRev.workflowStatus === 'Submitted') {
+                <span>⏳ Hồ sơ đang chờ phê duyệt (Submitted)</span>
+              } @else if (activeRev.workflowStatus === 'Rejected') {
+                <span>❌ Hồ sơ bị từ chối phê duyệt (Rejected)</span>
+              }
+            </div>
+            <div class="banner-desc">
+              Revision số <strong>#{{ activeRev.revisionNo }}</strong> — Tạo lúc: {{ activeRev.createdAt | date:'HH:mm dd/MM/yyyy' }}
+              @if (activeRev.submittedByUserName) {
+                • Người gửi: <strong>{{ activeRev.submittedByDisplayName || activeRev.submittedByUserName }}</strong> ({{ activeRev.submittedAt | date:'HH:mm dd/MM/yyyy' }})
+              }
+            </div>
+          </div>
+
+          <!-- Rejection notice if Rejected -->
+          @if (activeRev.workflowStatus === 'Rejected') {
+            @let lastDec = activeRev.decisions?.[0];
+            <div class="rejection-box">
+              <h4>Lý do từ chối:</h4>
+              <p class="rejection-text">{{ lastDec?.reason || 'Không có lý do cụ thể.' }}</p>
+              <div class="rejection-meta">
+                Người quyết định: <strong>{{ lastDec?.actorDisplayName || lastDec?.actorUserName }}</strong> lúc {{ lastDec?.decidedAt | date:'HH:mm dd/MM/yyyy' }}
+              </div>
+
+              @if (authService.hasPermission('deployments.write')) {
+                <div class="mt-3">
+                  <button type="button" class="btn btn-primary" (click)="reopenRevision()">
+                    ↺ Mở lại Bản nháp (Reopen) để chỉnh sửa
+                  </button>
+                </div>
+              }
+            </div>
+          }
+
+          <!-- Form Edit for Draft -->
+          @if (activeRev.workflowStatus === 'Draft') {
+            <form [formGroup]="draftForm" class="form-container">
+              <div class="form-grid">
+                <div class="form-group">
+                  <label class="form-label">Phiên bản phần mềm đã phát hành *</label>
+                  <select class="form-control" formControlName="releaseId">
+                    <option value="">-- Chọn phiên bản --</option>
+                    @for (rel of releases(); track rel.id) {
+                      <option [value]="rel.id">{{ rel.versionName }} (Phát hành: {{ rel.releaseDate | date:'dd/MM/yyyy' }})</option>
+                    }
+                  </select>
+                  <span class="field-hint">Bắt buộc khi gửi duyệt</span>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Tình trạng khai thác & vận hành *</label>
+                  <select class="form-control" formControlName="operationalStatus">
+                    <option value="NotInUse">Chưa sử dụng</option>
+                    <option value="Active">Đang sử dụng</option>
+                    <option value="Suspended">Tạm dừng</option>
+                    <option value="Retired">Ngừng sử dụng</option>
+                  </select>
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Ngày đơn vị tiếp nhận phần mềm</label>
+                  <input type="date" class="form-control" formControlName="startDate" />
+                </div>
+
+                <div class="form-group">
+                  <label class="form-label">Ngày chính thức đưa vào sử dụng</label>
+                  <input type="date" class="form-control" formControlName="goLiveDate" />
+                  <span class="field-hint">Bắt buộc khi trạng thái là "Đang sử dụng"</span>
+                </div>
+              </div>
+
+              <div class="form-actions">
+                <button type="button" class="btn btn-secondary" (click)="saveDraft()">
+                  💾 Lưu bản nháp
+                </button>
+
+                <button type="button" class="btn btn-primary" (click)="submitRevision()">
+                  🚀 Gửi Phê duyệt (Submit)
+                </button>
+              </div>
+            </form>
+          }
+
+          <!-- View mode and Approver Actions for Submitted -->
+          @if (activeRev.workflowStatus === 'Submitted') {
+            <div class="submitted-view">
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">Phiên bản triển khai:</span>
+                  <span class="info-value font-semibold">{{ activeRev.releaseVersionName || 'Chưa chọn' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Tình trạng vận hành:</span>
+                  <span class="info-value">{{ activeRev.operationalStatus }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Ngày tiếp nhận:</span>
+                  <span class="info-value">{{ activeRev.startDate || '—' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Ngày đưa vào sử dụng:</span>
+                  <span class="info-value">{{ activeRev.goLiveDate || '—' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Cán bộ gửi duyệt:</span>
+                  <span class="info-value">{{ activeRev.submittedByDisplayName || activeRev.submittedByUserName }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Thời điểm gửi:</span>
+                  <span class="info-value">{{ activeRev.submittedAt | date:'HH:mm dd/MM/yyyy' }}</span>
+                </div>
+              </div>
+
+              <!-- Diff View vs Approved -->
+              @if (dep.currentApprovedRevision; as approvedRev) {
+                <div class="diff-section">
+                  <h4>So sánh thay đổi so với Bản chính thức trước đó:</h4>
+                  <div class="diff-table-wrapper">
+                    <table class="diff-table">
+                      <thead>
+                        <tr>
+                          <th>Thuộc tính</th>
+                          <th>Bản chính thức cũ (Rev {{ approvedRev.revisionNo }})</th>
+                          <th>Bản gửi duyệt mới (Rev {{ activeRev.revisionNo }})</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Phiên bản Release</td>
+                          <td>{{ approvedRev.releaseVersionName || '—' }}</td>
+                          <td [class.diff-changed]="approvedRev.releaseId !== activeRev.releaseId">
+                            {{ activeRev.releaseVersionName || '—' }}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Tình trạng vận hành</td>
+                          <td>{{ approvedRev.operationalStatus }}</td>
+                          <td [class.diff-changed]="approvedRev.operationalStatus !== activeRev.operationalStatus">
+                            {{ activeRev.operationalStatus }}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Ngày tiếp nhận</td>
+                          <td>{{ approvedRev.startDate || '—' }}</td>
+                          <td [class.diff-changed]="approvedRev.startDate !== activeRev.startDate">
+                            {{ activeRev.startDate || '—' }}
+                          </td>
+                        </tr>
+                        <tr>
+                          <td>Ngày đưa vào sử dụng</td>
+                          <td>{{ approvedRev.goLiveDate || '—' }}</td>
+                          <td [class.diff-changed]="approvedRev.goLiveDate !== activeRev.goLiveDate">
+                            {{ activeRev.goLiveDate || '—' }}
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              }
+
+              <!-- Approval Action Bar -->
+              @if (authService.hasPermission('deployments.approve')) {
+                <div class="approval-bar">
+                  @if (isSubmitter()) {
+                    <div class="self-approval-notice">
+                      🛡️ <strong>Nguyên tắc cấm tự duyệt (Anti-Self-Approval):</strong> Bạn là người gửi duyệt hồ sơ này nên không thể tự phê duyệt theo quy định.
+                    </div>
+                  }
+
+                  <div class="action-buttons">
+                    <button
+                      type="button"
+                      class="btn btn-danger"
+                      [disabled]="isSubmitter()"
+                      (click)="openRejectModal()">
+                      ✕ Từ chối (Trả lại)
+                    </button>
+
+                    <button
+                      type="button"
+                      class="btn btn-success"
+                      [disabled]="isSubmitter()"
+                      (click)="approveRevision()">
+                      ✓ Phê duyệt Chính thức
+                    </button>
+                  </div>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Tab Content: Current Approved Revision -->
+      @if (activeTab() === 'approved') {
+        <div class="tab-body">
+          @if (dep.currentApprovedRevision; as approvedRev) {
+            <div class="approved-view">
+              <div class="approved-badge-bar">
+                <span class="badge badge-wf-approved">Bản Chính Thức Đã Duyệt (Revision #{{ approvedRev.revisionNo }})</span>
+                <span class="approved-date">Được duyệt lúc: {{ approvedRev.approvedAt | date:'HH:mm dd/MM/yyyy' }}</span>
+              </div>
+
+              <div class="info-grid">
+                <div class="info-item">
+                  <span class="info-label">Phiên bản Release:</span>
+                  <span class="info-value font-semibold">{{ approvedRev.releaseVersionName || '—' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Tình trạng khai thác:</span>
+                  <span class="info-value">{{ approvedRev.operationalStatus }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Ngày đơn vị tiếp nhận:</span>
+                  <span class="info-value">{{ approvedRev.startDate || '—' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Ngày đưa vào sử dụng:</span>
+                  <span class="info-value">{{ approvedRev.goLiveDate || '—' }}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Cán bộ phụ trách:</span>
+                  <span class="info-value">{{ approvedRev.responsibleUserDisplayName || approvedRev.responsibleUserName || '—' }}</span>
+                </div>
+              </div>
+            </div>
+          } @else {
+            <div class="empty-approved">
+              <div class="empty-icon">⏳</div>
+              <h3>Hồ sơ chưa có bản chính thức được duyệt</h3>
+              <p>Hồ sơ này đang trong quá trình khởi tạo nháp hoặc đang chờ lãnh đạo phê duyệt.</p>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- Tab Content: Revision History -->
+      @if (activeTab() === 'history') {
+        <div class="tab-body">
+          <div class="history-list">
+            @for (rev of historyRevisions(); track rev.id) {
+              <div class="history-item">
+                <div class="rev-header">
+                  <div class="rev-title">
+                    <span class="rev-no">Revision #{{ rev.revisionNo }}</span>
+                    <span class="badge {{ rev.workflowStatus | lowercase }}">{{ rev.workflowStatus }}</span>
+                    @if (dep.currentApprovedRevisionId === rev.id) {
+                      <span class="current-tag">★ Bản chính thức hiện tại</span>
+                    }
+                  </div>
+                  <div class="rev-meta">
+                    Tạo: {{ rev.createdAt | date:'dd/MM/yyyy HH:mm' }}
+                    @if (rev.approvedAt) {
+                      • Duyệt: {{ rev.approvedAt | date:'dd/MM/yyyy HH:mm' }}
+                    }
+                  </div>
+                </div>
+
+                <div class="rev-details">
+                  <span>Phiên bản: <strong>{{ rev.releaseVersionName || '—' }}</strong></span>
+                  <span>Vận hành: <strong>{{ rev.operationalStatus }}</strong></span>
+                  @if (rev.goLiveDate) {
+                    <span>Sử dụng từ: <strong>{{ rev.goLiveDate }}</strong></span>
+                  }
+                </div>
+
+                @if (rev.decisions && rev.decisions.length > 0) {
+                  <div class="decisions-history">
+                    <div class="dec-title">Nhật ký quyết định:</div>
+                    @for (dec of rev.decisions; track dec.id) {
+                      <div class="dec-item dec-{{ dec.decision | lowercase }}">
+                        <span class="dec-action">{{ dec.decision }}</span>
+                        bởi <strong>{{ dec.actorDisplayName || dec.actorUserName }}</strong> lúc {{ dec.decidedAt | date:'dd/MM/yyyy HH:mm' }}
+                        @if (dec.reason) {
+                          <div class="dec-reason">Lý do: "{{ dec.reason }}"</div>
+                        }
+                      </div>
+                    }
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        </div>
+      }
+    </div>
+  }
+</div>
+
+<!-- Modal: Từ chối Phê duyệt -->
+@if (isRejectModalOpen()) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Từ chối Phê duyệt Hồ sơ Triển khai</h2>
+        <button type="button" class="btn-close" (click)="closeRejectModal()">✕</button>
+      </div>
+
+      @if (rejectError()) {
+        <div class="alert alert-error">{{ rejectError() }}</div>
+      }
+
+      <div class="form-group">
+        <label class="form-label">Lý do từ chối (bắt buộc) *</label>
+        <textarea
+          class="form-control"
+          rows="4"
+          placeholder="Nhập lý do cụ thể cần bổ sung hoặc điều chỉnh thông tin..."
+          [ngModel]="rejectReason()"
+          (ngModelChange)="rejectReason.set($event)"></textarea>
+        <span class="field-hint">Tối đa 2.000 ký tự. Lý do sẽ được thông báo trực tiếp đến cán bộ gửi duyệt.</span>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeRejectModal()">Hủy</button>
+        <button type="button" class="btn btn-danger" (click)="confirmReject()">
+          Xác nhận Từ chối
+        </button>
+      </div>
+    </div>
+  </div>
+}

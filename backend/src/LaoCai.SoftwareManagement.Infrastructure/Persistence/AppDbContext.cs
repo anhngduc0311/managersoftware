@@ -3,7 +3,10 @@ using LaoCai.SoftwareManagement.Application.Common.Interfaces;
 using LaoCai.SoftwareManagement.Domain.Common;
 using LaoCai.SoftwareManagement.Domain.Entities.Audit;
 using LaoCai.SoftwareManagement.Domain.Entities.Catalog;
+using LaoCai.SoftwareManagement.Domain.Entities.Deployments;
 using LaoCai.SoftwareManagement.Domain.Entities.Iam;
+using LaoCai.SoftwareManagement.Domain.Entities.Jobs;
+using LaoCai.SoftwareManagement.Domain.Entities.Notifications;
 using LaoCai.SoftwareManagement.Domain.Entities.Organizations;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
@@ -43,6 +46,18 @@ public class AppDbContext : DbContext, IAppDbContext
     public DbSet<Software> Software => Set<Software>();
     public DbSet<SoftwareRelease> SoftwareReleases => Set<SoftwareRelease>();
     public DbSet<CatalogProposal> CatalogProposals => Set<CatalogProposal>();
+
+    // Deployments Schema
+    public DbSet<Deployment> Deployments => Set<Deployment>();
+    public DbSet<DeploymentRevision> DeploymentRevisions => Set<DeploymentRevision>();
+    public DbSet<ApprovalDecision> ApprovalDecisions => Set<ApprovalDecision>();
+
+    // Jobs & Idempotency Schema
+    public DbSet<BackgroundJob> BackgroundJobs => Set<BackgroundJob>();
+    public DbSet<IdempotencyRecord> IdempotencyRecords => Set<IdempotencyRecord>();
+
+    // Notifications Schema
+    public DbSet<Notification> Notifications => Set<Notification>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -242,6 +257,130 @@ public class AppDbContext : DbContext, IAppDbContext
                 .WithMany()
                 .HasForeignKey(p => p.CreatedSoftwareId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // Deployments Schema Configurations
+        modelBuilder.Entity<Deployment>(builder =>
+        {
+            builder.ToTable("deployments", "deployments");
+            builder.HasKey(d => d.Id);
+            builder.Property(d => d.Environment).HasMaxLength(50).IsRequired();
+            builder.Property(d => d.InstanceKey).HasMaxLength(50).HasDefaultValue("default").IsRequired();
+            builder.HasIndex(d => new { d.SoftwareId, d.OrganizationId, d.Environment, d.InstanceKey }).IsUnique();
+            builder.HasIndex(d => new { d.OrganizationId, d.SoftwareId });
+
+            builder.HasOne(d => d.Software)
+                .WithMany()
+                .HasForeignKey(d => d.SoftwareId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(d => d.Organization)
+                .WithMany()
+                .HasForeignKey(d => d.OrganizationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(d => d.CurrentApprovedRevision)
+                .WithMany()
+                .HasForeignKey(d => d.CurrentApprovedRevisionId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            builder.HasMany(d => d.Revisions)
+                .WithOne(r => r.Deployment)
+                .HasForeignKey(r => r.DeploymentId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<DeploymentRevision>(builder =>
+        {
+            builder.ToTable("deployment_revisions", "deployments");
+            builder.HasKey(r => r.Id);
+            builder.Property(r => r.OperationalStatus).HasMaxLength(50).IsRequired();
+            builder.Property(r => r.WorkflowStatus).HasMaxLength(30).HasDefaultValue("Draft").IsRequired();
+
+            builder.HasIndex(r => new { r.DeploymentId, r.RevisionNo }).IsUnique();
+            builder.HasIndex(r => new { r.WorkflowStatus, r.DeploymentId });
+            builder.HasIndex(r => new { r.DeploymentId, r.ApprovedAt });
+
+            // Partial unique index: at most one active revision (Draft or Submitted) per deployment
+            builder.HasIndex(r => r.DeploymentId)
+                .HasFilter("\"workflow_status\" IN ('Draft', 'Submitted')")
+                .IsUnique()
+                .HasDatabaseName("ix_deployment_revisions_active");
+
+            builder.HasOne(r => r.Release)
+                .WithMany()
+                .HasForeignKey(r => r.ReleaseId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(r => r.ResponsibleUser)
+                .WithMany()
+                .HasForeignKey(r => r.ResponsibleUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(r => r.SubmittedByUser)
+                .WithMany()
+                .HasForeignKey(r => r.SubmittedBy)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(r => r.Decisions)
+                .WithOne(d => d.DeploymentRevision)
+                .HasForeignKey(d => d.DeploymentRevisionId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ApprovalDecision>(builder =>
+        {
+            builder.ToTable("approval_decisions", "deployments");
+            builder.HasKey(ad => ad.Id);
+            builder.Property(ad => ad.Decision).HasMaxLength(30).IsRequired();
+            builder.Property(ad => ad.Reason).HasMaxLength(2000);
+
+            builder.HasOne(ad => ad.Actor)
+                .WithMany()
+                .HasForeignKey(ad => ad.ActorId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        // Jobs & Idempotency Schema Configurations
+        modelBuilder.Entity<BackgroundJob>(builder =>
+        {
+            builder.ToTable("background_jobs", "jobs");
+            builder.HasKey(j => j.Id);
+            builder.Property(j => j.Type).HasMaxLength(100).IsRequired();
+            builder.Property(j => j.Status).HasMaxLength(30).HasDefaultValue("Queued").IsRequired();
+            builder.Property(j => j.LeaseOwner).HasMaxLength(100);
+            builder.HasIndex(j => new { j.Status, j.NextRunAt, j.LeaseUntil });
+        });
+
+        modelBuilder.Entity<IdempotencyRecord>(builder =>
+        {
+            builder.ToTable("idempotency_records", "jobs");
+            builder.HasKey(r => r.Key);
+            builder.Property(r => r.Key).HasMaxLength(100);
+            builder.Property(r => r.RequestPath).HasMaxLength(200).IsRequired();
+            builder.Property(r => r.RequestHash).HasMaxLength(64).IsRequired();
+        });
+
+        // Notifications Schema Configurations
+        modelBuilder.Entity<Notification>(builder =>
+        {
+            builder.ToTable("notifications", "notifications");
+            builder.HasKey(n => n.Id);
+            builder.Property(n => n.Type).HasMaxLength(50).IsRequired();
+            builder.Property(n => n.Title).HasMaxLength(200).IsRequired();
+            builder.Property(n => n.TargetRoute).HasMaxLength(500);
+            builder.Property(n => n.DeduplicationKey).HasMaxLength(200);
+
+            builder.HasIndex(n => n.DeduplicationKey)
+                .IsUnique()
+                .HasFilter("\"deduplication_key\" IS NOT NULL");
+
+            builder.HasIndex(n => new { n.RecipientUserId, n.ReadAt, n.CreatedAt });
+
+            builder.HasOne(n => n.RecipientUser)
+                .WithMany()
+                .HasForeignKey(n => n.RecipientUserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
     }
 

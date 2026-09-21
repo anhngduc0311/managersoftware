@@ -442,5 +442,119 @@ public static class DataSeeder
         }
 
         await context.SaveChangesAsync();
+
+        // 6. Seed Sample Deployments & Revisions
+        var dep1Id = Guid.Parse("11112222-3333-4444-5555-666677778888");
+        var dep2Id = Guid.Parse("22223333-4444-5555-6666-777788889999");
+
+        var editorUser = await context.Users.FirstOrDefaultAsync(u => u.NormalizedUserName == "EDITOR_BAOTHANG");
+        var approverUser = await context.Users.FirstOrDefaultAsync(u => u.NormalizedUserName == "APPROVER_BAOTHANG");
+        var releaseIoffice = await context.SoftwareReleases.FirstOrDefaultAsync(r => r.SoftwareId == swIofficeId);
+        var releaseIgate = await context.SoftwareReleases.FirstOrDefaultAsync(r => r.SoftwareId == swIgateId);
+
+        if (!await context.Deployments.AnyAsync(d => d.Id == dep1Id))
+        {
+            var rev1Id = Guid.NewGuid();
+            var dep1 = new LaoCai.SoftwareManagement.Domain.Entities.Deployments.Deployment
+            {
+                Id = dep1Id,
+                SoftwareId = swIofficeId,
+                OrganizationId = orgBaoThangId,
+                Environment = "Production",
+                InstanceKey = "default",
+                CurrentApprovedRevisionId = rev1Id,
+                Version = 2,
+                CreatedAt = nowUtc.AddMonths(-6),
+                CreatedBy = editorUser?.Id
+            };
+
+            var rev1 = new LaoCai.SoftwareManagement.Domain.Entities.Deployments.DeploymentRevision
+            {
+                Id = rev1Id,
+                DeploymentId = dep1Id,
+                RevisionNo = 1,
+                ReleaseId = releaseIoffice?.Id,
+                OperationalStatus = "Active",
+                StartDate = new DateOnly(2024, 1, 1),
+                GoLiveDate = new DateOnly(2024, 2, 1),
+                ResponsibleUserId = editorUser?.Id,
+                WorkflowStatus = "Approved",
+                SubmittedBy = editorUser?.Id,
+                SubmittedAt = nowUtc.AddMonths(-6),
+                ApprovedAt = nowUtc.AddMonths(-6).AddDays(1),
+                Version = 2,
+                CreatedAt = nowUtc.AddMonths(-6),
+                CreatedBy = editorUser?.Id
+            };
+
+            var dec1 = new LaoCai.SoftwareManagement.Domain.Entities.Deployments.ApprovalDecision
+            {
+                Id = Guid.NewGuid(),
+                DeploymentRevisionId = rev1Id,
+                Decision = "Approved",
+                Reason = null,
+                ActorId = approverUser?.Id ?? Guid.NewGuid(),
+                DecidedAt = nowUtc.AddMonths(-6).AddDays(1)
+            };
+
+            context.Deployments.Add(dep1);
+            context.DeploymentRevisions.Add(rev1);
+            context.ApprovalDecisions.Add(dec1);
+        }
+
+        if (!await context.Deployments.AnyAsync(d => d.Id == dep2Id))
+        {
+            var rev2Id = Guid.NewGuid();
+            var dep2 = new LaoCai.SoftwareManagement.Domain.Entities.Deployments.Deployment
+            {
+                Id = dep2Id,
+                SoftwareId = swIgateId,
+                OrganizationId = orgBaoThangId,
+                Environment = "Production",
+                InstanceKey = "default",
+                CurrentApprovedRevisionId = null,
+                Version = 1,
+                CreatedAt = nowUtc.AddDays(-2),
+                CreatedBy = editorUser?.Id
+            };
+
+            var rev2 = new LaoCai.SoftwareManagement.Domain.Entities.Deployments.DeploymentRevision
+            {
+                Id = rev2Id,
+                DeploymentId = dep2Id,
+                RevisionNo = 1,
+                ReleaseId = releaseIgate?.Id,
+                OperationalStatus = "Active",
+                StartDate = new DateOnly(2025, 1, 1),
+                GoLiveDate = new DateOnly(2025, 3, 1),
+                ResponsibleUserId = editorUser?.Id,
+                WorkflowStatus = "Submitted",
+                SubmittedBy = editorUser?.Id,
+                SubmittedAt = nowUtc.AddDays(-1),
+                Version = 1,
+                CreatedAt = nowUtc.AddDays(-2),
+                CreatedBy = editorUser?.Id
+            };
+
+            context.Deployments.Add(dep2);
+            context.DeploymentRevisions.Add(rev2);
+
+            if (approverUser != null)
+            {
+                context.Notifications.Add(new LaoCai.SoftwareManagement.Domain.Entities.Notifications.Notification
+                {
+                    Id = Guid.NewGuid(),
+                    RecipientUserId = approverUser.Id,
+                    Type = "WorkflowSubmitted",
+                    Title = "Yêu cầu phê duyệt: Hệ thống iGate",
+                    Message = "Hồ sơ triển khai phần mềm 'Hệ thống Thông tin Giải quyết Thủ tục Hành chính (iGate)' đã được gửi duyệt. Vui lòng kiểm tra và phê duyệt.",
+                    TargetRoute = $"/deployments/{dep2Id}",
+                    DeduplicationKey = $"wf:submitted:{rev2Id}:{approverUser.Id}",
+                    CreatedAt = nowUtc.AddDays(-1)
+                });
+            }
+        }
+
+        await context.SaveChangesAsync();
     }
 }

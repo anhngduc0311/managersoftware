@@ -1,0 +1,282 @@
+<div class="page-container">
+  <!-- Header Bar -->
+  <div class="page-header">
+    <div class="title-area">
+      <div class="breadcrumb">
+        <span>Hệ thống</span> / <span class="current">Hồ sơ Triển khai</span>
+      </div>
+      <h1>Hồ sơ Sử dụng & Vận hành Phần mềm</h1>
+      <p class="subtitle">Quản lý hồ sơ cài đặt, vận hành và phê duyệt triển khai phần mềm tại các cơ quan, đơn vị tỉnh Lào Cai</p>
+    </div>
+
+    <div class="action-area">
+      @if (authService.hasPermission('deployments.write')) {
+        <button type="button" class="btn btn-primary" (click)="openCreateModal()">
+          <span>➕</span> Thêm mới Hồ sơ
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Filter & Navigation Tabs -->
+  <div class="content-card">
+    <div class="tabs-header">
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'all'"
+        (click)="setTab('all')">
+        📋 Tất cả hồ sơ
+      </button>
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'approved'"
+        (click)="setTab('approved')">
+        ✅ Đã duyệt chính thức
+      </button>
+      @if (authService.hasPermission('deployments.read_drafts')) {
+        <button
+          type="button"
+          class="tab-btn"
+          [class.active]="activeTab() === 'drafts'"
+          (click)="setTab('drafts')">
+          📝 Đang xử lý / Bản nháp
+        </button>
+      }
+    </div>
+
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="filter-group search-group">
+        <input
+          type="text"
+          class="form-control"
+          placeholder="Tìm theo tên phần mềm, mã, instance..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+          (keyup.enter)="applyFilters()" />
+      </div>
+
+      <div class="filter-group">
+        <select
+          class="form-control"
+          [ngModel]="selectedOrgId()"
+          (ngModelChange)="selectedOrgId.set($event); applyFilters()">
+          <option value="">-- Tất cả cơ quan/đơn vị --</option>
+          @for (org of organizations(); track org.id) {
+            <option [value]="org.id">{{ org.name || org.code }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <select
+          class="form-control"
+          [ngModel]="selectedSoftwareId()"
+          (ngModelChange)="selectedSoftwareId.set($event); applyFilters()">
+          <option value="">-- Tất cả phần mềm --</option>
+          @for (sw of softwareList(); track sw.id) {
+            <option [value]="sw.id">{{ sw.name }}</option>
+          }
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <select
+          class="form-control"
+          [ngModel]="selectedEnvironment()"
+          (ngModelChange)="selectedEnvironment.set($event); applyFilters()">
+          <option value="">-- Môi trường --</option>
+          <option value="Production">Production (Thực tế)</option>
+          <option value="Test">Test (Kiểm thử)</option>
+          <option value="Development">Development (Phát triển)</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <select
+          class="form-control"
+          [ngModel]="selectedOperationalStatus()"
+          (ngModelChange)="selectedOperationalStatus.set($event); applyFilters()">
+          <option value="">-- Tình trạng vận hành --</option>
+          <option value="Active">Đang sử dụng</option>
+          <option value="NotInUse">Chưa sử dụng</option>
+          <option value="Suspended">Tạm dừng</option>
+          <option value="Retired">Ngừng sử dụng</option>
+        </select>
+      </div>
+
+      <div class="filter-actions">
+        <button type="button" class="btn btn-secondary btn-sm" (click)="resetFilters()" title="Đặt lại bộ lọc">
+          ↺ Đặt lại
+        </button>
+      </div>
+    </div>
+
+    <!-- Data Table -->
+    @if (isLoading()) {
+      <div class="loading-box">
+        <div class="spinner"></div>
+        <p>Đang tải danh sách hồ sơ triển khai...</p>
+      </div>
+    } @else if (deployments().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">📂</div>
+        <h3>Không tìm thấy hồ sơ triển khai phù hợp</h3>
+        <p>Chưa có hồ sơ triển khai nào trong phạm vi được cấp hoặc không khớp với bộ lọc hiện tại.</p>
+        @if (authService.hasPermission('deployments.write')) {
+          <button type="button" class="btn btn-primary" (click)="openCreateModal()">
+            Tạo hồ sơ đầu tiên
+          </button>
+        }
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Phần mềm</th>
+              <th>Đơn vị quản lý / sử dụng</th>
+              <th>Môi trường & Instance</th>
+              <th>Tình trạng vận hành</th>
+              <th>Trạng thái duyệt</th>
+              <th>Phiên bản</th>
+              <th class="text-right">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (dep of deployments(); track dep.id) {
+              <tr class="table-row-clickable" (click)="viewDetail(dep.id)">
+                <td>
+                  <div class="item-title">{{ dep.softwareName }}</div>
+                  <div class="item-code">{{ dep.softwareCode }}</div>
+                </td>
+                <td>
+                  <div class="org-name">{{ dep.organizationName }}</div>
+                  <span class="badge-code">{{ dep.organizationCode }}</span>
+                </td>
+                <td>
+                  <span class="env-tag env-{{ dep.environment | lowercase }}">{{ dep.environment }}</span>
+                  <span class="instance-tag" title="Mã instance">#{{ dep.instanceKey }}</span>
+                </td>
+                <td>
+                  @let opStatus = dep.activeRevision?.operationalStatus || dep.currentApprovedRevision?.operationalStatus;
+                  <span class="badge {{ getOperationalBadgeClass(opStatus) }}">
+                    {{ getOperationalLabel(opStatus) }}
+                  </span>
+                </td>
+                <td>
+                  @if (dep.activeRevision) {
+                    <span class="badge {{ getWorkflowBadgeClass(dep.activeRevision.workflowStatus) }}">
+                      {{ getWorkflowLabel(dep.activeRevision.workflowStatus) }} (Rev {{ dep.activeRevision.revisionNo }})
+                    </span>
+                  } @else if (dep.currentApprovedRevision) {
+                    <span class="badge badge-wf-approved">
+                      Chính thức (Rev {{ dep.currentApprovedRevision.revisionNo }})
+                    </span>
+                  } @else {
+                    <span class="badge badge-default">Chưa có bản duyệt</span>
+                  }
+                </td>
+                <td>
+                  <span class="version-token">v{{ dep.version }}</span>
+                </td>
+                <td class="text-right" (click)="$event.stopPropagation()">
+                  <button type="button" class="btn btn-outline btn-sm" (click)="viewDetail(dep.id)">
+                    Xem chi tiết →
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination-footer">
+        <div class="total-label">Tổng số: <strong>{{ totalCount() }}</strong> hồ sơ</div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Modal: Thêm mới Hồ sơ Triển khai -->
+@if (isCreateModalOpen()) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Thêm mới Hồ sơ Triển khai</h2>
+        <button type="button" class="btn-close" (click)="closeCreateModal()">✕</button>
+      </div>
+
+      @if (modalError()) {
+        <div class="alert alert-error">{{ modalError() }}</div>
+      }
+
+      <form [formGroup]="createForm" (ngSubmit)="submitCreate()">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Phần mềm *</label>
+            <select class="form-control" formControlName="softwareId">
+              <option value="">-- Chọn phần mềm trong danh mục --</option>
+              @for (sw of softwareList(); track sw.id) {
+                <option [value]="sw.id">{{ sw.name }} ({{ sw.code }})</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Cơ quan / Đơn vị sử dụng *</label>
+            <select class="form-control" formControlName="organizationId">
+              <option value="">-- Chọn cơ quan / đơn vị --</option>
+              @for (org of organizations(); track org.id) {
+                <option [value]="org.id">{{ org.name || org.code }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Môi trường triển khai *</label>
+            <select class="form-control" formControlName="environment">
+              <option value="Production">Production (Thực tế)</option>
+              <option value="Test">Test (Kiểm thử)</option>
+              <option value="Development">Development (Phát triển)</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Mã phân biệt Instance *</label>
+            <input type="text" class="form-control" formControlName="instanceKey" placeholder="default" />
+            <span class="field-hint">Mặc định: 'default'</span>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Tình trạng vận hành thực tế *</label>
+            <select class="form-control" formControlName="operationalStatus">
+              <option value="NotInUse">Chưa sử dụng</option>
+              <option value="Active">Đang sử dụng</option>
+              <option value="Suspended">Tạm dừng</option>
+              <option value="Retired">Ngừng sử dụng</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ngày tiếp nhận (nếu biết)</label>
+            <input type="date" class="form-control" formControlName="startDate" />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Ngày đưa vào sử dụng</label>
+            <input type="date" class="form-control" formControlName="goLiveDate" />
+            <span class="field-hint">Bắt buộc khi trạng thái là "Đang sử dụng"</span>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeCreateModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Khởi tạo Bản nháp (Revision 1)</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

@@ -56,3 +56,12 @@ public class CustomValidationException : AppException
         };
     }
 }
+
+public class ConflictException : AppException
+{
+    public ConflictException(string message)
+        : base(message, "resource.conflict", 409)
+    {
+    }
+}
+

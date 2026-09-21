@@ -583,22 +583,22 @@ Tập dữ liệu kiểm chứng tối thiểu gồm hai đơn vị độc lập
 
 | ID | Vai trò | Việc làm và đầu ra cụ thể | Phụ thuộc | Hoàn thành khi |
 | --- | --- | --- | --- | --- |
-| T-06.1 | BE | [ ] Migration deployment/revision/decision, unique bộ khóa và partial unique | T-05.1, T-04.5 | DB từ chối hai revision hoạt động; con trỏ không trỏ deployment khác; test trạng thái sử dụng/ngày |
-| T-06.2 | BE | [ ] Use case/API tạo deployment, sửa Draft, list/detail theo scope | T-06.1, T-03.2, T-03.3 | Draft hợp lệ lưu được; stale ETag thất bại; Viewer không đọc nháp nếu thiếu quyền |
-| T-06.3 | BE | [ ] Use case tạo revision kế tiếp và reopen Rejected | T-06.2 | Khóa revision_no; copy dữ liệu hồ sơ; Approved bất biến; reopen bị chặn nếu có bản đang xử lý khác |
-| T-06.4 | BE | [ ] Use case submit/approve/reject với audit và job transaction | T-06.3, T-07.1, T-01.3 | Submitted khóa sửa; cấm tự duyệt; reject có lý do; hai quyết định đồng thời chỉ một thành công |
-| T-06.5 | FE | [ ] Danh sách/form deployment, tab official/draft/history và xử lý 412 | T-06.2, T-06.3, T-04.6 | Không ghi đè nháp khi conflict; filter ở URL; nhãn workflow/vận hành tách biệt |
-| T-06.6 | FE/QA | [ ] UI duyệt, so sánh bản sửa, reject/reopen; E2E editor → approver | T-06.4, T-06.5 | Báo cáo/chi tiết official vẫn giữ bản cũ cho tới approve; self-approval bị API chặn |
+| T-06.1 | BE | [x] Migration deployment/revision/decision, unique bộ khóa và partial unique | T-05.1, T-04.5 | DB từ chối hai revision hoạt động; con trỏ không trỏ deployment khác; test trạng thái sử dụng/ngày |
+| T-06.2 | BE | [x] Use case/API tạo deployment, sửa Draft, list/detail theo scope | T-06.1, T-03.2, T-03.3 | Draft hợp lệ lưu được; stale ETag thất bại; Viewer không đọc nháp nếu thiếu quyền |
+| T-06.3 | BE | [x] Use case tạo revision kế tiếp và reopen Rejected | T-06.2 | Khóa revision_no; copy dữ liệu hồ sơ; Approved bất biến; reopen bị chặn nếu có bản đang xử lý khác |
+| T-06.4 | BE | [x] Use case submit/approve/reject với audit và job transaction | T-06.3, T-07.1, T-01.3 | Submitted khóa sửa; cấm tự duyệt; reject có lý do; hai quyết định đồng thời chỉ một thành công |
+| T-06.5 | FE | [x] Danh sách/form deployment, tab official/draft/history và xử lý 412 | T-06.2, T-06.3, T-04.6 | Không ghi đè nháp khi conflict; filter ở URL; nhãn workflow/vận hành tách biệt |
+| T-06.6 | FE/QA | [x] UI duyệt, so sánh bản sửa, reject/reopen; E2E editor → approver | T-06.4, T-06.5 | Báo cáo/chi tiết official vẫn giữ bản cũ cho tới approve; self-approval bị API chặn |
 
 ### 4.8. T-07 — Job, notification và khả năng chạy lại
 
 | ID | Vai trò | Việc làm và đầu ra cụ thể | Phụ thuộc | Hoàn thành khi |
 | --- | --- | --- | --- | --- |
-| T-07.1 | BE | [ ] Tạo bảng job, interface enqueue trong transaction, idempotency request store | T-03.1, T-03.3 | Rollback nghiệp vụ rollback job; cùng key/payload trả một resource; khác payload trả 409 |
-| T-07.2 | BE | [ ] Worker claim SKIP LOCKED, lease/heartbeat/token, retry/backoff | T-07.1, T-03.5 | Hai worker không hoàn thành cùng token; kill/restart nhận lại; tối đa 5 lần thực thi tự động |
-| T-07.3 | BE | [ ] Notification store, dedupe, API danh sách/đọc, handler kết quả workflow/job | T-07.2, T-04.3 | Chỉ recipient truy cập; retry không trùng; mất quyền không lộ nội dung nghiệp vụ |
-| T-07.4 | BE/FE | [ ] API/UI trạng thái job và retry vận hành với requester gốc | T-07.2, T-04.6 | User chỉ xem job mình được phép; admin không đọc payload nghiệp vụ trái quyền; lỗi được làm sạch |
-| T-07.5 | FE | [ ] Trung tâm thông báo và polling trạng thái có backoff/hủy khi rời trang | T-07.3, T-07.4 | Đánh dấu đọc hoạt động; dừng polling sau terminal state/logout; không nhân request mutation |
+| T-07.1 | BE | [x] Tạo bảng job, interface enqueue trong transaction, idempotency request store | T-03.1, T-03.3 | Rollback nghiệp vụ rollback job; cùng key/payload trả một resource; khác payload trả 409 |
+| T-07.2 | BE | [x] Worker claim SKIP LOCKED, lease/heartbeat/token, retry/backoff | T-07.1, T-03.5 | Hai worker không hoàn thành cùng token; kill/restart nhận lại; tối đa 5 lần thực thi tự động |
+| T-07.3 | BE | [x] Notification store, dedupe, API danh sách/đọc, handler kết quả workflow/job | T-07.2, T-04.3 | Chỉ recipient truy cập; retry không trùng; mất quyền không lộ nội dung nghiệp vụ |
+| T-07.4 | BE/FE | [x] API/UI trạng thái job và retry vận hành với requester gốc | T-07.2, T-04.6 | User chỉ xem job mình được phép; admin không đọc payload nghiệp vụ trái quyền; lỗi được làm sạch |
+| T-07.5 | FE | [x] Trung tâm thông báo và polling trạng thái có backoff/hủy khi rời trang | T-07.3, T-07.4 | Đánh dấu đọc hoạt động; dừng polling sau terminal state/logout; không nhân request mutation |
 
 ### 4.9. T-08 — Hợp đồng và license
 

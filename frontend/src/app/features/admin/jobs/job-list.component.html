@@ -1,0 +1,128 @@
+<div class="page-container">
+  <div class="page-header">
+    <div class="title-area">
+      <div class="breadcrumb">
+        <span>Quản trị hệ thống</span> / <span class="current">Tác vụ ngầm (Jobs)</span>
+      </div>
+      <h1>Giám sát Tiến trình Nền (Background Worker)</h1>
+      <p class="subtitle">Theo dõi hàng đợi tác vụ, trạng thái xử lý thông báo, lease token và chạy lại tác vụ lỗi</p>
+    </div>
+
+    <div class="action-area">
+      <button type="button" class="btn btn-secondary" (click)="loadJobs()">
+        ↺ Làm mới danh sách
+      </button>
+    </div>
+  </div>
+
+  @if (actionMessage()) {
+    <div class="alert alert-success">
+      <span>ℹ️</span> {{ actionMessage() }}
+    </div>
+  }
+
+  <div class="content-card">
+    <div class="filter-bar">
+      <div class="filter-group">
+        <select
+          class="form-control"
+          [ngModel]="selectedStatus()"
+          (ngModelChange)="selectedStatus.set($event); loadJobs()">
+          <option value="">-- Tất cả trạng thái --</option>
+          <option value="Queued">Đang chờ (Queued)</option>
+          <option value="Running">Đang chạy (Running)</option>
+          <option value="Succeeded">Thành công (Succeeded)</option>
+          <option value="Failed">Thất bại (Failed)</option>
+        </select>
+      </div>
+
+      <div class="filter-group">
+        <select
+          class="form-control"
+          [ngModel]="selectedType()"
+          (ngModelChange)="selectedType.set($event); loadJobs()">
+          <option value="">-- Tất cả loại tác vụ --</option>
+          <option value="WorkflowNotification">Thông báo luồng duyệt (WorkflowNotification)</option>
+        </select>
+      </div>
+    </div>
+
+    @if (isLoading()) {
+      <div class="loading-box">
+        <div class="spinner"></div>
+        <p>Đang tải danh sách tác vụ ngầm...</p>
+      </div>
+    } @else if (jobs().length === 0) {
+      <div class="empty-state">
+        <div class="empty-icon">⚙️</div>
+        <h3>Không có tác vụ nào</h3>
+        <p>Chưa có tác vụ ngầm nào được lên lịch hoặc phù hợp với bộ lọc hiện tại.</p>
+      </div>
+    } @else {
+      <div class="table-responsive">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Loại tác vụ & ID</th>
+              <th>Trạng thái</th>
+              <th>Số lần thử</th>
+              <th>Thời gian tạo</th>
+              <th>Lần chạy tiếp theo / Hoàn thành</th>
+              <th>Lỗi gần nhất</th>
+              <th class="text-right">Thao tác</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (job of jobs(); track job.id) {
+              <tr>
+                <td>
+                  <div class="job-type">{{ job.type }}</div>
+                  <div class="job-id">{{ job.id }}</div>
+                  @if (job.leaseOwner) {
+                    <div class="job-owner">Worker: {{ job.leaseOwner }}</div>
+                  }
+                </td>
+                <td>
+                  <span class="badge {{ getStatusBadgeClass(job.status) }}">
+                    {{ getStatusLabel(job.status) }}
+                  </span>
+                </td>
+                <td>
+                  <span>{{ job.attempts }} / {{ job.maxAttempts }}</span>
+                </td>
+                <td>
+                  {{ job.createdAt | date:'HH:mm:ss dd/MM/yyyy' }}
+                </td>
+                <td>
+                  @if (job.completedAt) {
+                    <span class="text-success">Xong lúc: {{ job.completedAt | date:'HH:mm:ss dd/MM' }}</span>
+                  } @else {
+                    <span>Chạy lúc: {{ job.nextRunAt | date:'HH:mm:ss dd/MM' }}</span>
+                  }
+                </td>
+                <td>
+                  @if (job.lastError) {
+                    <span class="error-snippet" [title]="job.lastError">{{ job.lastError }}</span>
+                  } @else {
+                    <span class="text-muted">—</span>
+                  }
+                </td>
+                <td class="text-right">
+                  @if (job.status === 'Failed') {
+                    <button type="button" class="btn btn-outline btn-sm" (click)="retry(job.id)">
+                      ↺ Chạy lại
+                    </button>
+                  }
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      <div class="pagination-footer">
+        <div>Tổng số: <strong>{{ totalCount() }}</strong> tác vụ</div>
+      </div>
+    }
+  </div>
+</div>

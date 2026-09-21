@@ -48,6 +48,16 @@ export const routes: Routes = [
         loadComponent: () => import('@features/software/software-detail.component').then(m => m.SoftwareDetailComponent)
       },
       {
+        path: 'deployments',
+        canActivate: [permissionGuard('deployments.read')],
+        loadComponent: () => import('@features/deployments/deployment-list.component').then(m => m.DeploymentListComponent)
+      },
+      {
+        path: 'deployments/:id',
+        canActivate: [permissionGuard('deployments.read')],
+        loadComponent: () => import('@features/deployments/deployment-detail.component').then(m => m.DeploymentDetailComponent)
+      },
+      {
         path: 'admin/users',
         canActivate: [permissionGuard('access.manage')],
         loadComponent: () => import('@features/admin/users/user-list.component').then(m => m.UserListComponent)
@@ -56,6 +66,11 @@ export const routes: Routes = [
         path: 'admin/roles',
         canActivate: [permissionGuard('access.manage')],
         loadComponent: () => import('@features/admin/roles/role-list.component').then(m => m.RoleListComponent)
+      },
+      {
+        path: 'admin/jobs',
+        canActivate: [permissionGuard('jobs.manage')],
+        loadComponent: () => import('@features/admin/jobs/job-list.component').then(m => m.JobListComponent)
       }
     ]
   },
