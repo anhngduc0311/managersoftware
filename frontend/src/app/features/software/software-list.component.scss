@@ -4,6 +4,52 @@
   margin: 0 auto;
 }
 
+/* Toast Banner */
+.toast-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  border-radius: 0.65rem;
+  margin-bottom: 1.25rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.08);
+  animation: fadeInDown 0.3s ease;
+
+  &.toast-success {
+    background: #ecfdf5;
+    border: 1px solid #a7f3d0;
+    color: #065f46;
+  }
+
+  &.toast-error {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    color: #991b1b;
+  }
+
+  .toast-icon {
+    font-size: 1.15rem;
+  }
+
+  .toast-text {
+    flex: 1;
+    font-size: 0.9rem;
+    font-weight: 500;
+  }
+
+  .toast-close {
+    background: transparent;
+    border: none;
+    font-size: 1.1rem;
+    color: inherit;
+    opacity: 0.7;
+    cursor: pointer;
+    &:hover {
+      opacity: 1;
+    }
+  }
+}
+
 .page-header {
   display: flex;
   justify-content: space-between;
@@ -207,6 +253,20 @@
     background: #f1f5f9;
     border-color: #cbd5e1;
   }
+
+  &.btn-edit {
+    &:hover {
+      background: #eff6ff;
+      border-color: #93c5fd;
+    }
+  }
+
+  &.btn-delete {
+    &:hover {
+      background: #fee2e2;
+      border-color: #fca5a5;
+    }
+  }
 }
 
 .btn {
@@ -246,6 +306,14 @@
       background: #e2e8f0;
     }
   }
+
+  &.btn-danger {
+    background: #dc2626;
+    color: #ffffff;
+    &:hover {
+      background: #b91c1c;
+    }
+  }
 }
 
 .form-control {
@@ -261,6 +329,12 @@
     outline: none;
     border-color: #3b82f6;
     box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.15);
+  }
+
+  &.input-readonly {
+    background-color: #f8fafc;
+    color: #64748b;
+    cursor: not-allowed;
   }
 }
 
@@ -286,19 +360,38 @@
   overflow-y: auto;
   box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.2);
   padding: 1.5rem;
+
+  &.modal-card-lg {
+    max-width: 720px;
+  }
+
+  &.modal-delete-card {
+    max-width: 520px;
+    border-top: 4px solid #ef4444;
+  }
 }
 
 .modal-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
   margin-bottom: 1.25rem;
 
   h2 {
-    font-size: 1.2rem;
+    font-size: 1.25rem;
     font-weight: 700;
     color: #0f172a;
     margin: 0;
+  }
+
+  .modal-subtitle {
+    font-size: 0.82rem;
+    color: #64748b;
+    margin: 0.2rem 0 0;
+  }
+
+  &.modal-delete-header h2 {
+    color: #dc2626;
   }
 
   .btn-close {
@@ -309,6 +402,155 @@
     cursor: pointer;
     &:hover {
       color: #0f172a;
+    }
+  }
+}
+
+/* 1-Click Presets Section */
+.presets-section {
+  background: #f8fafc;
+  border: 1px dashed #cbd5e1;
+  border-radius: 0.75rem;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.25rem;
+
+  .presets-title {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 0.5rem;
+  }
+
+  .preset-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.4rem;
+
+    .preset-chip {
+      background: #ffffff;
+      border: 1px solid #cbd5e1;
+      border-radius: 9999px;
+      padding: 0.3rem 0.75rem;
+      font-size: 0.78rem;
+      font-weight: 500;
+      color: #334155;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      transition: all 0.15s ease;
+
+      &:hover {
+        background: #eff6ff;
+        border-color: #93c5fd;
+        color: #1d4ed8;
+      }
+
+      &.active {
+        background: #2563eb;
+        border-color: #2563eb;
+        color: #ffffff;
+      }
+    }
+  }
+}
+
+.label-with-action {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+
+  .btn-text-action {
+    background: transparent;
+    border: none;
+    color: #2563eb;
+    font-size: 0.75rem;
+    font-weight: 600;
+    cursor: pointer;
+    padding: 0;
+
+    &:hover {
+      text-decoration: underline;
+      color: #1d4ed8;
+    }
+  }
+}
+
+.code-input {
+  font-family: monospace;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Quick Add Inline Box */
+.quick-add-box {
+  background: #f0fdf4;
+  border: 1px solid #bbf7d0;
+  border-radius: 0.5rem;
+  padding: 0.75rem;
+  margin-top: 0.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  animation: fadeInDown 0.2s ease;
+
+  .quick-add-header {
+    font-size: 0.78rem;
+    color: #166534;
+  }
+
+  .quick-add-inputs {
+    display: flex;
+    gap: 0.4rem;
+    flex-wrap: wrap;
+
+    .form-control-sm {
+      flex: 1;
+      min-width: 120px;
+      padding: 0.35rem 0.55rem;
+      font-size: 0.8rem;
+    }
+  }
+}
+
+/* Release Subform Section */
+.release-subform-wrapper {
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  border-radius: 0.65rem;
+  padding: 0.85rem 1rem;
+
+  .checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    cursor: pointer;
+    user-select: none;
+
+    input[type="checkbox"] {
+      width: 1rem;
+      height: 1rem;
+      cursor: pointer;
+      accent-color: #2563eb;
+    }
+
+    .checkbox-text {
+      color: #1e40af;
+      font-size: 0.85rem;
+    }
+  }
+
+  .release-subform-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0.75rem;
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px dashed #93c5fd;
+
+    .form-control-sm {
+      padding: 0.4rem 0.6rem;
+      font-size: 0.8rem;
     }
   }
 }
@@ -351,3 +593,53 @@
   font-size: 0.85rem;
   margin-bottom: 1rem;
 }
+
+.delete-confirmation-content {
+  margin-bottom: 1.5rem;
+  color: #334155;
+  font-size: 0.9rem;
+  line-height: 1.5;
+
+  .target-item-preview {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 0.5rem;
+    padding: 0.85rem 1rem;
+    margin: 1rem 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    .preview-row {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+
+      .preview-label {
+        color: #64748b;
+        font-size: 0.8rem;
+        min-width: 100px;
+      }
+    }
+  }
+
+  .delete-warning-text {
+    font-size: 0.8rem;
+    color: #64748b;
+    margin-top: 0.75rem;
+    font-style: italic;
+  }
+}
+
+@keyframes fadeInDown {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+

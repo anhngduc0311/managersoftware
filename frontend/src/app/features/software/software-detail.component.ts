@@ -14,6 +14,9 @@ import { AuthService } from '@core/services/auth.service';
 export class SoftwareDetailComponent implements OnInit {
   @Input({ required: true }) software!: SoftwareDto;
   @Output() close = new EventEmitter<void>();
+  @Output() edit = new EventEmitter<SoftwareDto>();
+  @Output() delete = new EventEmitter<SoftwareDto>();
+  @Output() reload = new EventEmitter<void>();
 
   private softwareService = inject(SoftwareService);
   public authService = inject(AuthService);
@@ -70,10 +73,27 @@ export class SoftwareDetailComponent implements OnInit {
       next: () => {
         this.closeAddReleaseModal();
         this.loadReleases();
+        this.reload.emit();
       },
       error: (err) => {
         this.modalError.set(err.problem?.detail || err.error?.detail || 'Không thể thêm phiên bản phát hành.');
       }
     });
   }
+
+  deleteRelease(rel: SoftwareReleaseDto) {
+    if (!confirm(`Bạn có chắc chắn muốn xoá phiên bản "${rel.versionName}"?`)) {
+      return;
+    }
+    this.softwareService.deleteRelease(rel.id).subscribe({
+      next: () => {
+        this.loadReleases();
+        this.reload.emit();
+      },
+      error: (err) => {
+        alert(err.problem?.detail || err.error?.detail || 'Không thể xoá phiên bản này.');
+      }
+    });
+  }
 }
+

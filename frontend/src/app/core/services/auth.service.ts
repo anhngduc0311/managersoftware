@@ -1,7 +1,7 @@
 import { Injectable, signal, computed, inject } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Router } from '@angular/router';
-import { Observable, tap, catchError, of } from 'rxjs';
+import { Observable, tap, catchError, of, switchMap } from 'rxjs';
 import { CurrentUser, LoginResponse, CsrfTokenResponse } from '@core/models/auth.models';
 
 @Injectable({
@@ -18,23 +18,28 @@ export class AuthService {
   readonly isAuthenticated = computed(() => this.currentUserSignal() !== null);
   readonly isInitialized = computed(() => this.isInitializedSignal());
 
-  constructor() {
-    this.init();
-  }
+  constructor() {}
 
-  init(): void {
-    // Fetch CSRF token and current user session
-    this.http.get<CsrfTokenResponse>('/api/v1/auth/csrf').pipe(
-      catchError(() => of({ token: '' }))
-    ).subscribe(() => {
-      this.fetchCurrentUser().subscribe({
+  initApp(): Promise<void> {
+    return new Promise<void>((resolve) => {
+      this.http.get<CsrfTokenResponse>('/api/v1/auth/csrf').pipe(
+        catchError(() => of({ token: '' })),
+        switchMap(() => this.fetchCurrentUser()),
+        catchError(() => of(null))
+      ).subscribe({
         next: (user) => {
-          this.currentUserSignal.set(user);
+          if (user) {
+            this.currentUserSignal.set(user);
+          } else {
+            this.currentUserSignal.set(null);
+          }
           this.isInitializedSignal.set(true);
+          resolve();
         },
         error: () => {
           this.currentUserSignal.set(null);
           this.isInitializedSignal.set(true);
+          resolve();
         }
       });
     });
@@ -45,6 +50,7 @@ export class AuthService {
       tap((user) => this.currentUserSignal.set(user))
     );
   }
+
 
   login(credentials: { username: string; password: string }): Observable<LoginResponse> {
     return this.http.post<LoginResponse>('/api/v1/auth/login', credentials).pipe(

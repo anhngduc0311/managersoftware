@@ -45,7 +45,7 @@
           <div class="meta-value text-success">{{ formatCurrency(contract()?.totalAmount, contract()?.currencyCode) }}</div>
           <div class="meta-sub">Loại tiền tệ: {{ contract()?.currencyCode }}</div>
         } @else {
-          <div class="meta-value text-muted">🔒 Bảo mật</div>
+          <div class="meta-value text-muted">Bảo mật</div>
           <div class="meta-sub">Cần quyền contracts.read</div>
         }
       </div>
@@ -76,7 +76,7 @@
         [class.active]="activeTab() === 'items'"
         (click)="activeTab.set('items')"
       >
-        📦 Hạng mục & Hạn mức Bản quyền ({{ contract()?.items?.length || 0 }})
+        Hạng mục & Hạn mức Bản quyền ({{ contract()?.items?.length || 0 }})
       </button>
 
       <button
@@ -85,7 +85,7 @@
         [class.active]="activeTab() === 'allocations'"
         (click)="activeTab.set('allocations')"
       >
-        🎯 Phân bổ Bản quyền Hồ sơ ({{ allocations().length }})
+        Phân bổ Bản quyền Hồ sơ ({{ allocations().length }})
       </button>
 
       <button
@@ -94,7 +94,7 @@
         [class.active]="activeTab() === 'documents'"
         (click)="activeTab.set('documents')"
       >
-        📑 Hồ sơ Tài liệu & Quét An toàn ({{ attachments().length }})
+        Hồ sơ Tài liệu & Quét An toàn ({{ attachments().length }})
       </button>
     </div>
 
@@ -108,14 +108,13 @@
           </div>
           @if (authService.hasPermission('contracts.write')) {
             <button type="button" class="btn btn-primary btn-sm" (click)="openAddItemModal()">
-              ➕ Thêm Hạng mục
+              + Thêm Hạng mục
             </button>
           }
         </div>
 
         @if (contract()?.items?.length === 0) {
           <div class="empty-state">
-            <span class="empty-icon">📦</span>
             <p>Hợp đồng chưa có hạng mục phần mềm nào.</p>
           </div>
         } @else {
@@ -135,7 +134,7 @@
                     }
                     @if (authService.hasPermission('contracts.write')) {
                       <button type="button" class="btn btn-sm btn-outline-danger" (click)="deleteItem(item.id)" title="Xóa hạng mục">
-                        🗑️
+                        Xóa
                       </button>
                     }
                   </div>
@@ -147,7 +146,7 @@
                     <span class="sub-title">Hạn mức Quyền sử dụng (Entitlements):</span>
                     @if (authService.hasPermission('contracts.write')) {
                       <button type="button" class="btn btn-xs btn-outline" (click)="openAddEntitlementModal(item.id)">
-                        ➕ Thêm hạn mức
+                        + Thêm hạn mức
                       </button>
                     }
                   </div>
@@ -183,14 +182,14 @@
                             </div>
                           } @else {
                             <div class="unlimited-notice">
-                              ✓ Không giới hạn số lượng đơn vị & người dùng kích hoạt
+                              Không giới hạn số lượng đơn vị & người dùng kích hoạt
                             </div>
                           }
 
                           <div class="ent-actions">
                             @if (authService.hasPermission('licenses.allocate')) {
                               <button type="button" class="btn btn-xs btn-primary" (click)="openAllocateModal(ent.id)">
-                                🎯 Cấp phát License
+                                Cấp phát License
                               </button>
                             }
                           </div>
@@ -216,14 +215,13 @@
           </div>
           @if (authService.hasPermission('licenses.allocate')) {
             <button type="button" class="btn btn-primary btn-sm" (click)="openAllocateModal()">
-              🎯 Cấp phát License Mới
+              + Cấp phát License Mới
             </button>
           }
         </div>
 
         @if (allocations().length === 0) {
           <div class="empty-state">
-            <span class="empty-icon">🎯</span>
             <p>Chưa có hồ sơ triển khai nào được phân bổ bản quyền từ hợp đồng này.</p>
           </div>
         } @else {
@@ -290,7 +288,6 @@
                 [disabled]="isUploadingDoc()"
               />
               <label for="docUploadInput" class="upload-label">
-                <span class="upload-icon">📤</span>
                 <span class="upload-title">Nhấp vào đây để chọn tệp tài liệu đính kèm</span>
                 <span class="upload-hint">Định dạng hỗ trợ: PDF, DOCX, XLSX, PNG, JPEG (tối đa 20 MB/tệp)</span>
               </label>
@@ -314,7 +311,6 @@
         <div class="attachments-list">
           @if (attachments().length === 0) {
             <div class="empty-state">
-              <span class="empty-icon">📁</span>
               <p>Chưa có tài liệu đính kèm nào cho hợp đồng này.</p>
             </div>
           } @else {
@@ -334,29 +330,29 @@
                   @for (doc of attachments(); track doc.attachmentId) {
                     <tr>
                       <td class="font-semibold">
-                        <span class="doc-icon">📄</span> {{ doc.originalName }}
+                        {{ doc.originalName }}
                       </td>
                       <td>{{ formatFileSize(doc.sizeBytes) }}</td>
                       <td>
                         @switch (doc.scanStatus) {
                           @case ('Clean') {
                             <span class="scan-pill scan-clean" title="Tệp an toàn đã vượt qua kiểm tra">
-                              🟢 Sạch (Clean)
+                              Sạch (Clean)
                             </span>
                           }
                           @case ('Scanning') {
                             <span class="scan-pill scan-scanning" title="Tiến trình Worker đang quét">
-                              🔵 Đang quét...
+                              Đang quét...
                             </span>
                           }
                           @case ('Rejected') {
                             <span class="scan-pill scan-rejected" [title]="doc.scanMessage || 'Chứa mã độc'">
-                              🔴 Từ chối ({{ doc.scanMessage || 'Độc hại' }})
+                              Từ chối ({{ doc.scanMessage || 'Độc hại' }})
                             </span>
                           }
                           @default {
                             <span class="scan-pill scan-pending" title="Đang cách ly tại quarantine">
-                              🟡 Chờ quét an toàn
+                              Chờ quét an toàn
                             </span>
                           }
                         }
@@ -367,17 +363,17 @@
                         <div class="btn-group">
                           @if (doc.scanStatus === 'Clean') {
                             <button type="button" class="btn btn-xs btn-primary" (click)="downloadAttachment(doc)">
-                              ⬇ Tải xuống
+                              Tải xuống
                             </button>
                           } @else {
                             <button type="button" class="btn btn-xs btn-secondary" disabled title="Tệp chưa xác nhận an toàn">
-                              🔒 Bị khóa
+                              Bị khóa
                             </button>
                           }
 
                           @if (authService.hasPermission('contracts.write')) {
                             <button type="button" class="btn btn-xs btn-outline-danger" (click)="unlinkAttachment(doc)" title="Gỡ tài liệu">
-                              🗑️
+                              Xóa
                             </button>
                           }
                         </div>

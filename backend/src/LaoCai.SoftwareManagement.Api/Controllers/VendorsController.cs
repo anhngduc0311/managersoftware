@@ -92,4 +92,27 @@ public class VendorsController : BaseApiController
         await _context.SaveChangesAsync();
         return Ok(vendor);
     }
+
+    [HttpDelete("{id:guid}")]
+    [RequirePermission("catalog.manage")]
+    public async Task<IActionResult> DeleteVendor(Guid id)
+    {
+        var vendor = await _context.Vendors.FirstOrDefaultAsync(v => v.Id == id);
+        if (vendor == null)
+        {
+            return NotFound(new { detail = $"Không tìm thấy nhà cung cấp có ID: {id}" });
+        }
+
+        var isUsed = await _context.Software.AnyAsync(s => s.VendorId == id);
+        if (isUsed)
+        {
+            return BadRequest(new { detail = "Không thể xoá nhà cung cấp vì đang có phần mềm liên kết với đối tác này." });
+        }
+
+        _context.Vendors.Remove(vendor);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
 }
+

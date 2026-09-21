@@ -9,7 +9,7 @@
     <div class="header-actions">
       @if (authService.hasPermission('catalog.propose')) {
         <button type="button" class="btn btn-primary" (click)="openCreateModal()">
-          <span>💡</span> Gửi Đề xuất Phần mềm Mới
+          + Gửi Đề xuất Phần mềm Mới
         </button>
       }
     </div>
@@ -66,9 +66,9 @@
                 <td>{{ p.createdAt | date:'dd/MM/yyyy HH:mm' }}</td>
                 <td>
                   <span class="badge" [class.badge-pending]="p.status === 'Pending'" [class.badge-accepted]="p.status === 'Accepted'" [class.badge-rejected]="p.status === 'Rejected'">
-                    @if (p.status === 'Pending') { ⏳ Đang chờ duyệt }
-                    @else if (p.status === 'Accepted') { ✅ Đã chấp thuận }
-                    @else if (p.status === 'Rejected') { ❌ Đã từ chối }
+                    @if (p.status === 'Pending') { Đang chờ duyệt }
+                    @else if (p.status === 'Accepted') { Đã chấp thuận }
+                    @else if (p.status === 'Rejected') { Đã từ chối }
                   </span>
                 </td>
                 <td>

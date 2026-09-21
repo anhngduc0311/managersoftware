@@ -12,7 +12,7 @@
     <div class="action-area">
       @if (authService.hasPermission('contracts.write')) {
         <button type="button" class="btn btn-primary" (click)="openCreateModal()">
-          <span class="btn-icon">➕</span> Thêm Hợp đồng mới
+          + Thêm Hợp đồng mới
         </button>
       }
     </div>
@@ -23,7 +23,6 @@
     <!-- Filter Bar -->
     <div class="filter-bar">
       <div class="search-box">
-        <span class="search-icon">🔍</span>
         <input
           type="text"
           placeholder="Tìm số hợp đồng, cơ quan, nhà cung cấp..."
@@ -57,7 +56,7 @@
         </select>
 
         <button type="button" class="btn btn-secondary" (click)="resetFilters()" title="Làm mới bộ lọc">
-          ↺
+          Đặt lại
         </button>
       </div>
     </div>
@@ -88,7 +87,6 @@
             <tr>
               <td colspan="8" class="text-center empty-cell">
                 <div class="empty-state">
-                  <span class="empty-icon">📂</span>
                   <p>Không có hợp đồng nào phù hợp với bộ lọc tìm kiếm.</p>
                 </div>
               </td>
@@ -116,7 +114,7 @@
                   </div>
                   @if (contract.maintenanceEndDate) {
                     <div class="maintenance-pill" title="Thời hạn bảo trì nâng cấp">
-                      🛠️ BT đến {{ contract.maintenanceEndDate }}
+                      BT đến {{ contract.maintenanceEndDate }}
                     </div>
                   }
                 </td>
@@ -130,7 +128,7 @@
                     <span class="amount-value">{{ formatCurrency(contract.totalAmount, contract.currencyCode) }}</span>
                   } @else {
                     <span class="restricted-financial" title="Không có quyền xem chi phí tài chính (contracts.read)">
-                      🔒 Bảo mật
+                      Bảo mật
                     </span>
                   }
                 </td>
@@ -141,7 +139,7 @@
                 </td>
                 <td class="text-center" (click)="$event.stopPropagation()">
                   <button type="button" class="btn btn-sm btn-outline" (click)="viewDetail(contract.id)" title="Xem chi tiết & Phân bổ">
-                    👁️ Chi tiết
+                    Chi tiết
                   </button>
                 </td>
               </tr>

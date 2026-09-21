@@ -14,7 +14,7 @@
           [class.active]="activeTab() === 'cards'"
           (click)="activeTab.set('cards')"
         >
-          <span>📋 Chi tiết Vai trò</span>
+          <span>Chi tiết Vai trò</span>
         </button>
         <button
           type="button"
@@ -22,7 +22,7 @@
           [class.active]="activeTab() === 'matrix'"
           (click)="activeTab.set('matrix')"
         >
-          <span>📊 Ma trận Phân quyền</span>
+          <span>Ma trận Phân quyền</span>
         </button>
       </div>
     </div>
@@ -112,7 +112,7 @@
               @for (group of getPermissionGroups(); track group.groupName) {
                 <tr class="group-header-row">
                   <td [attr.colspan]="roles().length + 2">
-                    📁 <strong>Nhóm: {{ group.groupName }}</strong> ({{ group.permissions.length }} quyền)
+                    <strong>Nhóm: {{ group.groupName }}</strong> ({{ group.permissions.length }} quyền)
                   </td>
                 </tr>
 
@@ -125,7 +125,7 @@
                     @for (r of roles(); track r.id) {
                       <td class="text-center">
                         @if (hasRolePermission(r, p.code)) {
-                          <span class="check-icon" title="Có quyền">✅</span>
+                          <span class="badge badge-active" title="Có quyền">Có</span>
                         } @else {
                           <span class="cross-icon" title="Không có quyền">—</span>
                         }

@@ -23,7 +23,7 @@ import { SoftwareService, SoftwareDto } from '@core/services/software.service';
 
         <div class="header-actions">
           <div class="as-of-picker">
-            <span class="picker-label">📅 Mốc báo cáo (asOf):</span>
+            <span class="picker-label">Mốc báo cáo (asOf):</span>
             <input
               type="date"
               class="date-input"
@@ -36,7 +36,7 @@ import { SoftwareService, SoftwareDto } from '@core/services/software.service';
           </div>
 
           <button class="btn-config-coverage" *ngIf="canManageCoverage()" (click)="openCoverageModal()">
-            ⚙️ Cấu hình Độ phủ
+            Cấu hình Độ phủ
           </button>
         </div>
       </div>
@@ -48,8 +48,8 @@ import { SoftwareService, SoftwareDto } from '@core/services/software.service';
           <span>Báo cáo số liệu chốt đến ngày: <strong>{{ kpis()?.asOfDate }}</strong> (Tạo lúc: {{ kpis()?.generatedAtUtc | date:'HH:mm:ss dd/MM/yyyy' }})</span>
         </div>
         <div class="banner-quick-links">
-          <a routerLink="/deployments/excel" class="quick-link">📥 Nhập / Xuất Excel</a>
-          <a routerLink="/contracts" class="quick-link">📜 Hợp đồng & Bản quyền</a>
+          <a routerLink="/deployments/excel" class="quick-link">Nhập / Xuất Excel</a>
+          <a routerLink="/contracts" class="quick-link">Hợp đồng & Bản quyền</a>
         </div>
       </div>
 
@@ -63,9 +63,6 @@ import { SoftwareService, SoftwareDto } from '@core/services/software.service';
       <div class="kpi-grid" *ngIf="!isLoading() && kpis()">
         <!-- 1. Danh mục phần mềm -->
         <div class="kpi-card" routerLink="/software">
-          <div class="kpi-icon-wrapper blue">
-            <span>💻</span>
-          </div>
           <div class="kpi-data">
             <span class="kpi-title">DANH MỤC PHẦN MỀM</span>
             <div class="kpi-main-number">{{ kpis()?.totalSoftwareCount }}</div>
@@ -75,9 +72,6 @@ import { SoftwareService, SoftwareDto } from '@core/services/software.service';
 
         <!-- 2. Hồ sơ triển khai -->
         <div class="kpi-card" routerLink="/deployments">
-          <div class="kpi-icon-wrapper purple">
-            <span>🚀</span>
-          </div>
           <div class="kpi-data">
             <span class="kpi-title">HỒ SƠ TRIỂN KHAI</span>
             <div class="kpi-main-number">{{ kpis()?.totalDeploymentsCount }}</div>
@@ -87,9 +81,6 @@ import { SoftwareService, SoftwareDto } from '@core/services/software.service';
 
         <!-- 3. Đơn vị đang sử dụng -->
         <div class="kpi-card" routerLink="/organizations">
-          <div class="kpi-icon-wrapper emerald">
-            <span>🏢</span>
-          </div>
           <div class="kpi-data">
             <span class="kpi-title">ĐƠN VỊ ĐANG SỬ DỤNG</span>
             <div class="kpi-main-number">{{ kpis()?.activeOrganizationsCount }}</div>
@@ -99,9 +90,6 @@ import { SoftwareService, SoftwareDto } from '@core/services/software.service';
 
         <!-- 4. Tỷ lệ bao phủ -->
         <div class="kpi-card coverage-card">
-          <div class="kpi-icon-wrapper teal">
-            <span>🎯</span>
-          </div>
           <div class="kpi-data">
             <div class="coverage-header">
               <span class="kpi-title">TỶ LỆ BAO PHỦ TOÀN TỈNH</span>
@@ -120,9 +108,6 @@ import { SoftwareService, SoftwareDto } from '@core/services/software.service';
 
         <!-- 5. Chờ duyệt -->
         <div class="kpi-card" routerLink="/deployments">
-          <div class="kpi-icon-wrapper amber">
-            <span>⏳</span>
-          </div>
           <div class="kpi-data">
             <span class="kpi-title">HỒ SƠ CHỜ PHÊ DUYỆT</span>
             <div class="kpi-main-number">{{ kpis()?.pendingApprovalCount }}</div>
@@ -132,16 +117,13 @@ import { SoftwareService, SoftwareDto } from '@core/services/software.service';
 
         <!-- 6. Tổng kinh phí hợp đồng -->
         <div class="kpi-card finance-card" routerLink="/contracts">
-          <div class="kpi-icon-wrapper red">
-            <span>💰</span>
-          </div>
           <div class="kpi-data">
             <span class="kpi-title">TỔNG GIÁ TRỊ HỢP ĐỒNG</span>
             <div class="kpi-main-number" *ngIf="kpis()?.totalContractAmount !== null">
               {{ kpis()?.totalContractAmount | number:'1.0-0' }} <small>{{ kpis()?.currencyCode }}</small>
             </div>
             <div class="kpi-main-number security-protected" *ngIf="kpis()?.totalContractAmount === null">
-              🔒 Bảo mật
+              Bảo mật
             </div>
             <span class="kpi-sub" *ngIf="kpis()?.totalContractAmount !== null">
               {{ kpis()?.expiringContractsCount }} hợp đồng sắp đến hạn
@@ -158,7 +140,7 @@ import { SoftwareService, SoftwareDto } from '@core/services/software.service';
         <!-- Breakdowns: Status & Environment -->
         <div class="analytics-card">
           <div class="card-header">
-            <h3>📊 Phân bố theo Trạng thái Vận hành</h3>
+            <h3>Phân bố theo Trạng thái Vận hành</h3>
             <span class="card-subtitle">Tình hình hoạt động thực tế của các hệ thống</span>
           </div>
           <div class="breakdown-list">
@@ -184,7 +166,7 @@ import { SoftwareService, SoftwareDto } from '@core/services/software.service';
         <!-- Environment Breakdown -->
         <div class="analytics-card">
           <div class="card-header">
-            <h3>🌐 Phân bố theo Môi trường Triển khai</h3>
+            <h3>Phân bố theo Môi trường Triển khai</h3>
             <span class="card-subtitle">Hạ tầng Production, Staging và Thử nghiệm</span>
           </div>
           <div class="breakdown-list">
@@ -212,7 +194,7 @@ import { SoftwareService, SoftwareDto } from '@core/services/software.service';
         <div class="card-header">
           <div class="header-flex">
             <div>
-              <h3>🏆 Top Đơn vị Tiêu biểu Triển khai Phần mềm</h3>
+              <h3>Top Đơn vị Tiêu biểu Triển khai Phần mềm</h3>
               <span class="card-subtitle">Đơn vị có số lượng dịch vụ và phần mềm chuyển đổi số vận hành tích cực</span>
             </div>
             <a routerLink="/deployments" class="btn-link">Xem tất cả hồ sơ →</a>
@@ -274,7 +256,7 @@ import { SoftwareService, SoftwareDto } from '@core/services/software.service';
         <div class="modal-body">
           <!-- Form to add new eligibility -->
           <div class="add-eligibility-form">
-            <h4>➕ Thiết lập Đơn vị Đủ Điều kiện</h4>
+            <h4>Thiết lập Đơn vị Đủ Điều kiện</h4>
             <div class="form-row">
               <div class="form-group">
                 <label>Phần mềm (*)</label>

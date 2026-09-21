@@ -10,14 +10,14 @@
 
     <div class="action-area">
       <button type="button" class="btn btn-secondary" (click)="loadJobs()">
-        ↺ Làm mới danh sách
+        Làm mới danh sách
       </button>
     </div>
   </div>
 
   @if (actionMessage()) {
     <div class="alert alert-success">
-      <span>ℹ️</span> {{ actionMessage() }}
+      {{ actionMessage() }}
     </div>
   }
 
@@ -54,7 +54,6 @@
       </div>
     } @else if (jobs().length === 0) {
       <div class="empty-state">
-        <div class="empty-icon">⚙️</div>
         <h3>Không có tác vụ nào</h3>
         <p>Chưa có tác vụ ngầm nào được lên lịch hoặc phù hợp với bộ lọc hiện tại.</p>
       </div>
@@ -110,7 +109,7 @@
                 <td class="text-right">
                   @if (job.status === 'Failed') {
                     <button type="button" class="btn btn-outline btn-sm" (click)="retry(job.id)">
-                      ↺ Chạy lại
+                      Chạy lại
                     </button>
                   }
                 </td>

@@ -41,8 +41,8 @@
 | `organizations.read` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `organizations.manage` | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ | ❌ |
 | `catalog.read` | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ | ✅ |
-| `catalog.manage` | ❌ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
-| `catalog.propose` | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
+| `catalog.manage` | ✅ | ✅ | ❌ | ❌ | ❌ | ❌ | ❌ |
+| `catalog.propose` | ✅ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |
 | `deployments.read` | ❌ | ❌ | ✅ | ✅ | ✅ | ✅ | ✅ |
 | `deployments.read_drafts`| ❌ | ❌ | ✅ | ✅ | ✅ | ❌ | ❌ |
 | `deployments.write` | ❌ | ❌ | ❌ | ✅ | ❌ | ❌ | ❌ |

@@ -12,7 +12,10 @@ public record CreateSoftwareRequest(
     Guid CategoryId,
     Guid VendorId,
     string? Description,
-    string LifecycleStatus);
+    string LifecycleStatus,
+    string? InitialVersionName = null,
+    DateTime? InitialReleaseDate = null,
+    DateTime? InitialSupportEndDate = null);
 
 public record UpdateSoftwareRequest(
     string Name,
@@ -193,10 +196,38 @@ public class SoftwareController : BaseApiController
         };
 
         _context.Software.Add(software);
+
+        if (!string.IsNullOrWhiteSpace(request.InitialVersionName))
+        {
+            var release = new SoftwareRelease
+            {
+                Id = Guid.NewGuid(),
+                SoftwareId = software.Id,
+                VersionName = request.InitialVersionName.Trim(),
+                ReleaseDate = request.InitialReleaseDate ?? _dateTimeProvider.UtcNow,
+                SupportEndDate = request.InitialSupportEndDate,
+                CreatedAt = _dateTimeProvider.UtcNow
+            };
+            _context.SoftwareReleases.Add(release);
+        }
+
         await _context.SaveChangesAsync();
 
-        return CreatedAtAction(nameof(GetSoftwareById), new { id = software.Id }, software);
+        return CreatedAtAction(nameof(GetSoftwareById), new { id = software.Id }, new
+        {
+            software.Id,
+            software.Code,
+            software.Name,
+            software.CategoryId,
+            software.VendorId,
+            software.Description,
+            software.LifecycleStatus,
+            software.Version,
+            software.CreatedAt,
+            software.UpdatedAt
+        });
     }
+
 
     [HttpPut("{id:guid}")]
     [RequirePermission("catalog.manage")]
@@ -228,7 +259,19 @@ public class SoftwareController : BaseApiController
         software.LifecycleStatus = request.LifecycleStatus;
 
         await _context.SaveChangesAsync();
-        return Ok(software);
+        return Ok(new
+        {
+            software.Id,
+            software.Code,
+            software.Name,
+            software.CategoryId,
+            software.VendorId,
+            software.Description,
+            software.LifecycleStatus,
+            software.Version,
+            software.CreatedAt,
+            software.UpdatedAt
+        });
     }
 
     [HttpGet("{id:guid}/releases")]
@@ -288,7 +331,15 @@ public class SoftwareController : BaseApiController
         software.Version += 1;
 
         await _context.SaveChangesAsync();
-        return Ok(release);
+        return Ok(new
+        {
+            release.Id,
+            release.SoftwareId,
+            release.VersionName,
+            release.ReleaseDate,
+            release.SupportEndDate,
+            release.CreatedAt
+        });
     }
 
     [HttpPut("/api/v1/software-releases/{id:guid}")]
@@ -309,6 +360,94 @@ public class SoftwareController : BaseApiController
         release.Software.Version += 1;
 
         await _context.SaveChangesAsync();
-        return Ok(release);
+        return Ok(new
+        {
+            release.Id,
+            release.SoftwareId,
+            release.VersionName,
+            release.ReleaseDate,
+            release.SupportEndDate,
+            release.CreatedAt,
+            release.UpdatedAt
+        });
+    }
+
+    [HttpDelete("{id:guid}")]
+    [RequirePermission("catalog.manage")]
+    public async Task<IActionResult> DeleteSoftware(Guid id)
+    {
+        var software = await _context.Software
+            .Include(s => s.Releases)
+            .FirstOrDefaultAsync(s => s.Id == id);
+
+        if (software == null)
+        {
+            return NotFound(new { detail = $"Không tìm thấy phần mềm có ID: {id}" });
+        }
+
+        var hasDeployments = await _context.Deployments.AnyAsync(d => d.SoftwareId == id);
+        if (hasDeployments)
+        {
+            return BadRequest(new { detail = "Không thể xoá phần mềm vì đã có hồ sơ triển khai áp dụng. Vui lòng chuyển trạng thái sang 'Ngừng sử dụng' (Retired) thay vì xoá." });
+        }
+
+        var hasContracts = await _context.ContractItems.AnyAsync(ci => ci.SoftwareId == id);
+        if (hasContracts)
+        {
+            return BadRequest(new { detail = "Không thể xoá phần mềm vì đang liên kết với hạng mục hợp đồng mua sắm/bảo trì." });
+        }
+
+        var hasCoverage = await _context.CoverageEligibilities.AnyAsync(ce => ce.SoftwareId == id);
+        if (hasCoverage)
+        {
+            return BadRequest(new { detail = "Không thể xoá phần mềm vì có thiết lập đối tượng áp dụng báo cáo." });
+        }
+
+        var proposals = await _context.CatalogProposals.Where(p => p.CreatedSoftwareId == id).ToListAsync();
+        foreach (var p in proposals)
+        {
+            p.CreatedSoftwareId = null;
+        }
+
+        if (software.Releases.Any())
+        {
+            _context.SoftwareReleases.RemoveRange(software.Releases);
+        }
+
+        _context.Software.Remove(software);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
+    [HttpDelete("/api/v1/software-releases/{id:guid}")]
+    [RequirePermission("catalog.manage")]
+    public async Task<IActionResult> DeleteRelease(Guid id)
+    {
+        var release = await _context.SoftwareReleases
+            .Include(r => r.Software)
+            .FirstOrDefaultAsync(r => r.Id == id);
+
+        if (release == null)
+        {
+            return NotFound(new { detail = $"Không tìm thấy phiên bản phát hành có ID: {id}" });
+        }
+
+        var isUsedInDeployment = await _context.DeploymentRevisions.AnyAsync(dr => dr.ReleaseId == id);
+        if (isUsedInDeployment)
+        {
+            return BadRequest(new { detail = "Không thể xoá phiên bản này vì đã được gắn vào hồ sơ triển khai của đơn vị." });
+        }
+
+        if (release.Software != null)
+        {
+            release.Software.Version += 1;
+        }
+
+        _context.SoftwareReleases.Remove(release);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
     }
 }
+

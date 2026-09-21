@@ -89,4 +89,27 @@ public class SoftwareCategoriesController : BaseApiController
         await _context.SaveChangesAsync();
         return Ok(category);
     }
+
+    [HttpDelete("{id:guid}")]
+    [RequirePermission("catalog.manage")]
+    public async Task<IActionResult> DeleteCategory(Guid id)
+    {
+        var category = await _context.SoftwareCategories.FirstOrDefaultAsync(c => c.Id == id);
+        if (category == null)
+        {
+            return NotFound(new { detail = $"Không tìm thấy nhóm phần mềm có ID: {id}" });
+        }
+
+        var isUsed = await _context.Software.AnyAsync(s => s.CategoryId == id);
+        if (isUsed)
+        {
+            return BadRequest(new { detail = "Không thể xoá nhóm phần mềm vì đang có phần mềm thuộc nhóm này." });
+        }
+
+        _context.SoftwareCategories.Remove(category);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
 }
+

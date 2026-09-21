@@ -1,4 +1,14 @@
 <div class="page-container">
+  <!-- Toast Notification -->
+  @if (toast(); as t) {
+    <div class="toast-banner" [class.toast-success]="t.type === 'success'" [class.toast-error]="t.type === 'error'">
+      <span class="toast-text">{{ t.message }}</span>
+      <button type="button" class="toast-close" (click)="toast.set(null)">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+      </button>
+    </div>
+  }
+
   <!-- Page Header -->
   <div class="page-header">
     <div>
@@ -8,15 +18,22 @@
 
     <div class="header-actions">
       @if (authService.hasPermission('catalog.manage')) {
-        <button type="button" class="btn btn-outline" (click)="openCreateCategoryModal()">
-          <span>🏷️</span> Thêm Nhóm
-        </button>
-        <button type="button" class="btn btn-outline" (click)="openCreateVendorModal()">
-          <span>🏢</span> Thêm Nhà Cung Cấp
-        </button>
-        <button type="button" class="btn btn-primary" (click)="openCreateSoftwareModal()">
-          <span>➕</span> Thêm Phần Mềm Mới
-        </button>
+        @if (activeTab() === 'software') {
+          <button type="button" class="btn btn-primary" (click)="openCreateSoftwareModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Thêm Phần mềm mới</span>
+          </button>
+        } @else if (activeTab() === 'categories') {
+          <button type="button" class="btn btn-primary" (click)="openCreateCategoryModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Thêm Nhóm phần mềm</span>
+          </button>
+        } @else if (activeTab() === 'vendors') {
+          <button type="button" class="btn btn-primary" (click)="openCreateVendorModal()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <span>Thêm Nhà cung cấp</span>
+          </button>
+        }
       }
     </div>
   </div>
@@ -28,21 +45,24 @@
       class="tab-btn"
       [class.active]="activeTab() === 'software'"
       (click)="setTab('software')">
-      <span>📦 Phần mềm ({{ softwareList().length }})</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="12 2 2 7 12 12 22 7 12 2"></polygon><polyline points="2 17 12 22 22 17"></polyline><polyline points="2 12 12 17 22 12"></polyline></svg>
+      <span>Phần mềm ({{ softwareList().length }})</span>
     </button>
     <button
       type="button"
       class="tab-btn"
       [class.active]="activeTab() === 'categories'"
       (click)="setTab('categories')">
-      <span>🏷️ Nhóm phần mềm ({{ categories().length }})</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path></svg>
+      <span>Nhóm phần mềm ({{ categories().length }})</span>
     </button>
     <button
       type="button"
       class="tab-btn"
       [class.active]="activeTab() === 'vendors'"
       (click)="setTab('vendors')">
-      <span>🏢 Nhà cung cấp & Đối tác ({{ vendors().length }})</span>
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>
+      <span>Nhà cung cấp & Đối tác ({{ vendors().length }})</span>
     </button>
   </div>
 
@@ -52,7 +72,10 @@
       <!-- Filter Bar -->
       <div class="filter-bar">
         <div class="search-box">
-          <span class="search-icon">🔍</span>
+          <svg class="search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
           <input
             type="text"
             class="form-control"
@@ -97,7 +120,7 @@
               <th>Nhà cung cấp</th>
               <th>Phiên bản mới nhất</th>
               <th>Trạng thái</th>
-              <th class="text-right">Chi tiết</th>
+              <th class="text-right">Thao tác</th>
             </tr>
           </thead>
           <tbody>
@@ -131,9 +154,17 @@
                     </span>
                   </td>
                   <td class="text-right action-cell">
-                    <button type="button" class="btn-icon" title="Xem chi tiết & phiên bản">
-                      <span>👁️</span>
+                    <button type="button" class="btn-action btn-action-view" title="Xem chi tiết & phiên bản" (click)="$event.stopPropagation(); openSoftwareDetail(item)">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>
                     </button>
+                    @if (authService.hasPermission('catalog.manage')) {
+                      <button type="button" class="btn-action btn-action-edit" title="Chỉnh sửa phần mềm" (click)="openEditSoftwareModal(item, $event)">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                      </button>
+                      <button type="button" class="btn-action btn-action-delete" title="Xoá phần mềm" (click)="openDeleteSoftwareModal(item, $event)">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                      </button>
+                    }
                   </td>
                 </tr>
               }
@@ -155,6 +186,9 @@
               <th>Tên nhóm phần mềm</th>
               <th>Trạng thái</th>
               <th>Ngày tạo</th>
+              @if (authService.hasPermission('catalog.manage')) {
+                <th class="text-right">Thao tác</th>
+              }
             </tr>
           </thead>
           <tbody>
@@ -163,9 +197,21 @@
                 <td><span class="code-pill">{{ c.code }}</span></td>
                 <td class="font-semibold">{{ c.name }}</td>
                 <td>
-                  <span class="badge badge-active">Hoạt động</span>
+                  <span class="badge" [class.badge-active]="c.isActive" [class.badge-retired]="!c.isActive">
+                    {{ c.isActive ? 'Hoạt động' : 'Tạm dừng' }}
+                  </span>
                 </td>
                 <td>{{ c.createdAt | date:'dd/MM/yyyy' }}</td>
+                @if (authService.hasPermission('catalog.manage')) {
+                  <td class="text-right action-cell">
+                    <button type="button" class="btn-action btn-action-edit" title="Sửa nhóm phần mềm" (click)="openEditCategoryModal(c)">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    </button>
+                    <button type="button" class="btn-action btn-action-delete" title="Xoá nhóm phần mềm" (click)="openDeleteCategoryModal(c)">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                  </td>
+                }
               </tr>
             }
           </tbody>
@@ -185,6 +231,9 @@
               <th>Tên Nhà cung cấp / Đối tác</th>
               <th>Thông tin liên hệ</th>
               <th>Trạng thái</th>
+              @if (authService.hasPermission('catalog.manage')) {
+                <th class="text-right">Thao tác</th>
+              }
             </tr>
           </thead>
           <tbody>
@@ -194,8 +243,20 @@
                 <td class="font-semibold">{{ v.name }}</td>
                 <td>{{ v.contactInfo || '—' }}</td>
                 <td>
-                  <span class="badge badge-active">Hoạt động</span>
+                  <span class="badge" [class.badge-active]="v.isActive" [class.badge-retired]="!v.isActive">
+                    {{ v.isActive ? 'Hoạt động' : 'Tạm dừng' }}
+                  </span>
                 </td>
+                @if (authService.hasPermission('catalog.manage')) {
+                  <td class="text-right action-cell">
+                    <button type="button" class="btn-action btn-action-edit" title="Sửa nhà cung cấp" (click)="openEditVendorModal(v)">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>
+                    </button>
+                    <button type="button" class="btn-action btn-action-delete" title="Xoá nhà cung cấp" (click)="openDeleteVendorModal(v)">
+                      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                    </button>
+                  </td>
+                }
               </tr>
             }
           </tbody>
@@ -209,17 +270,43 @@
 @if (selectedSoftware()) {
   <app-software-detail
     [software]="selectedSoftware()!"
-    (close)="closeSoftwareDetail()">
+    (close)="closeSoftwareDetail()"
+    (edit)="openEditSoftwareModal($event)"
+    (delete)="openDeleteSoftwareModal($event)"
+    (reload)="loadSoftware()">
   </app-software-detail>
 }
 
-<!-- Modal: Tạo Phần Mềm Mới -->
+<!-- Modal: Tạo Phần Mềm Mới (Smart Form) -->
 @if (isCreateSoftwareModalOpen()) {
   <div class="modal-backdrop">
-    <div class="modal-card">
+    <div class="modal-card modal-card-lg">
       <div class="modal-header">
-        <h2>Thêm Phần mềm mới vào Danh mục</h2>
-        <button type="button" class="btn-close" (click)="closeCreateSoftwareModal()">✕</button>
+        <div>
+          <h2>Thêm Phần mềm mới vào Danh mục</h2>
+          <p class="modal-subtitle">Nhập thông tin hoặc chọn nhanh từ danh sách mẫu phổ biến</p>
+        </div>
+        <button type="button" class="btn-close" (click)="closeCreateSoftwareModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      <!-- 1-Click Preset Template Chips -->
+      <div class="presets-section">
+        <div class="presets-title">
+          <span>Gợi ý mẫu phần mềm dùng chung phổ biến (nhấn để điền nhanh):</span>
+        </div>
+        <div class="preset-chips">
+          @for (p of softwarePresets; track p.code) {
+            <button
+              type="button"
+              class="preset-chip"
+              [class.active]="selectedPresetName() === p.label"
+              (click)="applyPreset(p)">
+              <span class="preset-label">{{ p.label }}</span>
+            </button>
+          }
+        </div>
       </div>
 
       @if (modalError()) {
@@ -228,9 +315,188 @@
 
       <form [formGroup]="softwareForm" (ngSubmit)="submitCreateSoftware()">
         <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Tên phần mềm *</label>
+            <input
+              type="text"
+              class="form-control"
+              formControlName="name"
+              (ngModelChange)="onNameChange($event)"
+              placeholder="VD: Hệ thống Quản lý văn bản và Điều hành"
+            />
+          </div>
+
           <div class="form-group">
-            <label class="form-label">Mã phần mềm (Code) *</label>
-            <input type="text" class="form-control" formControlName="code" placeholder="VD: VNPT_IGATE" />
+            <div class="label-with-action">
+              <label class="form-label">Mã phần mềm (Code) *</label>
+              <button type="button" class="btn-text-action" (click)="regenerateCode()" title="Tự động sinh lại mã từ Tên và Nhà cung cấp">
+                <span>Tự động sinh mã</span>
+              </button>
+            </div>
+            <input
+              type="text"
+              class="form-control code-input"
+              formControlName="code"
+              placeholder="VD: VNPT_IOFFICE"
+            />
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Vòng đời sử dụng</label>
+            <select class="form-control" formControlName="lifecycleStatus">
+              <option value="Active">Đang duy trì & sử dụng (Active)</option>
+              <option value="Deprecated">Cảnh báo thay thế (Deprecated)</option>
+              <option value="Retired">Ngừng hỗ trợ (Retired)</option>
+            </select>
+          </div>
+
+          <!-- Category Selection + Inline Quick Add -->
+          <div class="form-group">
+            <div class="label-with-action">
+              <label class="form-label">Nhóm phân loại *</label>
+              <button type="button" class="btn-text-action" (click)="toggleQuickCategory()">
+                <span>{{ isQuickCategoryOpen() ? 'Đóng' : '+ Thêm nhanh Nhóm' }}</span>
+              </button>
+            </div>
+            <select class="form-control" formControlName="categoryId">
+              <option value="">-- Chọn nhóm --</option>
+              @for (c of categories(); track c.id) {
+                <option [value]="c.id">{{ c.name }} ({{ c.code }})</option>
+              }
+            </select>
+
+            @if (isQuickCategoryOpen()) {
+              <div class="quick-add-box" [formGroup]="quickCategoryForm">
+                <div class="quick-add-header">
+                  <strong>Thêm nhanh Nhóm mới</strong>
+                </div>
+                <div class="quick-add-inputs">
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    formControlName="name"
+                    placeholder="Tên nhóm mới..."
+                    (ngModelChange)="onQuickCategoryNameChange($event)"
+                  />
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    formControlName="code"
+                    placeholder="Mã nhóm..."
+                  />
+                  <button type="button" class="btn btn-sm btn-primary" (click)="submitQuickCategory()">Lưu & Chọn</button>
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Vendor Selection + Inline Quick Add -->
+          <div class="form-group">
+            <div class="label-with-action">
+              <label class="form-label">Nhà cung cấp / Đối tác *</label>
+              <button type="button" class="btn-text-action" (click)="toggleQuickVendor()">
+                <span>{{ isQuickVendorOpen() ? 'Đóng' : '+ Thêm nhanh NCC' }}</span>
+              </button>
+            </div>
+            <select class="form-control" formControlName="vendorId" (ngModelChange)="onVendorChange($event)">
+              <option value="">-- Chọn NCC --</option>
+              @for (v of vendors(); track v.id) {
+                <option [value]="v.id">{{ v.name }} ({{ v.code }})</option>
+              }
+            </select>
+
+            @if (isQuickVendorOpen()) {
+              <div class="quick-add-box" [formGroup]="quickVendorForm">
+                <div class="quick-add-header">
+                  <strong>Thêm nhanh Nhà cung cấp mới</strong>
+                </div>
+                <div class="quick-add-inputs">
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    formControlName="name"
+                    placeholder="Tên Nhà cung cấp..."
+                    (ngModelChange)="onQuickVendorNameChange($event)"
+                  />
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    formControlName="code"
+                    placeholder="Mã NCC..."
+                  />
+                  <input
+                    type="text"
+                    class="form-control form-control-sm"
+                    formControlName="contactInfo"
+                    placeholder="Hotline/Email..."
+                  />
+                  <button type="button" class="btn btn-sm btn-primary" (click)="submitQuickVendor()">Lưu & Chọn</button>
+                </div>
+              </div>
+            }
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Mô tả tóm tắt tính năng</label>
+            <textarea class="form-control" formControlName="description" rows="2" placeholder="Mô tả phạm vi ứng dụng và tính năng chính..."></textarea>
+          </div>
+
+          <!-- Initial Release Subsection -->
+          <div class="form-group full-width release-subform-wrapper">
+            <label class="checkbox-label">
+              <input type="checkbox" formControlName="includeInitialRelease" />
+              <span class="checkbox-text font-semibold">Tạo kèm Phiên bản phát hành ban đầu</span>
+            </label>
+
+            @if (softwareForm.get('includeInitialRelease')?.value) {
+              <div class="release-subform-grid">
+                <div class="form-group">
+                  <label class="form-label">Tên phiên bản *</label>
+                  <input type="text" class="form-control form-control-sm" formControlName="initialVersionName" placeholder="VD: v1.0.0" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Ngày phát hành *</label>
+                  <input type="date" class="form-control form-control-sm" formControlName="initialReleaseDate" />
+                </div>
+                <div class="form-group">
+                  <label class="form-label">Hạn hỗ trợ (Tùy chọn)</label>
+                  <input type="date" class="form-control form-control-sm" formControlName="initialSupportEndDate" />
+                </div>
+              </div>
+            }
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeCreateSoftwareModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu Phần mềm</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+
+<!-- Modal: Chỉnh Sửa Phần Mềm -->
+@if (isEditSoftwareModalOpen() && softwareToEdit(); as sw) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Chỉnh sửa thông tin Phần mềm</h2>
+        <button type="button" class="btn-close" (click)="closeEditSoftwareModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      @if (modalError()) {
+        <div class="alert alert-error">{{ modalError() }}</div>
+      }
+
+      <form [formGroup]="editSoftwareForm" (ngSubmit)="submitEditSoftware()">
+        <div class="form-grid">
+          <div class="form-group">
+            <label class="form-label">Mã phần mềm (Code)</label>
+            <input type="text" class="form-control input-readonly" formControlName="code" readonly />
           </div>
 
           <div class="form-group">
@@ -274,10 +540,60 @@
         </div>
 
         <div class="modal-actions">
-          <button type="button" class="btn btn-secondary" (click)="closeCreateSoftwareModal()">Hủy</button>
-          <button type="submit" class="btn btn-primary">Lưu Phần mềm</button>
+          <button type="button" class="btn btn-secondary" (click)="closeEditSoftwareModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Cập nhật thay đổi</button>
         </div>
       </form>
+    </div>
+  </div>
+}
+
+<!-- Modal: Xác Nhận Xoá Phần Mềm -->
+@if (isDeleteSoftwareModalOpen() && softwareToDelete(); as sw) {
+  <div class="modal-backdrop">
+    <div class="modal-card modal-delete-card">
+      <div class="modal-header modal-delete-header">
+        <h2>Xác nhận Xoá Phần mềm</h2>
+        <button type="button" class="btn-close" (click)="closeDeleteSoftwareModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      @if (deleteError()) {
+        <div class="alert alert-error">
+          <strong>Không thể xoá:</strong> {{ deleteError() }}
+        </div>
+      }
+
+      <div class="delete-confirmation-content">
+        <p>Bạn có chắc chắn muốn xoá phần mềm sau khỏi hệ thống danh mục dùng chung?</p>
+        <div class="target-item-preview">
+          <div class="preview-row">
+            <span class="preview-label">Mã:</span>
+            <span class="code-pill">{{ sw.code }}</span>
+          </div>
+          <div class="preview-row">
+            <span class="preview-label">Tên phần mềm:</span>
+            <strong>{{ sw.name }}</strong>
+          </div>
+          <div class="preview-row">
+            <span class="preview-label">Nhóm:</span>
+            <span>{{ sw.categoryName }}</span>
+          </div>
+          <div class="preview-row">
+            <span class="preview-label">Nhà cung cấp:</span>
+            <span>{{ sw.vendorName }}</span>
+          </div>
+        </div>
+        <p class="delete-warning-text">
+          Lưu ý: Thao tác này sẽ xoá phần mềm và toàn bộ các phiên bản phát hành liên quan. Nếu phần mềm đã có hồ sơ triển khai hoặc hợp đồng, hệ thống sẽ từ chối xoá để bảo đảm dữ liệu.
+        </p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeDeleteSoftwareModal()">Hủy bỏ</button>
+        <button type="button" class="btn btn-danger" (click)="submitDeleteSoftware()">Xoá Vĩnh Viễn</button>
+      </div>
     </div>
   </div>
 }
@@ -288,7 +604,9 @@
     <div class="modal-card">
       <div class="modal-header">
         <h2>Thêm Nhóm phần mềm mới</h2>
-        <button type="button" class="btn-close" (click)="closeCreateCategoryModal()">✕</button>
+        <button type="button" class="btn-close" (click)="closeCreateCategoryModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
       </div>
 
       @if (modalError()) {
@@ -317,13 +635,90 @@
   </div>
 }
 
+<!-- Modal: Sửa Nhóm Phần Mềm -->
+@if (isEditCategoryModalOpen() && categoryToEdit(); as cat) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Chỉnh sửa Nhóm phần mềm</h2>
+        <button type="button" class="btn-close" (click)="closeEditCategoryModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      @if (modalError()) {
+        <div class="alert alert-error">{{ modalError() }}</div>
+      }
+
+      <form [formGroup]="editCategoryForm" (ngSubmit)="submitEditCategory()">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Mã nhóm (Code)</label>
+            <input type="text" class="form-control input-readonly" formControlName="code" readonly />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Tên nhóm *</label>
+            <input type="text" class="form-control" formControlName="name" placeholder="VD: Chính quyền số" />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Trạng thái hoạt động</label>
+            <select class="form-control" formControlName="isActive">
+              <option [ngValue]="true">Hoạt động</option>
+              <option [ngValue]="false">Tạm dừng</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeEditCategoryModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal: Xác Nhận Xoá Nhóm Phần Mềm -->
+@if (isDeleteCategoryModalOpen() && categoryToDelete(); as cat) {
+  <div class="modal-backdrop">
+    <div class="modal-card modal-delete-card">
+      <div class="modal-header modal-delete-header">
+        <h2>Xác nhận Xoá Nhóm phần mềm</h2>
+        <button type="button" class="btn-close" (click)="closeDeleteCategoryModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      @if (deleteError()) {
+        <div class="alert alert-error">
+          <strong>Không thể xoá:</strong> {{ deleteError() }}
+        </div>
+      }
+
+      <div class="delete-confirmation-content">
+        <p>Bạn có chắc chắn muốn xoá nhóm <strong>"{{ cat.name }}"</strong> (Mã: <code>{{ cat.code }}</code>)?</p>
+        <p class="delete-warning-text">Lưu ý: Chỉ có thể xoá nhóm khi chưa có phần mềm nào thuộc nhóm này.</p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeDeleteCategoryModal()">Hủy</button>
+        <button type="button" class="btn btn-danger" (click)="submitDeleteCategory()">Xoá Nhóm</button>
+      </div>
+    </div>
+  </div>
+}
+
 <!-- Modal: Tạo Nhà Cung Cấp -->
 @if (isCreateVendorModalOpen()) {
   <div class="modal-backdrop">
     <div class="modal-card">
       <div class="modal-header">
         <h2>Thêm Nhà cung cấp / Đối tác mới</h2>
-        <button type="button" class="btn-close" (click)="closeCreateVendorModal()">✕</button>
+        <button type="button" class="btn-close" (click)="closeCreateVendorModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
       </div>
 
       @if (modalError()) {
@@ -356,3 +751,85 @@
     </div>
   </div>
 }
+
+<!-- Modal: Sửa Nhà Cung Cấp -->
+@if (isEditVendorModalOpen() && vendorToEdit(); as v) {
+  <div class="modal-backdrop">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h2>Chỉnh sửa Nhà cung cấp</h2>
+        <button type="button" class="btn-close" (click)="closeEditVendorModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      @if (modalError()) {
+        <div class="alert alert-error">{{ modalError() }}</div>
+      }
+
+      <form [formGroup]="editVendorForm" (ngSubmit)="submitEditVendor()">
+        <div class="form-grid">
+          <div class="form-group full-width">
+            <label class="form-label">Mã NCC (Code)</label>
+            <input type="text" class="form-control input-readonly" formControlName="code" readonly />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Tên Nhà cung cấp *</label>
+            <input type="text" class="form-control" formControlName="name" placeholder="VD: VNPT Lào Cai" />
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Thông tin liên hệ / Hotline</label>
+            <textarea class="form-control" formControlName="contactInfo" rows="2" placeholder="Hotline, Email, Địa chỉ..."></textarea>
+          </div>
+
+          <div class="form-group full-width">
+            <label class="form-label">Trạng thái hoạt động</label>
+            <select class="form-control" formControlName="isActive">
+              <option [ngValue]="true">Hoạt động</option>
+              <option [ngValue]="false">Tạm dừng</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="button" class="btn btn-secondary" (click)="closeEditVendorModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary">Lưu thay đổi</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal: Xác Nhận Xoá Nhà Cung Cấp -->
+@if (isDeleteVendorModalOpen() && vendorToDelete(); as v) {
+  <div class="modal-backdrop">
+    <div class="modal-card modal-delete-card">
+      <div class="modal-header modal-delete-header">
+        <h2>Xác nhận Xoá Nhà cung cấp</h2>
+        <button type="button" class="btn-close" (click)="closeDeleteVendorModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+        </button>
+      </div>
+
+      @if (deleteError()) {
+        <div class="alert alert-error">
+          <strong>Không thể xoá:</strong> {{ deleteError() }}
+        </div>
+      }
+
+      <div class="delete-confirmation-content">
+        <p>Bạn có chắc chắn muốn xoá nhà cung cấp <strong>"{{ v.name }}"</strong> (Mã: <code>{{ v.code }}</code>)?</p>
+        <p class="delete-warning-text">Lưu ý: Chỉ có thể xoá khi chưa có phần mềm nào liên kết với nhà cung cấp này.</p>
+      </div>
+
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" (click)="closeDeleteVendorModal()">Hủy</button>
+        <button type="button" class="btn btn-danger" (click)="submitDeleteVendor()">Xoá Nhà Cung Cấp</button>
+      </div>
+    </div>
+  </div>
+}
+
+

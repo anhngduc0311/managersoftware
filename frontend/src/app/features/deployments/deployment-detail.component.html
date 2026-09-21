@@ -8,7 +8,7 @@
       @if (deployment(); as dep) {
         <h1>{{ dep.softwareName }}</h1>
         <div class="header-meta">
-          <span class="meta-tag org-tag">🏛️ {{ dep.organizationName }} ({{ dep.organizationCode }})</span>
+          <span class="meta-tag org-tag">{{ dep.organizationName }} ({{ dep.organizationCode }})</span>
           <span class="meta-tag env-tag env-{{ dep.environment | lowercase }}">{{ dep.environment }}</span>
           <span class="meta-tag instance-tag">#{{ dep.instanceKey }}</span>
           <span class="meta-tag version-tag">v{{ dep.version }}</span>
@@ -19,7 +19,7 @@
     <div class="action-area">
       @if (deployment()?.currentApprovedRevisionId && !deployment()?.activeRevision && authService.hasPermission('deployments.write')) {
         <button type="button" class="btn btn-primary" (click)="createNextRevision()">
-          <span>📝</span> Tạo Revision Mới (Sửa hồ sơ)
+          Tạo Revision Mới (Sửa hồ sơ)
         </button>
       }
     </div>
@@ -28,7 +28,6 @@
   <!-- Notifications & Alerts -->
   @if (concurrencyWarning()) {
     <div class="alert alert-warning">
-      <div class="alert-icon">⚠️</div>
       <div class="alert-content">
         <strong>Xung đột phiên bản (Concurrency Conflict):</strong> Dữ liệu hồ sơ này đã được cập nhật bởi một phiên làm việc khác. Dữ liệu bạn vừa nhập vẫn được giữ lại tại form này. Vui lòng kiểm tra lại và tải lại trang để đối soát.
         <button type="button" class="btn btn-outline btn-sm mt-2" (click)="loadDeployment(deploymentId())">
@@ -40,13 +39,13 @@
 
   @if (actionSuccess()) {
     <div class="alert alert-success">
-      <span>✅</span> {{ actionSuccess() }}
+      {{ actionSuccess() }}
     </div>
   }
 
   @if (actionError()) {
     <div class="alert alert-error">
-      <span>❌</span> {{ actionError() }}
+      {{ actionError() }}
     </div>
   }
 
@@ -60,7 +59,7 @@
     <!-- License Information Section -->
     <div class="license-info-card">
       <div class="card-header">
-        <span class="card-title">📜 Bản quyền Phần mềm (License Allocations)</span>
+        <span class="card-title">Bản quyền Phần mềm (License Allocations)</span>
         @if (allocations().length === 0) {
           <span class="badge badge-warning">Chưa cấp bản quyền</span>
         } @else {
@@ -95,11 +94,11 @@
             [class.active]="activeTab() === 'active'"
             (click)="setTab('active')">
             @if (dep.activeRevision.workflowStatus === 'Draft') {
-              📝 Bản nháp (Revision {{ dep.activeRevision.revisionNo }})
+              Bản nháp (Revision {{ dep.activeRevision.revisionNo }})
             } @else if (dep.activeRevision.workflowStatus === 'Submitted') {
-              ⏳ Đang chờ duyệt (Revision {{ dep.activeRevision.revisionNo }})
+              Đang chờ duyệt (Revision {{ dep.activeRevision.revisionNo }})
             } @else if (dep.activeRevision.workflowStatus === 'Rejected') {
-              ❌ Bị từ chối (Revision {{ dep.activeRevision.revisionNo }})
+              Bị từ chối (Revision {{ dep.activeRevision.revisionNo }})
             }
           </button>
         }
@@ -109,7 +108,7 @@
           class="tab-btn"
           [class.active]="activeTab() === 'approved'"
           (click)="setTab('approved')">
-          ✅ Bản chính thức đã duyệt
+          Bản chính thức đã duyệt
           @if (dep.currentApprovedRevision) {
             (Rev {{ dep.currentApprovedRevision.revisionNo }})
           }
@@ -120,7 +119,7 @@
           class="tab-btn"
           [class.active]="activeTab() === 'history'"
           (click)="setTab('history')">
-          📜 Lịch sử Revisions & Quyết định
+          Lịch sử Revisions & Quyết định
         </button>
       </div>
 
@@ -130,11 +129,11 @@
           <div class="status-banner banner-{{ activeRev.workflowStatus | lowercase }}">
             <div class="banner-title">
               @if (activeRev.workflowStatus === 'Draft') {
-                <span>✏️ Hồ sơ ở trạng thái Bản Nháp (Draft)</span>
+                <span>Hồ sơ ở trạng thái Bản Nháp (Draft)</span>
               } @else if (activeRev.workflowStatus === 'Submitted') {
-                <span>⏳ Hồ sơ đang chờ phê duyệt (Submitted)</span>
+                <span>Hồ sơ đang chờ phê duyệt (Submitted)</span>
               } @else if (activeRev.workflowStatus === 'Rejected') {
-                <span>❌ Hồ sơ bị từ chối phê duyệt (Rejected)</span>
+                <span>Hồ sơ bị từ chối phê duyệt (Rejected)</span>
               }
             </div>
             <div class="banner-desc">
@@ -158,7 +157,7 @@
               @if (authService.hasPermission('deployments.write')) {
                 <div class="mt-3">
                   <button type="button" class="btn btn-primary" (click)="reopenRevision()">
-                    ↺ Mở lại Bản nháp (Reopen) để chỉnh sửa
+                    Mở lại Bản nháp (Reopen) để chỉnh sửa
                   </button>
                 </div>
               }
@@ -204,11 +203,11 @@
 
               <div class="form-actions">
                 <button type="button" class="btn btn-secondary" (click)="saveDraft()">
-                  💾 Lưu bản nháp
+                  Lưu bản nháp
                 </button>
 
                 <button type="button" class="btn btn-primary" (click)="submitRevision()">
-                  🚀 Gửi Phê duyệt (Submit)
+                  Gửi Phê duyệt (Submit)
                 </button>
               </div>
             </form>
@@ -217,7 +216,7 @@
           <!-- Document Attachments & Quarantine Scanner Widget -->
           <div class="documents-section">
             <div class="section-title-row">
-              <h4>📑 Hồ sơ Tài liệu Đính kèm ({{ attachments().length }})</h4>
+              <h4>Hồ sơ Tài liệu Đính kèm ({{ attachments().length }})</h4>
               <span class="text-hint">Tự động quét mã độc và cách ly (quarantine)</span>
             </div>
 
@@ -232,7 +231,7 @@
                   style="display:none"
                 />
                 <label for="depDocUpload" class="btn btn-sm btn-outline">
-                  ➕ Tải lên tài liệu mới (.pdf, .docx, .xlsx...)
+                  + Tải lên tài liệu mới (.pdf, .docx, .xlsx...)
                 </label>
                 @if (isUploadingDoc()) {
                   <span class="uploading-spinner"><div class="spinner"></div> Đang tải lên & quét...</span>
@@ -249,7 +248,6 @@
               <div class="doc-chips-grid">
                 @for (doc of attachments(); track doc.attachmentId) {
                   <div class="doc-chip">
-                    <span class="doc-icon">📄</span>
                     <div class="doc-info">
                       <span class="doc-name">{{ doc.originalName }}</span>
                       <span class="doc-status-badge scan-{{ doc.scanStatus | lowercase }}">
@@ -260,12 +258,12 @@
                     <div class="doc-actions">
                       @if (doc.scanStatus === 'Clean') {
                         <button type="button" class="btn btn-xs btn-outline" (click)="downloadAttachment(doc)" title="Tải xuống">
-                          ⬇ Tải
+                          Tải xuống
                         </button>
                       }
                       @if (activeRev.workflowStatus === 'Draft' && authService.hasPermission('deployments.write')) {
                         <button type="button" class="btn btn-xs btn-outline-danger" (click)="unlinkAttachment(doc, activeRev.id)" title="Gỡ tài liệu">
-                          ✕
+                          Gỡ
                         </button>
                       }
                     </div>
@@ -358,7 +356,7 @@
                 <div class="approval-bar">
                   @if (isSubmitter()) {
                     <div class="self-approval-notice">
-                      🛡️ <strong>Nguyên tắc cấm tự duyệt (Anti-Self-Approval):</strong> Bạn là người gửi duyệt hồ sơ này nên không thể tự phê duyệt theo quy định.
+                      <strong>Nguyên tắc cấm tự duyệt (Anti-Self-Approval):</strong> Bạn là người gửi duyệt hồ sơ này nên không thể tự phê duyệt theo quy định.
                     </div>
                   }
 
@@ -368,7 +366,7 @@
                       class="btn btn-danger"
                       [disabled]="isSubmitter()"
                       (click)="openRejectModal()">
-                      ✕ Từ chối (Trả lại)
+                      Từ chối (Trả lại)
                     </button>
 
                     <button
@@ -376,7 +374,7 @@
                       class="btn btn-success"
                       [disabled]="isSubmitter()"
                       (click)="approveRevision()">
-                      ✓ Phê duyệt Chính thức
+                      Phê duyệt Chính thức
                     </button>
                   </div>
                 </div>
@@ -421,7 +419,6 @@
             </div>
           } @else {
             <div class="empty-approved">
-              <div class="empty-icon">⏳</div>
               <h3>Hồ sơ chưa có bản chính thức được duyệt</h3>
               <p>Hồ sơ này đang trong quá trình khởi tạo nháp hoặc đang chờ lãnh đạo phê duyệt.</p>
             </div>
@@ -440,7 +437,7 @@
                     <span class="rev-no">Revision #{{ rev.revisionNo }}</span>
                     <span class="badge {{ rev.workflowStatus | lowercase }}">{{ rev.workflowStatus }}</span>
                     @if (dep.currentApprovedRevisionId === rev.id) {
-                      <span class="current-tag">★ Bản chính thức hiện tại</span>
+                      <span class="current-tag">Bản chính thức hiện tại</span>
                     }
                   </div>
                   <div class="rev-meta">

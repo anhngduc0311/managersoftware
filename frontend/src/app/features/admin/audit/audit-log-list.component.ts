@@ -22,7 +22,7 @@ import { AuditService, AuditLogDto, AuditFilterDto } from '@core/services/audit.
             <p class="subtitle">Tra cứu toàn bộ biến động dữ liệu, truy vết người thực hiện và đối soát tính toàn vẹn (Chỉ ghi Append-Only)</p>
           </div>
           <div class="security-badge">
-            🔒 Append-Only Protected
+            Append-Only Protected
           </div>
         </div>
       </div>
@@ -79,7 +79,7 @@ import { AuditService, AuditLogDto, AuditFilterDto } from '@core/services/audit.
 
         <div class="filter-actions">
           <button class="btn-reset" (click)="resetFilters()">Đặt lại bộ lọc</button>
-          <button class="btn-search" (click)="applyFilters()">🔍 Tìm kiếm</button>
+          <button class="btn-search" (click)="applyFilters()">Tìm kiếm</button>
         </div>
       </div>
 
@@ -134,7 +134,7 @@ import { AuditService, AuditLogDto, AuditFilterDto } from '@core/services/audit.
                     </td>
                     <td class="text-center">
                       <button class="btn-diff" (click)="openDiffModal(log)">
-                        👁️ Diff
+                        Xem Diff
                       </button>
                     </td>
                   </tr>
@@ -187,7 +187,7 @@ import { AuditService, AuditLogDto, AuditFilterDto } from '@core/services/audit.
             </div>
 
             <div class="sanitization-notice">
-              🛡️ <strong>Lưu ý bảo mật:</strong> Toàn bộ trường nhạy cảm (mật khẩu, khóa bảo mật, token xác thực) đã được tự động loại bỏ / băm bảo vệ.
+              <strong>Lưu ý bảo mật:</strong> Toàn bộ trường nhạy cảm (mật khẩu, khóa bảo mật, token xác thực) đã được tự động loại bỏ / băm bảo vệ.
             </div>
           </div>
         </div>

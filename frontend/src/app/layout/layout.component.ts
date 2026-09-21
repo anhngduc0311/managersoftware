@@ -3,8 +3,6 @@ import { CommonModule } from '@angular/common';
 import { RouterModule, Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AuthService } from '@core/services/auth.service';
-import { NotificationService } from '@core/services/notification.service';
-import { NotificationDto } from '@core/models/notification.models';
 
 @Component({
   selector: 'app-layout',
@@ -15,14 +13,12 @@ import { NotificationDto } from '@core/models/notification.models';
 })
 export class LayoutComponent {
   public authService = inject(AuthService);
-  public notificationService = inject(NotificationService);
   private router = inject(Router);
   private fb = inject(FormBuilder);
 
   currentUser = this.authService.currentUser;
   isSidebarOpen = true;
   isUserMenuOpen = signal<boolean>(false);
-  isNotificationMenuOpen = signal<boolean>(false);
   isChangePasswordModalOpen = signal<boolean>(false);
   passwordModalError = signal<string | null>(null);
   passwordModalSuccess = signal<string | null>(null);
@@ -37,39 +33,11 @@ export class LayoutComponent {
   }
 
   toggleUserMenu() {
-    this.isNotificationMenuOpen.set(false);
     this.isUserMenuOpen.set(!this.isUserMenuOpen());
   }
 
   closeUserMenu() {
     this.isUserMenuOpen.set(false);
-  }
-
-  toggleNotificationMenu() {
-    this.isUserMenuOpen.set(false);
-    const nextState = !this.isNotificationMenuOpen();
-    this.isNotificationMenuOpen.set(nextState);
-    if (nextState) {
-      this.notificationService.loadRecent();
-    }
-  }
-
-  closeNotificationMenu() {
-    this.isNotificationMenuOpen.set(false);
-  }
-
-  onNotificationClick(item: NotificationDto) {
-    if (!item.readAt) {
-      this.notificationService.markAsRead(item.id).subscribe();
-    }
-    this.closeNotificationMenu();
-    if (item.targetRoute) {
-      this.router.navigateByUrl(item.targetRoute);
-    }
-  }
-
-  markAllNotificationsAsRead() {
-    this.notificationService.markAllAsRead().subscribe();
   }
 
   openChangePasswordModal() {

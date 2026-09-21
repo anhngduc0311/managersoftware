@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, OnInit, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -11,7 +11,7 @@ import { AuthService } from '@core/services/auth.service';
   templateUrl: './login.component.html',
   styleUrls: ['./login.component.scss']
 })
-export class LoginComponent {
+export class LoginComponent implements OnInit {
   private fb = inject(FormBuilder);
   private authService = inject(AuthService);
   private router = inject(Router);
@@ -24,6 +24,14 @@ export class LoginComponent {
 
   isLoading = signal<boolean>(false);
   errorMessage = signal<string | null>(null);
+
+  ngOnInit(): void {
+    if (this.authService.isAuthenticated()) {
+      const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/software';
+      this.router.navigateByUrl(returnUrl);
+    }
+  }
+
 
   quickAccounts = [
     { label: 'Quản trị hệ thống', username: 'admin', pass: 'Admin@123456', role: 'SystemAdmin' },
@@ -54,7 +62,7 @@ export class LoginComponent {
     }).subscribe({
       next: () => {
         this.isLoading.set(false);
-        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/dashboard';
+        const returnUrl = this.route.snapshot.queryParams['returnUrl'] || '/software';
         this.router.navigateByUrl(returnUrl);
       },
       error: (err) => {

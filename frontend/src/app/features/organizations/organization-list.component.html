@@ -9,10 +9,10 @@
     <div class="header-actions">
       @if (authService.hasPermission('organizations.manage')) {
         <button type="button" class="btn btn-outline" (click)="openSuccessionModal()">
-          <span>🔄</span> Ghi nhận Sáp nhập / Kế nhiệm
+          Ghi nhận Sáp nhập / Kế nhiệm
         </button>
         <button type="button" class="btn btn-primary" (click)="openCreateModal()">
-          <span>➕</span> Thêm Đơn vị Mới
+          + Thêm Đơn vị Mới
         </button>
       }
     </div>
@@ -25,21 +25,21 @@
       class="tab-btn"
       [class.active]="activeTab() === 'tree'"
       (click)="setTab('tree')">
-      <span>🌳 Cây phân cấp cơ cấu</span>
+      Cây phân cấp cơ cấu
     </button>
     <button
       type="button"
       class="tab-btn"
       [class.active]="activeTab() === 'table'"
       (click)="setTab('table')">
-      <span>📋 Danh sách đơn vị</span>
+      Danh sách đơn vị
     </button>
     <button
       type="button"
       class="tab-btn"
       [class.active]="activeTab() === 'successions'"
       (click)="setTab('successions')">
-      <span>🔄 Lịch sử sáp nhập & kế nhiệm ({{ successions().length }})</span>
+      Lịch sử sáp nhập & kế nhiệm ({{ successions().length }})
     </button>
   </div>
 
@@ -55,7 +55,6 @@
     <div class="card content-card">
       <div class="table-toolbar">
         <div class="search-box">
-          <span class="search-icon">🔍</span>
           <input
             type="text"
             class="form-control"
@@ -109,12 +108,12 @@
                     }
                   </td>
                   <td class="text-right action-cell">
-                    <button type="button" class="btn-icon" (click)="openHistoryModal(org)" title="Xem lịch sử thay đổi">
-                      <span>📜</span>
+                    <button type="button" class="btn btn-sm btn-outline" (click)="openHistoryModal(org)" title="Xem lịch sử thay đổi">
+                      Lịch sử
                     </button>
                     @if (authService.hasPermission('organizations.manage')) {
-                      <button type="button" class="btn-icon" (click)="openEditModal(org)" title="Chỉnh sửa đơn vị">
-                        <span>✏️</span>
+                      <button type="button" class="btn btn-sm btn-outline" (click)="openEditModal(org)" title="Chỉnh sửa đơn vị">
+                        Sửa
                       </button>
                     }
                   </td>

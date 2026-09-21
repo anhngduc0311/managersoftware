@@ -3,80 +3,21 @@
   <header class="app-header">
     <div class="header-left">
       <button class="toggle-btn" (click)="toggleSidebar()" title="Đóng/mở Menu">
-        <span>☰</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <line x1="3" y1="12" x2="21" y2="12"></line>
+          <line x1="3" y1="6" x2="21" y2="6"></line>
+          <line x1="3" y1="18" x2="21" y2="18"></line>
+        </svg>
       </button>
       <div class="brand">
-        <span class="brand-icon">🏛️</span>
         <div class="brand-text">
-          <h1>HỆ THỐNG QUẢN LÝ PHẦN MỀM CHUYỂN ĐỔI SỐ</h1>
+          <h1>HỆ THỐNG QUẢN LÝ PHẦN MỀM</h1>
           <span class="province-badge">Tỉnh Lào Cai</span>
         </div>
       </div>
     </div>
 
     <div class="header-right">
-      <!-- Notification Center Bell -->
-      <div class="notification-wrapper">
-        <button type="button" class="notification-btn" (click)="toggleNotificationMenu()" title="Thông báo hệ thống">
-          <span class="bell-icon">🔔</span>
-          @if (notificationService.unreadCount() > 0) {
-            <span class="notification-badge">{{ notificationService.unreadCount() > 99 ? '99+' : notificationService.unreadCount() }}</span>
-          }
-        </button>
-
-        @if (isNotificationMenuOpen()) {
-          <div class="notification-dropdown-menu">
-            <div class="notif-header">
-              <div class="notif-title">
-                <strong>Thông báo</strong>
-                @if (notificationService.unreadCount() > 0) {
-                  <span class="unread-pill">{{ notificationService.unreadCount() }} mới</span>
-                }
-              </div>
-              @if (notificationService.unreadCount() > 0) {
-                <button type="button" class="mark-all-btn" (click)="markAllNotificationsAsRead()">
-                  Đánh dấu đã đọc
-                </button>
-              }
-            </div>
-
-            <div class="notif-body">
-              @if (notificationService.isLoading()) {
-                <div class="notif-loading">Đang tải thông báo...</div>
-              } @else if (notificationService.recentNotifications().length === 0) {
-                <div class="notif-empty">
-                  <span class="empty-icon">📭</span>
-                  <p>Không có thông báo nào</p>
-                </div>
-              } @else {
-                <div class="notif-list">
-                  @for (item of notificationService.recentNotifications(); track item.id) {
-                    <div class="notif-item" [class.unread]="!item.readAt" (click)="onNotificationClick(item)">
-                      <div class="notif-icon">
-                        @switch (item.type) {
-                          @case ('WorkflowApproved') { <span>✅</span> }
-                          @case ('WorkflowRejected') { <span>❌</span> }
-                          @case ('WorkflowSubmitted') { <span>📋</span> }
-                          @default { <span>ℹ️</span> }
-                        }
-                      </div>
-                      <div class="notif-content">
-                        <div class="notif-item-title">{{ item.title }}</div>
-                        <div class="notif-item-msg">{{ item.message }}</div>
-                        <div class="notif-item-time">{{ item.createdAt | date:'HH:mm dd/MM/yyyy' }}</div>
-                      </div>
-                      @if (!item.readAt) {
-                        <div class="unread-dot" title="Chưa đọc"></div>
-                      }
-                    </div>
-                  }
-                </div>
-              }
-            </div>
-          </div>
-        }
-      </div>
-
       <div class="user-profile-wrapper">
         <button type="button" class="user-profile-btn" (click)="toggleUserMenu()">
           <div class="user-avatar">
@@ -86,7 +27,9 @@
             <span class="user-name">{{ currentUser()?.displayName || currentUser()?.username }}</span>
             <span class="user-role">{{ currentUser()?.roles?.[0] || 'Người dùng' }}</span>
           </div>
-          <span class="dropdown-arrow">▼</span>
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
         </button>
 
         @if (isUserMenuOpen()) {
@@ -104,11 +47,20 @@
             <div class="menu-divider"></div>
 
             <button type="button" class="menu-item" (click)="openChangePasswordModal()">
-              <span>🔑</span> Đổi mật khẩu
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+              </svg>
+              <span>Đổi mật khẩu</span>
             </button>
 
             <button type="button" class="menu-item text-danger" (click)="logout()">
-              <span>🚪</span> Đăng xuất
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+                <polyline points="16 17 21 12 16 7"></polyline>
+                <line x1="21" y1="12" x2="9" y2="12"></line>
+              </svg>
+              <span>Đăng xuất</span>
             </button>
           </div>
         }
@@ -120,85 +72,62 @@
     <!-- Sidebar Navigation -->
     <aside class="app-sidebar" [class.collapsed]="!isSidebarOpen">
       <nav class="sidebar-nav">
-        <!-- Tổng quan -->
-        <div class="nav-section-title" *ngIf="isSidebarOpen">TỔNG QUAN</div>
-        <a routerLink="/dashboard" routerLinkActive="active" class="nav-item">
-          <span class="nav-icon">📊</span>
-          <span class="nav-label" *ngIf="isSidebarOpen">Dashboard & Báo cáo</span>
+        <div class="nav-section-title" *ngIf="isSidebarOpen">QUẢN LÝ PHẦN MỀM</div>
+
+        <a
+          routerLink="/software"
+          [queryParams]="{ tab: 'software' }"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: false }"
+          class="nav-item"
+          title="Danh mục Phần mềm"
+        >
+          <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <polygon points="12 2 2 7 12 12 22 7 12 2"></polygon>
+            <polyline points="2 17 12 22 22 17"></polyline>
+            <polyline points="2 12 12 17 22 12"></polyline>
+          </svg>
+          <span class="nav-label" *ngIf="isSidebarOpen">Danh mục Phần mềm</span>
         </a>
 
-        <!-- Nghiệp vụ hạt nhân -->
-        <div class="nav-section-title" *ngIf="isSidebarOpen">QUẢN LÝ DANH MỤC</div>
+        <a
+          routerLink="/software"
+          [queryParams]="{ tab: 'categories' }"
+          routerLinkActive="active"
+          class="nav-item"
+          title="Nhóm phân loại"
+        >
+          <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"></path>
+          </svg>
+          <span class="nav-label" *ngIf="isSidebarOpen">Nhóm phân loại</span>
+        </a>
 
-        @if (authService.hasPermission('catalog.read')) {
-          <a routerLink="/software" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
-            <span class="nav-icon">💻</span>
-            <span class="nav-label" *ngIf="isSidebarOpen">Danh mục Phần mềm</span>
-          </a>
-        }
+        <a
+          routerLink="/software"
+          [queryParams]="{ tab: 'vendors' }"
+          routerLinkActive="active"
+          class="nav-item"
+          title="Nhà cung cấp & Đối tác"
+        >
+          <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+            <circle cx="12" cy="7" r="4"></circle>
+          </svg>
+          <span class="nav-label" *ngIf="isSidebarOpen">Nhà cung cấp & Đối tác</span>
+        </a>
 
-        @if (authService.hasPermission('catalog.propose') || authService.hasPermission('catalog.manage')) {
-          <a routerLink="/software/proposals" routerLinkActive="active" class="nav-item">
-            <span class="nav-icon">💡</span>
-            <span class="nav-label" *ngIf="isSidebarOpen">Đề xuất Bổ sung DM</span>
+        @if (authService.hasPermission('access.manage')) {
+          <div class="nav-section-title" *ngIf="isSidebarOpen">HỆ THỐNG</div>
+          <a routerLink="/admin/users" routerLinkActive="active" class="nav-item" title="Quản lý Tài khoản">
+            <svg class="nav-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+              <circle cx="9" cy="7" r="4"></circle>
+              <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+              <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+            </svg>
+            <span class="nav-label" *ngIf="isSidebarOpen">Quản lý Tài khoản</span>
           </a>
-        }
-
-        <!-- Quản lý Triển khai -->
-        @if (authService.hasPermission('deployments.read')) {
-          <div class="nav-section-title" *ngIf="isSidebarOpen">TRIỂN KHAI & CÀI ĐẶT</div>
-          <a routerLink="/deployments" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
-            <span class="nav-icon">🚀</span>
-            <span class="nav-label" *ngIf="isSidebarOpen">Hồ sơ Triển khai</span>
-          </a>
-          <a routerLink="/deployments/excel" routerLinkActive="active" class="nav-item">
-            <span class="nav-icon">📊</span>
-            <span class="nav-label" *ngIf="isSidebarOpen">Nhập / Xuất Excel</span>
-          </a>
-        }
-
-        <!-- Hợp đồng & Bản quyền (Giai đoạn 4) -->
-        @if (authService.hasPermission('contracts.read') || authService.hasPermission('contracts.write') || authService.hasPermission('licenses.allocate')) {
-          <div class="nav-section-title" *ngIf="isSidebarOpen">HỢP ĐỒNG & BẢN QUYỀN</div>
-          <a routerLink="/contracts" routerLinkActive="active" class="nav-item">
-            <span class="nav-icon">📜</span>
-            <span class="nav-label" *ngIf="isSidebarOpen">Hợp đồng & License</span>
-          </a>
-        }
-
-        @if (authService.hasPermission('organizations.read')) {
-          <div class="nav-section-title" *ngIf="isSidebarOpen">TỔ CHỨC & ĐƠN VỊ</div>
-          <a routerLink="/organizations" routerLinkActive="active" class="nav-item">
-            <span class="nav-icon">🏢</span>
-            <span class="nav-label" *ngIf="isSidebarOpen">Cơ quan & Đơn vị</span>
-          </a>
-        }
-
-        <!-- Quản trị hệ thống (SystemAdmin, Auditor) -->
-        @if (authService.hasPermission('access.manage') || authService.hasPermission('jobs.manage') || authService.hasPermission('audit.read')) {
-          <div class="nav-section-title" *ngIf="isSidebarOpen">QUẢN TRỊ HỆ THỐNG</div>
-          @if (authService.hasPermission('access.manage')) {
-            <a routerLink="/admin/users" routerLinkActive="active" class="nav-item">
-              <span class="nav-icon">👥</span>
-              <span class="nav-label" *ngIf="isSidebarOpen">Tài khoản & Phân quyền</span>
-            </a>
-            <a routerLink="/admin/roles" routerLinkActive="active" class="nav-item">
-              <span class="nav-icon">🛡️</span>
-              <span class="nav-label" *ngIf="isSidebarOpen">Vai trò & Ma trận Quyền</span>
-            </a>
-          }
-          @if (authService.hasPermission('audit.read') || authService.hasPermission('access.manage')) {
-            <a routerLink="/admin/audit" routerLinkActive="active" class="nav-item">
-              <span class="nav-icon">🔍</span>
-              <span class="nav-label" *ngIf="isSidebarOpen">Nhật ký Kiểm toán</span>
-            </a>
-          }
-          @if (authService.hasPermission('jobs.manage')) {
-            <a routerLink="/admin/jobs" routerLinkActive="active" class="nav-item">
-              <span class="nav-icon">⚙️</span>
-              <span class="nav-label" *ngIf="isSidebarOpen">Tiến trình Nền (Worker Jobs)</span>
-            </a>
-          }
         }
       </nav>
     </aside>
@@ -216,7 +145,12 @@
     <div class="modal-card">
       <div class="modal-header">
         <h2>Đổi Mật khẩu Cá nhân</h2>
-        <button type="button" class="btn-close" (click)="closeChangePasswordModal()">✕</button>
+        <button type="button" class="btn-close" (click)="closeChangePasswordModal()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
       </div>
 
       @if (passwordModalError()) {

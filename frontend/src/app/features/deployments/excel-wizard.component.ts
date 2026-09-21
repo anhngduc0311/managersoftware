@@ -29,14 +29,14 @@ import { OrganizationService, OrganizationDto } from '@core/services/organizatio
           [class.active]="activeTab() === 'import'"
           (click)="activeTab.set('import')"
         >
-          📥 Nhập Dữ liệu Triển khai (Import Excel)
+          Nhập Dữ liệu Triển khai (Import Excel)
         </button>
         <button
           class="tab-btn"
           [class.active]="activeTab() === 'export'"
           (click)="activeTab.set('export')"
         >
-          📤 Xuất Báo cáo Excel (Background Export)
+          Xuất Báo cáo Excel (Background Export)
         </button>
       </div>
 
@@ -44,7 +44,6 @@ import { OrganizationService, OrganizationDto } from '@core/services/organizatio
       <div class="tab-content" *ngIf="activeTab() === 'import'">
         <!-- Step 1: Download Template -->
         <div class="guide-card">
-          <div class="guide-icon">💡</div>
           <div class="guide-content">
             <h4>Quy trình nhập dữ liệu an toàn</h4>
             <p>
@@ -52,8 +51,8 @@ import { OrganizationService, OrganizationDto } from '@core/services/organizatio
               Mọi ký tự công thức nguy hiểm (<code>=</code>, <code>+</code>, <code>-</code>, <code>&#64;</code>) sẽ bị từ chối tự động. Giới hạn tối đa 5.000 dòng.
             </p>
             <button class="btn-download-template" (click)="downloadTemplate()" [disabled]="isDownloadingTemplate()">
-              <span *ngIf="!isDownloadingTemplate()">📄 Tải Tệp Mẫu Excel Chuẩn (.xlsx)</span>
-              <span *ngIf="isDownloadingTemplate()">⏳ Đang tạo tệp mẫu...</span>
+              <span *ngIf="!isDownloadingTemplate()">Tải Tệp Mẫu Excel Chuẩn (.xlsx)</span>
+              <span *ngIf="isDownloadingTemplate()">Đang tạo tệp mẫu...</span>
             </button>
           </div>
         </div>
@@ -67,7 +66,6 @@ import { OrganizationService, OrganizationDto } from '@core/services/organizatio
             (drop)="onFileDrop($event)"
             [class.dragging]="isDragging()"
           >
-            <div class="dropzone-icon">📁</div>
             <div class="dropzone-text">
               <h3>Kéo & thả tệp Excel vào đây</h3>
               <p>Hoặc bấm vào nút bên dưới để chọn tệp từ máy tính (.xlsx, tối đa 20MB)</p>
@@ -118,7 +116,7 @@ import { OrganizationService, OrganizationDto } from '@core/services/organizatio
 
           <!-- Error Message banner if any -->
           <div class="alert alert-danger" *ngIf="currentBatch()?.failureReason">
-            ⚠️ {{ currentBatch()?.failureReason }}
+            {{ currentBatch()?.failureReason }}
           </div>
 
           <!-- Error Grid -->
@@ -150,13 +148,13 @@ import { OrganizationService, OrganizationDto } from '@core/services/organizatio
           <div class="commit-actions">
             <div class="commit-notes">
               <span *ngIf="currentBatch()?.status === 'ReadyToCommit'" class="text-success">
-                ✅ Tệp kiểm tra đạt 0 lỗi! Bạn có thể nhấn nút Commit bên phải để nhập các hồ sơ triển khai ở trạng thái Bản nháp.
+                Tệp kiểm tra đạt 0 lỗi! Bạn có thể nhấn nút Commit bên phải để nhập các hồ sơ triển khai ở trạng thái Bản nháp.
               </span>
               <span *ngIf="currentBatch()?.status === 'FailedValidation'" class="text-danger">
-                ❌ Tệp chứa lỗi. Vui lòng sửa lại tệp Excel trên máy và tải lên lại (All-or-Nothing).
+                Tệp chứa lỗi. Vui lòng sửa lại tệp Excel trên máy và tải lên lại (All-or-Nothing).
               </span>
               <span *ngIf="currentBatch()?.status === 'Committed'" class="text-success font-bold">
-                🎉 Lô nhập liệu đã được Commit thành công! Các hồ sơ triển khai đã được tạo ở trạng thái Bản nháp.
+                Lô nhập liệu đã được Commit thành công! Các hồ sơ triển khai đã được tạo ở trạng thái Bản nháp.
               </span>
             </div>
 
@@ -167,7 +165,7 @@ import { OrganizationService, OrganizationDto } from '@core/services/organizatio
                 *ngIf="currentBatch()?.status === 'FailedValidation' || currentBatch()?.status === 'Pending'"
                 [disabled]="isValidating()"
               >
-                🔄 Kiểm tra lại
+                Kiểm tra lại
               </button>
 
               <button
@@ -175,7 +173,7 @@ import { OrganizationService, OrganizationDto } from '@core/services/organizatio
                 (click)="commitBatch()"
                 [disabled]="currentBatch()?.status !== 'ReadyToCommit' || isCommitting()"
               >
-                <span *ngIf="!isCommitting()">🚀 Cam kết nhập dữ liệu (Commit)</span>
+                <span *ngIf="!isCommitting()">Cam kết nhập dữ liệu (Commit)</span>
                 <span *ngIf="isCommitting()">Đang ghi dữ liệu bản nháp...</span>
               </button>
             </div>
@@ -233,7 +231,7 @@ import { OrganizationService, OrganizationDto } from '@core/services/organizatio
 
             <div class="form-actions">
               <button class="btn-request-export" (click)="requestExport()" [disabled]="isRequestingExport()">
-                <span *ngIf="!isRequestingExport()">📤 Gửi Yêu cầu Xuất Tệp Excel</span>
+                <span *ngIf="!isRequestingExport()">Gửi Yêu cầu Xuất Tệp Excel</span>
                 <span *ngIf="isRequestingExport()">Đang gửi yêu cầu...</span>
               </button>
             </div>
@@ -243,7 +241,6 @@ import { OrganizationService, OrganizationDto } from '@core/services/organizatio
           <div class="export-status-panel" *ngIf="currentExport()">
             <div class="status-box">
               <div class="status-left">
-                <div class="job-icon">📊</div>
                 <div>
                   <h4>Yêu cầu Xuất: {{ currentExport()?.fileName || 'BaoCao_TrienKhai.xlsx' }}</h4>
                   <p class="job-meta">
@@ -260,7 +257,7 @@ import { OrganizationService, OrganizationDto } from '@core/services/organizatio
                   *ngIf="currentExport()?.status === 'Completed'"
                   (click)="downloadExportFile()"
                 >
-                  📥 Tải Tệp Kết quả (.xlsx)
+                  Tải Tệp Kết quả (.xlsx)
                 </button>
 
                 <div class="processing-spinner" *ngIf="currentExport()?.status === 'Queued' || currentExport()?.status === 'Processing'">

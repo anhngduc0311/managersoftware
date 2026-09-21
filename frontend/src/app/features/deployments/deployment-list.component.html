@@ -12,7 +12,7 @@
     <div class="action-area">
       @if (authService.hasPermission('deployments.write')) {
         <button type="button" class="btn btn-primary" (click)="openCreateModal()">
-          <span>➕</span> Thêm mới Hồ sơ
+          + Thêm mới Hồ sơ
         </button>
       }
     </div>
@@ -26,14 +26,14 @@
         class="tab-btn"
         [class.active]="activeTab() === 'all'"
         (click)="setTab('all')">
-        📋 Tất cả hồ sơ
+        Tất cả hồ sơ
       </button>
       <button
         type="button"
         class="tab-btn"
         [class.active]="activeTab() === 'approved'"
         (click)="setTab('approved')">
-        ✅ Đã duyệt chính thức
+        Đã duyệt chính thức
       </button>
       @if (authService.hasPermission('deployments.read_drafts')) {
         <button
@@ -41,7 +41,7 @@
           class="tab-btn"
           [class.active]="activeTab() === 'drafts'"
           (click)="setTab('drafts')">
-          📝 Đang xử lý / Bản nháp
+          Đang xử lý / Bản nháp
         </button>
       }
     </div>
@@ -109,7 +109,7 @@
 
       <div class="filter-actions">
         <button type="button" class="btn btn-secondary btn-sm" (click)="resetFilters()" title="Đặt lại bộ lọc">
-          ↺ Đặt lại
+          Đặt lại
         </button>
       </div>
     </div>
@@ -122,7 +122,6 @@
       </div>
     } @else if (deployments().length === 0) {
       <div class="empty-state">
-        <div class="empty-icon">📂</div>
         <h3>Không tìm thấy hồ sơ triển khai phù hợp</h3>
         <p>Chưa có hồ sơ triển khai nào trong phạm vi được cấp hoặc không khớp với bộ lọc hiện tại.</p>
         @if (authService.hasPermission('deployments.write')) {

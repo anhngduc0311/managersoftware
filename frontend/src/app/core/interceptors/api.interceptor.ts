@@ -38,11 +38,13 @@ export const apiInterceptor: HttpInterceptorFn = (req, next) => {
       }
 
       if (error.status === 401) {
-        // Unauthenticated -> redirect to login if not already there
-        if (!router.url.includes('/login')) {
+        // Unauthenticated -> redirect to login if not already there, except for auth checks
+        const isAuthCheck = req.url.includes('/api/v1/auth/me') || req.url.includes('/api/v1/auth/login') || req.url.includes('/api/v1/auth/csrf');
+        if (!isAuthCheck && !router.url.includes('/login')) {
           router.navigate(['/login']);
         }
       }
+
 
       return throwError(() => ({
         originalError: error,

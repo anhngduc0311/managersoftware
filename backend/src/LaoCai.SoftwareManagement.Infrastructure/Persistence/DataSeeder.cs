@@ -65,7 +65,7 @@ public static class DataSeeder
             ["SystemAdmin"] = (
                 "Quản trị viên Hệ thống",
                 "Quản lý tài khoản, phân quyền, cấu hình và tiến trình vận hành",
-                new[] { "access.manage", "settings.manage", "jobs.manage", "organizations.read", "organizations.manage", "catalog.read", "deployments.read", "deployments.read_drafts", "deployments.write", "deployments.approve", "contracts.read", "contracts.write", "licenses.allocate", "reports.read", "reports.export", "reports.import", "audit.read" }
+                new[] { "access.manage", "settings.manage", "jobs.manage", "organizations.read", "organizations.manage", "catalog.read", "catalog.manage", "catalog.propose", "deployments.read", "deployments.read_drafts", "deployments.write", "deployments.approve", "contracts.read", "contracts.write", "licenses.allocate", "reports.read", "reports.export", "reports.import", "audit.read" }
             ),
             ["CatalogManager"] = (
                 "Quản trị Danh mục",

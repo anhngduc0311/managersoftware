@@ -70,10 +70,13 @@ builder.Services.AddRateLimiter(options =>
     });
 });
 
-// Add Controllers with ETag Filter
+// Add Controllers with ETag Filter and IgnoreCycles
 builder.Services.AddControllers(options =>
 {
     options.Filters.Add<ETagResultFilter>();
+}).AddJsonOptions(options =>
+{
+    options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
 });
 
 // Configure Antiforgery for CSRF protection
