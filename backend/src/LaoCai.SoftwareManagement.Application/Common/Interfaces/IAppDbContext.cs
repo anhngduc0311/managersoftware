@@ -1,6 +1,8 @@
 using LaoCai.SoftwareManagement.Domain.Entities.Audit;
 using LaoCai.SoftwareManagement.Domain.Entities.Catalog;
+using LaoCai.SoftwareManagement.Domain.Entities.Contracts;
 using LaoCai.SoftwareManagement.Domain.Entities.Deployments;
+using LaoCai.SoftwareManagement.Domain.Entities.Documents;
 using LaoCai.SoftwareManagement.Domain.Entities.Iam;
 using LaoCai.SoftwareManagement.Domain.Entities.Jobs;
 using LaoCai.SoftwareManagement.Domain.Entities.Notifications;
@@ -41,6 +43,16 @@ public interface IAppDbContext
 
     // Notifications Schema
     DbSet<Notification> Notifications { get; }
+
+    // Contracts Schema
+    DbSet<Contract> Contracts { get; }
+    DbSet<ContractItem> ContractItems { get; }
+    DbSet<LicenseEntitlement> LicenseEntitlements { get; }
+    DbSet<LicenseAllocation> LicenseAllocations { get; }
+
+    // Documents Schema
+    DbSet<Document> Documents { get; }
+    DbSet<DocumentAttachment> DocumentAttachments { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

@@ -14,6 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\LaoCai.SoftwareManagement.Api\LaoCai.SoftwareManagement.Api.csproj" />
+    <ProjectReference Include="..\..\src\LaoCai.SoftwareManagement.Worker\LaoCai.SoftwareManagement.Worker.csproj" />
   </ItemGroup>
 
   <ItemGroup>

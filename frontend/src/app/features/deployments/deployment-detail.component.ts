@@ -4,8 +4,12 @@ import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angu
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { DeploymentService } from '@core/services/deployment.service';
 import { SoftwareService, SoftwareReleaseDto } from '@core/services/software.service';
+import { ContractService } from '@core/services/contract.service';
+import { DocumentService } from '@core/services/document.service';
 import { AuthService } from '@core/services/auth.service';
 import { DeploymentDto, DeploymentRevisionDto, ApprovalDecisionDto } from '@core/models/deployment.models';
+import { LicenseAllocationDto } from '@core/models/contract.models';
+import { DocumentAttachmentDto } from '@core/models/document.models';
 
 @Component({
   selector: 'app-deployment-detail',
@@ -19,6 +23,8 @@ export class DeploymentDetailComponent implements OnInit {
   private router = inject(Router);
   private deploymentService = inject(DeploymentService);
   private softwareService = inject(SoftwareService);
+  private contractService = inject(ContractService);
+  private documentService = inject(DocumentService);
   public authService = inject(AuthService);
   private fb = inject(FormBuilder);
 
@@ -26,6 +32,10 @@ export class DeploymentDetailComponent implements OnInit {
   deployment = signal<DeploymentDto | null>(null);
   historyRevisions = signal<DeploymentRevisionDto[]>([]);
   releases = signal<SoftwareReleaseDto[]>([]);
+  allocations = signal<LicenseAllocationDto[]>([]);
+  attachments = signal<DocumentAttachmentDto[]>([]);
+  isUploadingDoc = signal<boolean>(false);
+  docUploadError = signal<string | null>(null);
   isLoading = signal<boolean>(true);
   actionError = signal<string | null>(null);
   actionSuccess = signal<string | null>(null);
@@ -79,8 +89,10 @@ export class DeploymentDetailComponent implements OnInit {
           this.activeTab.set('approved');
         }
 
-        // Load history
+        // Load history, allocations and attachments
         this.loadHistory(id);
+        this.loadAllocations(id);
+        this.loadAttachments(dep.activeRevision?.id || dep.currentApprovedRevision?.id);
       },
       error: (err) => {
         this.isLoading.set(false);
@@ -295,6 +307,82 @@ export class DeploymentDetailComponent implements OnInit {
       error: (err) => {
         this.actionError.set(err.error?.detail || 'Không thể tạo revision mới.');
       }
+    });
+  }
+
+  loadAllocations(deploymentId: string): void {
+    this.contractService.getAllocationsByDeployment(deploymentId).subscribe({
+      next: (allocs) => this.allocations.set(allocs),
+      error: () => {}
+    });
+  }
+
+  loadAttachments(revisionId?: string): void {
+    if (!revisionId) {
+      this.attachments.set([]);
+      return;
+    }
+    this.documentService.getAttachments('DeploymentRevision', revisionId).subscribe({
+      next: (docs) => this.attachments.set(docs),
+      error: () => {}
+    });
+  }
+
+  onFileSelected(event: Event, revisionId: string): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files || input.files.length === 0) return;
+
+    const file = input.files[0];
+    if (file.size > 20 * 1024 * 1024) {
+      this.docUploadError.set('Tệp vượt quá kích thước cho phép (tối đa 20 MB).');
+      input.value = '';
+      return;
+    }
+
+    this.isUploadingDoc.set(true);
+    this.docUploadError.set(null);
+
+    this.documentService.uploadDocument(file, 'DeploymentRevision', revisionId).subscribe({
+      next: () => {
+        this.isUploadingDoc.set(false);
+        input.value = '';
+        this.loadAttachments(revisionId);
+      },
+      error: (err) => {
+        this.isUploadingDoc.set(false);
+        this.docUploadError.set(err.error?.detail || 'Tải lên thất bại. Vui lòng kiểm tra định dạng và chính sách an toàn.');
+        input.value = '';
+      }
+    });
+  }
+
+  downloadAttachment(doc: DocumentAttachmentDto): void {
+    if (doc.scanStatus !== 'Clean') {
+      alert('Tệp này chưa được xác nhận Clean hoặc bị từ chối do quét an toàn.');
+      return;
+    }
+
+    this.documentService.downloadDocument(doc.documentId).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = doc.originalName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: () => alert('Không thể tải tệp. Vui lòng kiểm tra lại quyền truy cập.')
+    });
+  }
+
+  unlinkAttachment(doc: DocumentAttachmentDto, revisionId: string): void {
+    if (!confirm(`Bạn có chắc chắn muốn gỡ tài liệu '${doc.originalName}' khỏi hồ sơ?`)) return;
+
+    this.documentService.unlinkAttachment(doc.attachmentId).subscribe({
+      next: () => this.loadAttachments(revisionId),
+      error: (err) => alert(err.error?.detail || 'Lỗi gỡ tài liệu')
     });
   }
 

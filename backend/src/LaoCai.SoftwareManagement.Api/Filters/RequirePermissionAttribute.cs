@@ -8,13 +8,19 @@ namespace LaoCai.SoftwareManagement.Api.Filters;
 [AttributeUsage(AttributeTargets.Class | AttributeTargets.Method, AllowMultiple = true)]
 public class RequirePermissionAttribute : Attribute, IAsyncActionFilter
 {
-    public string Permission { get; }
+    public string[] Permissions { get; }
     public string? OrgIdParameterName { get; }
 
     public RequirePermissionAttribute(string permission, string? orgIdParameterName = null)
     {
-        Permission = permission;
+        Permissions = new[] { permission };
         OrgIdParameterName = orgIdParameterName;
+    }
+
+    public RequirePermissionAttribute(params string[] permissions)
+    {
+        Permissions = permissions;
+        OrgIdParameterName = null;
     }
 
     public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
@@ -56,11 +62,15 @@ public class RequirePermissionAttribute : Attribute, IAsyncActionFilter
             }
         }
 
-        var hasPermission = await scopeAuthService.HasPermissionAsync(
-            currentUserService.UserId.Value,
-            Permission,
-            targetOrgId,
-            httpContext.RequestAborted);
+        bool hasPermission = false;
+        foreach (var perm in Permissions)
+        {
+            if (await scopeAuthService.HasPermissionAsync(currentUserService.UserId.Value, perm, targetOrgId, httpContext.RequestAborted))
+            {
+                hasPermission = true;
+                break;
+            }
+        }
 
         if (!hasPermission)
         {
@@ -70,7 +80,7 @@ public class RequirePermissionAttribute : Attribute, IAsyncActionFilter
                 title = "Từ chối truy cập",
                 status = StatusCodes.Status403Forbidden,
                 code = "auth.forbidden",
-                detail = $"Bạn không có quyền '{Permission}' trong phạm vi yêu cầu.",
+                detail = $"Bạn không có quyền '{string.Join(", ", Permissions)}' trong phạm vi yêu cầu.",
                 traceId = currentUserService.CorrelationId
             })
             {

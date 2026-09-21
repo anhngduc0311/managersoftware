@@ -57,6 +57,34 @@
       <p>Đang tải thông tin hồ sơ triển khai...</p>
     </div>
   } @else if (deployment(); as dep) {
+    <!-- License Information Section -->
+    <div class="license-info-card">
+      <div class="card-header">
+        <span class="card-title">📜 Bản quyền Phần mềm (License Allocations)</span>
+        @if (allocations().length === 0) {
+          <span class="badge badge-warning">Chưa cấp bản quyền</span>
+        } @else {
+          <span class="badge badge-success">Đã phân bổ {{ allocations().length }} gói bản quyền</span>
+        }
+      </div>
+      <div class="card-body">
+        @if (allocations().length === 0) {
+          <p class="text-muted mb-0">Hồ sơ triển khai này chưa được phân bổ license từ hợp đồng nào.</p>
+        } @else {
+          <div class="allocations-inline-list">
+            @for (alloc of allocations(); track alloc.id) {
+              <div class="alloc-item">
+                <div class="alloc-title">{{ alloc.softwareName }} ({{ alloc.environment }})</div>
+                <div class="alloc-meta">
+                  Hạn mức: <strong>{{ alloc.quantity }} seats</strong> • Cấp ngày: {{ alloc.allocatedAt | date:'dd/MM/yyyy' }}
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+
     <div class="content-card">
       <!-- Tabs Navigation -->
       <div class="tabs-header">
@@ -185,6 +213,67 @@
               </div>
             </form>
           }
+
+          <!-- Document Attachments & Quarantine Scanner Widget -->
+          <div class="documents-section">
+            <div class="section-title-row">
+              <h4>📑 Hồ sơ Tài liệu Đính kèm ({{ attachments().length }})</h4>
+              <span class="text-hint">Tự động quét mã độc và cách ly (quarantine)</span>
+            </div>
+
+            @if (activeRev.workflowStatus === 'Draft' && authService.hasPermission('deployments.write')) {
+              <div class="upload-widget">
+                <input
+                  type="file"
+                  id="depDocUpload"
+                  (change)="onFileSelected($event, activeRev.id)"
+                  accept=".pdf,.docx,.xlsx,.png,.jpeg,.jpg"
+                  [disabled]="isUploadingDoc()"
+                  style="display:none"
+                />
+                <label for="depDocUpload" class="btn btn-sm btn-outline">
+                  ➕ Tải lên tài liệu mới (.pdf, .docx, .xlsx...)
+                </label>
+                @if (isUploadingDoc()) {
+                  <span class="uploading-spinner"><div class="spinner"></div> Đang tải lên & quét...</span>
+                }
+                @if (docUploadError()) {
+                  <span class="error-inline text-danger">{{ docUploadError() }}</span>
+                }
+              </div>
+            }
+
+            @if (attachments().length === 0) {
+              <p class="no-docs-text">Chưa có tài liệu đính kèm cho hồ sơ này.</p>
+            } @else {
+              <div class="doc-chips-grid">
+                @for (doc of attachments(); track doc.attachmentId) {
+                  <div class="doc-chip">
+                    <span class="doc-icon">📄</span>
+                    <div class="doc-info">
+                      <span class="doc-name">{{ doc.originalName }}</span>
+                      <span class="doc-status-badge scan-{{ doc.scanStatus | lowercase }}">
+                        {{ doc.scanStatus === 'Clean' ? 'Sạch (Clean)' : (doc.scanStatus === 'Scanning' ? 'Đang quét...' : (doc.scanStatus === 'Rejected' ? 'Từ chối' : 'Chờ quét')) }}
+                      </span>
+                    </div>
+
+                    <div class="doc-actions">
+                      @if (doc.scanStatus === 'Clean') {
+                        <button type="button" class="btn btn-xs btn-outline" (click)="downloadAttachment(doc)" title="Tải xuống">
+                          ⬇ Tải
+                        </button>
+                      }
+                      @if (activeRev.workflowStatus === 'Draft' && authService.hasPermission('deployments.write')) {
+                        <button type="button" class="btn btn-xs btn-outline-danger" (click)="unlinkAttachment(doc, activeRev.id)" title="Gỡ tài liệu">
+                          ✕
+                        </button>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
 
           <!-- View mode and Approver Actions for Submitted -->
           @if (activeRev.workflowStatus === 'Submitted') {

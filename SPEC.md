@@ -604,19 +604,19 @@ Tập dữ liệu kiểm chứng tối thiểu gồm hai đơn vị độc lập
 
 | ID | Vai trò | Việc làm và đầu ra cụ thể | Phụ thuộc | Hoàn thành khi |
 | --- | --- | --- | --- | --- |
-| T-08.1 | BE | [ ] Migration hợp đồng/hạng mục/entitlement/allocation và trạng thái/bảo trì | T-01.3, T-05.1, T-06.1 | Ràng buộc ngày, tiền, quota/Unlimited và FK được kiểm tra trên PostgreSQL |
-| T-08.2 | BE | [ ] API hợp đồng/hạng mục/entitlement, scope, ETag và audit | T-08.1, T-04.3 | Không có contracts.read thì không xem tiền; phiên bản cũ không ghi đè |
-| T-08.3 | BE/QA | [ ] Use case cấp/đổi allocation và giảm quota với khóa entitlement | T-08.2, T-06.2 | Test transaction cạnh tranh không vượt quota; sai software/đơn vị/thời hạn bị từ chối |
-| T-08.4 | FE | [ ] UI hợp đồng, bảo trì, hạng mục, quota và phân bổ | T-08.2, T-08.3, T-04.6 | Hiển thị số đã cấp/còn lại đúng; không cộng tiền khác currency; lỗi conflict có hướng xử lý |
+| T-08.1 | BE | [x] Migration hợp đồng/hạng mục/entitlement/allocation và trạng thái/bảo trì | T-01.3, T-05.1, T-06.1 | Ràng buộc ngày, tiền, quota/Unlimited và FK được kiểm tra trên PostgreSQL |
+| T-08.2 | BE | [x] API hợp đồng/hạng mục/entitlement, scope, ETag và audit | T-08.1, T-04.3 | Không có contracts.read thì không xem tiền; phiên bản cũ không ghi đè |
+| T-08.3 | BE/QA | [x] Use case cấp/đổi allocation và giảm quota với khóa entitlement | T-08.2, T-06.2 | Test transaction cạnh tranh không vượt quota; sai software/đơn vị/thời hạn bị từ chối |
+| T-08.4 | FE | [x] UI hợp đồng, bảo trì, hạng mục, quota và phân bổ | T-08.2, T-08.3, T-04.6 | Hiển thị số đã cấp/còn lại đúng; không cộng tiền khác currency; lỗi conflict có hướng xử lý |
 
 ### 4.10. T-09 — Tài liệu riêng và scanner
 
 | ID | Vai trò | Việc làm và đầu ra cụ thể | Phụ thuộc | Hoàn thành khi |
 | --- | --- | --- | --- | --- |
-| T-09.1 | BE/OPS | [ ] Implement IFileStorage, quarantine, metadata và scanner adapter/cấu hình | T-03.1, T-07.2 | Scanner lỗi không Clean; tên client không quyết định đường dẫn; giới hạn 20 MB và OOXML được kiểm tra |
-| T-09.2 | BE | [ ] API upload/status/download/unlink gắn revision/hợp đồng, tăng aggregate version | T-09.1, T-06.2, T-08.2 | Đủ quyền cha mới thao tác; Submitted/Approved không đổi tệp; chỉ Clean tải được |
-| T-09.3 | BE/QA | [ ] Thêm cleanup blob mồ côi, phát hiện missing blob và test tệp nhiều liên kết | T-09.2 | Không xóa blob còn link/retention; clone revision giữ tài liệu; không lộ file qua link trái scope |
-| T-09.4 | FE | [ ] Component upload/progress/scan/error/download và gắn vào hai feature | T-09.2, T-06.5, T-08.4 | Người dùng thấy Pending/Clean/Rejected; retry upload không giả tệp đã sạch |
+| T-09.1 | BE/OPS | [x] Implement IFileStorage, quarantine, metadata và scanner adapter/cấu hình | T-03.1, T-07.2 | Scanner lỗi không Clean; tên client không quyết định đường dẫn; giới hạn 20 MB và OOXML được kiểm tra |
+| T-09.2 | BE | [x] API upload/status/download/unlink gắn revision/hợp đồng, tăng aggregate version | T-09.1, T-06.2, T-08.2 | Đủ quyền cha mới thao tác; Submitted/Approved không đổi tệp; chỉ Clean tải được |
+| T-09.3 | BE/QA | [x] Thêm cleanup blob mồ côi, phát hiện missing blob và test tệp nhiều liên kết | T-09.2 | Không xóa blob còn link/retention; clone revision giữ tài liệu; không lộ file qua link trái scope |
+| T-09.4 | FE | [x] Component upload/progress/scan/error/download và gắn vào hai feature | T-09.2, T-06.5, T-08.4 | Người dùng thấy Pending/Clean/Rejected; retry upload không giả tệp đã sạch |
 
 ### 4.11. T-10 — Dashboard và báo cáo
 

@@ -65,7 +65,7 @@ public static class DataSeeder
             ["SystemAdmin"] = (
                 "Quản trị viên Hệ thống",
                 "Quản lý tài khoản, phân quyền, cấu hình và tiến trình vận hành",
-                new[] { "access.manage", "settings.manage", "jobs.manage", "organizations.read", "organizations.manage", "catalog.read" }
+                new[] { "access.manage", "settings.manage", "jobs.manage", "organizations.read", "organizations.manage", "catalog.read", "contracts.read", "contracts.write", "licenses.allocate" }
             ),
             ["CatalogManager"] = (
                 "Quản trị Danh mục",
@@ -75,12 +75,12 @@ public static class DataSeeder
             ["Coordinator"] = (
                 "Điều phối viên",
                 "Tổng hợp, rà soát và theo dõi tình hình ứng dụng phần mềm toàn tỉnh",
-                new[] { "organizations.read", "catalog.read", "deployments.read", "deployments.read_drafts", "deployments.approve", "contracts.read", "reports.read", "reports.export" }
+                new[] { "organizations.read", "catalog.read", "deployments.read", "deployments.read_drafts", "deployments.approve", "contracts.read", "contracts.write", "licenses.allocate", "reports.read", "reports.export" }
             ),
             ["UnitEditor"] = (
                 "Cán bộ Cập nhật Đơn vị",
                 "Tạo và chỉnh sửa hồ sơ triển khai, gửi duyệt, đề xuất phần mềm mới tại đơn vị",
-                new[] { "organizations.read", "catalog.read", "catalog.propose", "deployments.read", "deployments.read_drafts", "deployments.write", "reports.read", "reports.import" }
+                new[] { "organizations.read", "catalog.read", "catalog.propose", "deployments.read", "deployments.read_drafts", "deployments.write", "licenses.allocate", "reports.read", "reports.import" }
             ),
             ["UnitApprover"] = (
                 "Lãnh đạo Phê duyệt Đơn vị",
@@ -552,6 +552,99 @@ public static class DataSeeder
                     DeduplicationKey = $"wf:submitted:{rev2Id}:{approverUser.Id}",
                     CreatedAt = nowUtc.AddDays(-1)
                 });
+            }
+        }
+
+        // 8. Seed Contracts and License Allocations
+        var contractId = Guid.Parse("77777777-7777-7777-7777-777777777777");
+        if (!await context.Contracts.AnyAsync(c => c.Id == contractId))
+        {
+            var orgSoTttt = await context.Organizations.FirstOrDefaultAsync(o => o.Code == "STTT");
+            var vendorVnpt = await context.Vendors.FirstOrDefaultAsync(v => v.Code == "VNPT_LAOCAI");
+            var swIoffice = await context.Software.FirstOrDefaultAsync(s => s.Code == "VNPT_IOFFICE");
+            var swIgate = await context.Software.FirstOrDefaultAsync(s => s.Code == "VNPT_IGATE");
+
+            if (orgSoTttt != null && vendorVnpt != null && swIoffice != null)
+            {
+                var contract = new LaoCai.SoftwareManagement.Domain.Entities.Contracts.Contract
+                {
+                    Id = contractId,
+                    ContractNo = "HD-01/2026/STTTT-VNPT",
+                    OwningOrganizationId = orgSoTttt.Id,
+                    VendorId = vendorVnpt.Id,
+                    Status = "Active",
+                    SignedDate = new DateOnly(2026, 1, 10),
+                    StartDate = new DateOnly(2026, 1, 15),
+                    EndDate = new DateOnly(2027, 1, 15),
+                    TotalAmount = 250000000m,
+                    CurrencyCode = "VND",
+                    MaintenanceStartDate = new DateOnly(2026, 1, 15),
+                    MaintenanceEndDate = new DateOnly(2027, 1, 15),
+                    Version = 1,
+                    CreatedAt = nowUtc.AddMonths(-2),
+                    CreatedBy = adminUser?.Id
+                };
+
+                var item1Id = Guid.NewGuid();
+                var item1 = new LaoCai.SoftwareManagement.Domain.Entities.Contracts.ContractItem
+                {
+                    Id = item1Id,
+                    ContractId = contractId,
+                    SoftwareId = swIoffice.Id,
+                    Description = "Bản quyền phần mềm Quản lý văn bản và điều hành VNPT iOffice",
+                    Amount = 180000000m
+                };
+
+                var ent1Id = Guid.NewGuid();
+                var ent1 = new LaoCai.SoftwareManagement.Domain.Entities.Contracts.LicenseEntitlement
+                {
+                    Id = ent1Id,
+                    ContractItemId = item1Id,
+                    LicenseType = "Seat",
+                    Quantity = 50,
+                    ValidFrom = new DateOnly(2026, 1, 15),
+                    ValidTo = new DateOnly(2027, 1, 15)
+                };
+
+                var alloc1 = new LaoCai.SoftwareManagement.Domain.Entities.Contracts.LicenseAllocation
+                {
+                    Id = Guid.NewGuid(),
+                    EntitlementId = ent1Id,
+                    DeploymentId = dep1Id,
+                    Quantity = 20,
+                    AllocatedAt = nowUtc.AddMonths(-1)
+                };
+
+                context.Contracts.Add(contract);
+                context.ContractItems.Add(item1);
+                context.LicenseEntitlements.Add(ent1);
+                context.LicenseAllocations.Add(alloc1);
+
+                if (swIgate != null)
+                {
+                    var item2Id = Guid.NewGuid();
+                    var item2 = new LaoCai.SoftwareManagement.Domain.Entities.Contracts.ContractItem
+                    {
+                        Id = item2Id,
+                        ContractId = contractId,
+                        SoftwareId = swIgate.Id,
+                        Description = "Hệ thống Một cửa điện tử dùng chung toàn tỉnh",
+                        Amount = 70000000m
+                    };
+
+                    var ent2 = new LaoCai.SoftwareManagement.Domain.Entities.Contracts.LicenseEntitlement
+                    {
+                        Id = Guid.NewGuid(),
+                        ContractItemId = item2Id,
+                        LicenseType = "Unlimited",
+                        Quantity = null,
+                        ValidFrom = new DateOnly(2026, 1, 15),
+                        ValidTo = new DateOnly(2027, 1, 15)
+                    };
+
+                    context.ContractItems.Add(item2);
+                    context.LicenseEntitlements.Add(ent2);
+                }
             }
         }
 

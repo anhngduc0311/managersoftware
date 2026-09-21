@@ -15,6 +15,7 @@ builder.Services.AddScoped<ICurrentUserService, WorkerCurrentUserService>();
 
 // Register Handlers
 builder.Services.AddScoped<IJobHandler, WorkflowNotificationJobHandler>();
+builder.Services.AddScoped<IJobHandler, DocumentScanJobHandler>();
 
 // Register Worker as HostedService
 builder.Services.AddSingleton<BackgroundJobWorker>();

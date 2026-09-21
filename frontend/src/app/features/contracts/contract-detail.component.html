@@ -1,0 +1,545 @@
+<div class="page-container">
+  @if (isLoading()) {
+    <div class="loading-state">
+      <div class="spinner"></div> Đang tải thông tin hợp đồng...
+    </div>
+  } @else if (errorMessage()) {
+    <div class="alert alert-danger">
+      {{ errorMessage() }}
+    </div>
+    <button type="button" class="btn btn-secondary" routerLink="/contracts">← Quay lại danh sách</button>
+  } @else if (contract()) {
+    <!-- Header -->
+    <div class="page-header">
+      <div class="title-area">
+        <div class="breadcrumb">
+          <a routerLink="/contracts">Hợp đồng & Bản quyền</a> / <span class="current">{{ contract()?.contractNo }}</span>
+        </div>
+        <div class="header-main">
+          <h1>Hợp đồng: {{ contract()?.contractNo }}</h1>
+          <span class="status-badge status-{{ contract()?.status?.toLowerCase() }}">
+            {{ contract()?.status }}
+          </span>
+        </div>
+        <p class="subtitle">Đơn vị: <strong>{{ contract()?.owningOrganizationName }}</strong> | Đối tác: <strong>{{ contract()?.vendorName }}</strong></p>
+      </div>
+
+      <div class="action-area">
+        <button type="button" class="btn btn-secondary" routerLink="/contracts">
+          ← Danh sách Hợp đồng
+        </button>
+      </div>
+    </div>
+
+    <!-- Contract Overview Meta Card -->
+    <div class="overview-grid">
+      <div class="meta-card">
+        <div class="meta-label">Thời hạn hiệu lực</div>
+        <div class="meta-value">{{ contract()?.startDate }} → {{ contract()?.endDate }}</div>
+        <div class="meta-sub">Ngày ký: {{ contract()?.signedDate }}</div>
+      </div>
+
+      <div class="meta-card">
+        <div class="meta-label">Kinh phí / Giá trị</div>
+        @if (contract()?.totalAmount !== null && contract()?.totalAmount !== undefined) {
+          <div class="meta-value text-success">{{ formatCurrency(contract()?.totalAmount, contract()?.currencyCode) }}</div>
+          <div class="meta-sub">Loại tiền tệ: {{ contract()?.currencyCode }}</div>
+        } @else {
+          <div class="meta-value text-muted">🔒 Bảo mật</div>
+          <div class="meta-sub">Cần quyền contracts.read</div>
+        }
+      </div>
+
+      <div class="meta-card">
+        <div class="meta-label">Bảo hành & Hỗ trợ</div>
+        @if (contract()?.maintenanceEndDate) {
+          <div class="meta-value">{{ contract()?.maintenanceStartDate || '—' }} → {{ contract()?.maintenanceEndDate }}</div>
+          <div class="meta-sub">Đang trong thời hạn cam kết</div>
+        } @else {
+          <div class="meta-value text-muted">Chưa đăng ký</div>
+          <div class="meta-sub">Không có điều khoản bảo trì riêng</div>
+        }
+      </div>
+
+      <div class="meta-card">
+        <div class="meta-label">Phiên bản & Kiểm toán</div>
+        <div class="meta-value">ETag v{{ contract()?.version }}</div>
+        <div class="meta-sub">Kiểm soát xung đột phiên bản</div>
+      </div>
+    </div>
+
+    <!-- Navigation Tabs -->
+    <div class="tabs-nav">
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'items'"
+        (click)="activeTab.set('items')"
+      >
+        📦 Hạng mục & Hạn mức Bản quyền ({{ contract()?.items?.length || 0 }})
+      </button>
+
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'allocations'"
+        (click)="activeTab.set('allocations')"
+      >
+        🎯 Phân bổ Bản quyền Hồ sơ ({{ allocations().length }})
+      </button>
+
+      <button
+        type="button"
+        class="tab-btn"
+        [class.active]="activeTab() === 'documents'"
+        (click)="activeTab.set('documents')"
+      >
+        📑 Hồ sơ Tài liệu & Quét An toàn ({{ attachments().length }})
+      </button>
+    </div>
+
+    <!-- TAB 1: Items & Entitlements -->
+    @if (activeTab() === 'items') {
+      <div class="tab-content">
+        <div class="content-header">
+          <div>
+            <h3>Danh sách Hạng mục Phần mềm & Hạn mức License</h3>
+            <p class="text-muted">Mỗi hạng mục thuộc về một phần mềm trong Danh mục dùng chung của tỉnh và có các gói quyền sử dụng (Seat hoặc Unlimited).</p>
+          </div>
+          @if (authService.hasPermission('contracts.write')) {
+            <button type="button" class="btn btn-primary btn-sm" (click)="openAddItemModal()">
+              ➕ Thêm Hạng mục
+            </button>
+          }
+        </div>
+
+        @if (contract()?.items?.length === 0) {
+          <div class="empty-state">
+            <span class="empty-icon">📦</span>
+            <p>Hợp đồng chưa có hạng mục phần mềm nào.</p>
+          </div>
+        } @else {
+          <div class="items-list">
+            @for (item of contract()?.items; track item.id) {
+              <div class="item-card">
+                <div class="item-header">
+                  <div class="item-title">
+                    <h4>{{ item.softwareName }}</h4>
+                    @if (item.description) {
+                      <p class="item-desc">{{ item.description }}</p>
+                    }
+                  </div>
+                  <div class="item-amount-actions">
+                    @if (item.amount !== null && item.amount !== undefined) {
+                      <span class="item-amount">{{ formatCurrency(item.amount) }}</span>
+                    }
+                    @if (authService.hasPermission('contracts.write')) {
+                      <button type="button" class="btn btn-sm btn-outline-danger" (click)="deleteItem(item.id)" title="Xóa hạng mục">
+                        🗑️
+                      </button>
+                    }
+                  </div>
+                </div>
+
+                <!-- Entitlements sub-section -->
+                <div class="entitlements-container">
+                  <div class="entitlements-header">
+                    <span class="sub-title">Hạn mức Quyền sử dụng (Entitlements):</span>
+                    @if (authService.hasPermission('contracts.write')) {
+                      <button type="button" class="btn btn-xs btn-outline" (click)="openAddEntitlementModal(item.id)">
+                        ➕ Thêm hạn mức
+                      </button>
+                    }
+                  </div>
+
+                  @if (item.entitlements.length === 0) {
+                    <p class="no-entitlements">Chưa cấu hình hạn mức license cho hạng mục này.</p>
+                  } @else {
+                    <div class="entitlements-grid">
+                      @for (ent of item.entitlements; track ent.id) {
+                        <div class="entitlement-card">
+                          <div class="ent-top">
+                            <span class="ent-type-badge" [class.unlimited]="ent.licenseType === 'Unlimited'">
+                              {{ ent.licenseType === 'Seat' ? 'Số lượng Seat giới hạn' : 'Không giới hạn (Unlimited)' }}
+                            </span>
+                            <span class="ent-validity">
+                              {{ ent.validFrom }} → {{ ent.validTo }}
+                            </span>
+                          </div>
+
+                          @if (ent.licenseType === 'Seat') {
+                            <div class="quota-progress-container">
+                              <div class="quota-numbers">
+                                <span>Đã cấp: <strong>{{ ent.allocatedQuantity }}</strong> / {{ ent.quantity }} seats</span>
+                                <span class="remaining-seats">Còn lại: <strong>{{ ent.remainingQuantity }}</strong> seats</span>
+                              </div>
+                              <div class="progress-bar-bg">
+                                <div
+                                  class="progress-bar-fill"
+                                  [style.width.%]="(ent.allocatedQuantity / (ent.quantity || 1)) * 100"
+                                  [class.full]="(ent.remainingQuantity || 0) <= 0"
+                                ></div>
+                              </div>
+                            </div>
+                          } @else {
+                            <div class="unlimited-notice">
+                              ✓ Không giới hạn số lượng đơn vị & người dùng kích hoạt
+                            </div>
+                          }
+
+                          <div class="ent-actions">
+                            @if (authService.hasPermission('licenses.allocate')) {
+                              <button type="button" class="btn btn-xs btn-primary" (click)="openAllocateModal(ent.id)">
+                                🎯 Cấp phát License
+                              </button>
+                            }
+                          </div>
+                        </div>
+                      }
+                    </div>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    }
+
+    <!-- TAB 2: Allocations -->
+    @if (activeTab() === 'allocations') {
+      <div class="tab-content">
+        <div class="content-header">
+          <div>
+            <h3>Danh sách Phân bổ Bản quyền cho các Hồ sơ Triển khai</h3>
+            <p class="text-muted">Bảo đảm kiểm soát hạn mức (Seat quota) theo nguyên tắc bi quan (Pessimistic Locking) chống vượt quota.</p>
+          </div>
+          @if (authService.hasPermission('licenses.allocate')) {
+            <button type="button" class="btn btn-primary btn-sm" (click)="openAllocateModal()">
+              🎯 Cấp phát License Mới
+            </button>
+          }
+        </div>
+
+        @if (allocations().length === 0) {
+          <div class="empty-state">
+            <span class="empty-icon">🎯</span>
+            <p>Chưa có hồ sơ triển khai nào được phân bổ bản quyền từ hợp đồng này.</p>
+          </div>
+        } @else {
+          <div class="table-responsive">
+            <table class="data-table">
+              <thead>
+                <tr>
+                  <th>Đơn vị Sử dụng</th>
+                  <th>Phần mềm</th>
+                  <th>Môi trường / Phiên bản</th>
+                  <th class="text-center">Số lượng License (Seats)</th>
+                  <th>Thời điểm cấp</th>
+                  <th class="text-center">Thao tác</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (alloc of allocations(); track alloc.id) {
+                  <tr>
+                    <td class="font-semibold">{{ alloc.organizationName }}</td>
+                    <td>{{ alloc.softwareName }}</td>
+                    <td>
+                      <span class="env-pill env-{{ alloc.environment.toLowerCase() }}">{{ alloc.environment }}</span>
+                      <span class="instance-key">({{ alloc.instanceKey }})</span>
+                    </td>
+                    <td class="text-center">
+                      <span class="seats-badge">{{ alloc.quantity }} seats</span>
+                    </td>
+                    <td>{{ alloc.allocatedAt | date:'HH:mm dd/MM/yyyy' }}</td>
+                    <td class="text-center">
+                      @if (authService.hasPermission('licenses.allocate')) {
+                        <button type="button" class="btn btn-xs btn-outline-danger" (click)="revokeAllocation(alloc.id)">
+                          Thu hồi
+                        </button>
+                      }
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </div>
+    }
+
+    <!-- TAB 3: Documents & Scanner -->
+    @if (activeTab() === 'documents') {
+      <div class="tab-content">
+        <div class="content-header">
+          <div>
+            <h3>Tài liệu Hợp đồng & Hồ sơ Kỹ thuật</h3>
+            <p class="text-muted">Hỗ trợ PDF, DOCX, XLSX, PNG, JPEG (tối đa 20 MB). Tất cả tệp upload sẽ tự động được cách ly và quét virus/mã độc.</p>
+          </div>
+        </div>
+
+        <!-- Upload Box -->
+        @if (authService.hasPermission('contracts.write')) {
+          <div class="upload-panel">
+            <div class="upload-dropzone">
+              <input
+                type="file"
+                id="docUploadInput"
+                (change)="onFileSelected($event)"
+                accept=".pdf,.docx,.xlsx,.png,.jpeg,.jpg"
+                [disabled]="isUploadingDoc()"
+              />
+              <label for="docUploadInput" class="upload-label">
+                <span class="upload-icon">📤</span>
+                <span class="upload-title">Nhấp vào đây để chọn tệp tài liệu đính kèm</span>
+                <span class="upload-hint">Định dạng hỗ trợ: PDF, DOCX, XLSX, PNG, JPEG (tối đa 20 MB/tệp)</span>
+              </label>
+            </div>
+
+            @if (isUploadingDoc()) {
+              <div class="upload-progress">
+                <div class="spinner"></div> Đang chuyển tệp vào kho cách ly (Quarantine)...
+              </div>
+            }
+
+            @if (docUploadError()) {
+              <div class="alert alert-danger mt-2">
+                {{ docUploadError() }}
+              </div>
+            }
+          </div>
+        }
+
+        <!-- Attachments Table -->
+        <div class="attachments-list">
+          @if (attachments().length === 0) {
+            <div class="empty-state">
+              <span class="empty-icon">📁</span>
+              <p>Chưa có tài liệu đính kèm nào cho hợp đồng này.</p>
+            </div>
+          } @else {
+            <div class="table-responsive">
+              <table class="data-table">
+                <thead>
+                  <tr>
+                    <th>Tên Tệp</th>
+                    <th>Dung lượng</th>
+                    <th>Trạng thái Quét An toàn</th>
+                    <th>Người tải lên</th>
+                    <th>Thời điểm</th>
+                    <th class="text-center">Thao tác</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (doc of attachments(); track doc.attachmentId) {
+                    <tr>
+                      <td class="font-semibold">
+                        <span class="doc-icon">📄</span> {{ doc.originalName }}
+                      </td>
+                      <td>{{ formatFileSize(doc.sizeBytes) }}</td>
+                      <td>
+                        @switch (doc.scanStatus) {
+                          @case ('Clean') {
+                            <span class="scan-pill scan-clean" title="Tệp an toàn đã vượt qua kiểm tra">
+                              🟢 Sạch (Clean)
+                            </span>
+                          }
+                          @case ('Scanning') {
+                            <span class="scan-pill scan-scanning" title="Tiến trình Worker đang quét">
+                              🔵 Đang quét...
+                            </span>
+                          }
+                          @case ('Rejected') {
+                            <span class="scan-pill scan-rejected" [title]="doc.scanMessage || 'Chứa mã độc'">
+                              🔴 Từ chối ({{ doc.scanMessage || 'Độc hại' }})
+                            </span>
+                          }
+                          @default {
+                            <span class="scan-pill scan-pending" title="Đang cách ly tại quarantine">
+                              🟡 Chờ quét an toàn
+                            </span>
+                          }
+                        }
+                      </td>
+                      <td>{{ doc.attachedByUserName || 'Hệ thống' }}</td>
+                      <td>{{ doc.attachedAt | date:'HH:mm dd/MM/yyyy' }}</td>
+                      <td class="text-center">
+                        <div class="btn-group">
+                          @if (doc.scanStatus === 'Clean') {
+                            <button type="button" class="btn btn-xs btn-primary" (click)="downloadAttachment(doc)">
+                              ⬇ Tải xuống
+                            </button>
+                          } @else {
+                            <button type="button" class="btn btn-xs btn-secondary" disabled title="Tệp chưa xác nhận an toàn">
+                              🔒 Bị khóa
+                            </button>
+                          }
+
+                          @if (authService.hasPermission('contracts.write')) {
+                            <button type="button" class="btn btn-xs btn-outline-danger" (click)="unlinkAttachment(doc)" title="Gỡ tài liệu">
+                              🗑️
+                            </button>
+                          }
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            </div>
+          }
+        </div>
+      </div>
+    }
+  }
+</div>
+
+<!-- Modal Thêm Hạng Mục -->
+@if (isAddItemModalOpen()) {
+  <div class="modal-backdrop" (click)="closeAddItemModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Thêm Hạng Mục Phần Mềm Hợp Đồng</h2>
+        <button type="button" class="close-btn" (click)="closeAddItemModal()">✕</button>
+      </div>
+
+      <form [formGroup]="itemForm" (ngSubmit)="submitAddItem()">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Phần mềm Danh mục dùng chung <span class="required">*</span></label>
+            <select formControlName="softwareId" class="form-control">
+              <option value="">-- Chọn phần mềm --</option>
+              @for (sw of availableSoftware(); track sw.id) {
+                <option [value]="sw.id">{{ sw.name }} ({{ sw.code }})</option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Mô tả hạng mục mua sắm / bản quyền</label>
+            <textarea formControlName="description" class="form-control" rows="3" placeholder="Chi tiết phạm vi gói bản quyền..."></textarea>
+          </div>
+
+          <div class="form-group">
+            <label>Giá trị hạng mục (VNĐ) <span class="required">*</span></label>
+            <input type="number" formControlName="amount" class="form-control" min="0" />
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeAddItemModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary" [disabled]="itemForm.invalid">Lưu hạng mục</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal Thêm Hạn Mức Entitlement -->
+@if (isAddEntitlementModalOpen()) {
+  <div class="modal-backdrop" (click)="closeAddEntitlementModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Cấu hình Hạn mức Bản quyền (License Entitlement)</h2>
+        <button type="button" class="close-btn" (click)="closeAddEntitlementModal()">✕</button>
+      </div>
+
+      <form [formGroup]="entitlementForm" (ngSubmit)="submitAddEntitlement()">
+        <div class="modal-body">
+          <div class="form-group">
+            <label>Loại bản quyền <span class="required">*</span></label>
+            <select formControlName="licenseType" class="form-control">
+              <option value="Seat">Theo số lượng người dùng / vị trí (Seat)</option>
+              <option value="Unlimited">Không giới hạn người dùng (Unlimited)</option>
+            </select>
+          </div>
+
+          @if (entitlementForm.value.licenseType === 'Seat') {
+            <div class="form-group">
+              <label>Số lượng Seat được cấp <span class="required">*</span></label>
+              <input type="number" formControlName="quantity" class="form-control" min="1" />
+            </div>
+          }
+
+          <div class="form-grid">
+            <div class="form-group">
+              <label>Hiệu lực từ ngày <span class="required">*</span></label>
+              <input type="date" formControlName="validFrom" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label>Hiệu lực đến ngày <span class="required">*</span></label>
+              <input type="date" formControlName="validTo" class="form-control" />
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeAddEntitlementModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary" [disabled]="entitlementForm.invalid">Lưu hạn mức</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}
+
+<!-- Modal Phân Bổ License -->
+@if (isAllocateModalOpen()) {
+  <div class="modal-backdrop" (click)="closeAllocateModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Phân Bổ Bản Quyền cho Hồ Sơ Triển Khai</h2>
+        <button type="button" class="close-btn" (click)="closeAllocateModal()">✕</button>
+      </div>
+
+      <form [formGroup]="allocateForm" (ngSubmit)="submitAllocate()">
+        <div class="modal-body">
+          @if (allocateError()) {
+            <div class="alert alert-danger">
+              {{ allocateError() }}
+            </div>
+          }
+
+          <div class="form-group">
+            <label>Gói bản quyền (Entitlement) <span class="required">*</span></label>
+            <select formControlName="entitlementId" class="form-control">
+              <option value="">-- Chọn gói bản quyền --</option>
+              @for (item of contract()?.items; track item.id) {
+                <optgroup [label]="item.softwareName">
+                  @for (ent of item.entitlements; track ent.id) {
+                    <option [value]="ent.id">
+                      {{ ent.licenseType === 'Seat' ? (ent.quantity + ' seats (Còn ' + ent.remainingQuantity + ')') : 'Không giới hạn' }} | {{ ent.validFrom }} → {{ ent.validTo }}
+                    </option>
+                  }
+                </optgroup>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Hồ sơ Triển khai đơn vị tiếp nhận <span class="required">*</span></label>
+            <select formControlName="deploymentId" class="form-control">
+              <option value="">-- Chọn hồ sơ triển khai --</option>
+              @for (dep of getFilteredDeploymentsForSelectedEntitlement(); track dep.id) {
+                <option [value]="dep.id">
+                  {{ dep.organizationName }} - {{ dep.softwareName }} ({{ dep.environment }})
+                </option>
+              }
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Số lượng Seats phân bổ <span class="required">*</span></label>
+            <input type="number" formControlName="quantity" class="form-control" min="1" />
+            <small class="text-muted">Hệ thống sẽ kiểm tra và khóa hàng (Pessimistic Lock) để chống vượt quota.</small>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeAllocateModal()">Hủy</button>
+          <button type="submit" class="btn btn-primary" [disabled]="allocateForm.invalid">Xác nhận Phân bổ</button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

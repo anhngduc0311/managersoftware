@@ -2,7 +2,7 @@ import { inject } from '@angular/core';
 import { Router, CanActivateFn } from '@angular/router';
 import { AuthService } from '@core/services/auth.service';
 
-export const permissionGuard = (requiredPermission: string): CanActivateFn => {
+export const permissionGuard = (...requiredPermissions: string[]): CanActivateFn => {
   return () => {
     const authService = inject(AuthService);
     const router = inject(Router);
@@ -12,7 +12,7 @@ export const permissionGuard = (requiredPermission: string): CanActivateFn => {
       return false;
     }
 
-    if (authService.hasPermission(requiredPermission)) {
+    if (requiredPermissions.some(p => authService.hasPermission(p))) {
       return true;
     }
 

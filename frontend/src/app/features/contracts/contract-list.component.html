@@ -1,0 +1,287 @@
+<div class="page-container">
+  <!-- Header -->
+  <div class="page-header">
+    <div class="title-area">
+      <div class="breadcrumb">
+        <span>Trang chủ</span> / <span class="current">Hợp đồng & Bản quyền</span>
+      </div>
+      <h1>Quản lý Hợp đồng & Bản quyền Phần mềm</h1>
+      <p class="subtitle">Theo dõi các hợp đồng mua sắm, hạn mức bản quyền (Seat/Unlimited) và phân bổ cho các cơ quan đơn vị toàn tỉnh.</p>
+    </div>
+
+    <div class="action-area">
+      @if (authService.hasPermission('contracts.write')) {
+        <button type="button" class="btn btn-primary" (click)="openCreateModal()">
+          <span class="btn-icon">➕</span> Thêm Hợp đồng mới
+        </button>
+      }
+    </div>
+  </div>
+
+  <!-- Content Card -->
+  <div class="content-card">
+    <!-- Filter Bar -->
+    <div class="filter-bar">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input
+          type="text"
+          placeholder="Tìm số hợp đồng, cơ quan, nhà cung cấp..."
+          [ngModel]="searchTerm()"
+          (ngModelChange)="searchTerm.set($event)"
+          (keyup.enter)="onSearch()"
+        />
+      </div>
+
+      <div class="filter-controls">
+        <select [ngModel]="selectedStatus()" (ngModelChange)="selectedStatus.set($event); onSearch()">
+          <option value="">Tất cả trạng thái</option>
+          <option value="Active">Đang hiệu lực</option>
+          <option value="Expired">Hết hiệu lực</option>
+          <option value="Terminated">Đã chấm dứt</option>
+          <option value="Draft">Dự thảo</option>
+        </select>
+
+        <select [ngModel]="selectedOrgId()" (ngModelChange)="selectedOrgId.set($event); onSearch()">
+          <option value="">Tất cả đơn vị sở hữu</option>
+          @for (org of organizations(); track org.id) {
+            <option [value]="org.id">{{ org.name }}</option>
+          }
+        </select>
+
+        <select [ngModel]="selectedVendorId()" (ngModelChange)="selectedVendorId.set($event); onSearch()">
+          <option value="">Tất cả nhà cung cấp</option>
+          @for (vendor of vendors(); track vendor.id) {
+            <option [value]="vendor.id">{{ vendor.name }}</option>
+          }
+        </select>
+
+        <button type="button" class="btn btn-secondary" (click)="resetFilters()" title="Làm mới bộ lọc">
+          ↺
+        </button>
+      </div>
+    </div>
+
+    <!-- Table Content -->
+    <div class="table-responsive">
+      <table class="data-table">
+        <thead>
+          <tr>
+            <th>Số Hợp đồng</th>
+            <th>Đơn vị Sở hữu</th>
+            <th>Nhà Cung cấp</th>
+            <th>Thời hạn Hiệu lực</th>
+            <th>Trạng thái</th>
+            <th class="text-right">Tổng giá trị</th>
+            <th>Hạng mục / Bản quyền</th>
+            <th class="text-center">Thao tác</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (isLoading()) {
+            <tr>
+              <td colspan="8" class="text-center loading-cell">
+                <div class="spinner"></div> Đang tải danh sách hợp đồng...
+              </td>
+            </tr>
+          } @else if (contracts().length === 0) {
+            <tr>
+              <td colspan="8" class="text-center empty-cell">
+                <div class="empty-state">
+                  <span class="empty-icon">📂</span>
+                  <p>Không có hợp đồng nào phù hợp với bộ lọc tìm kiếm.</p>
+                </div>
+              </td>
+            </tr>
+          } @else {
+            @for (contract of contracts(); track contract.id) {
+              <tr class="clickable-row" (click)="viewDetail(contract.id)">
+                <td class="font-semibold text-primary">
+                  <span class="contract-no">{{ contract.contractNo }}</span>
+                  <div class="signed-date">Ký: {{ contract.signedDate }}</div>
+                </td>
+                <td>
+                  <div class="org-cell">
+                    <span class="org-name">{{ contract.owningOrganizationName }}</span>
+                  </div>
+                </td>
+                <td>
+                  <div class="vendor-cell">{{ contract.vendorName }}</div>
+                </td>
+                <td>
+                  <div class="date-range">
+                    <span>{{ contract.startDate }}</span>
+                    <span class="date-sep">→</span>
+                    <span>{{ contract.endDate }}</span>
+                  </div>
+                  @if (contract.maintenanceEndDate) {
+                    <div class="maintenance-pill" title="Thời hạn bảo trì nâng cấp">
+                      🛠️ BT đến {{ contract.maintenanceEndDate }}
+                    </div>
+                  }
+                </td>
+                <td>
+                  <span class="status-badge" [ngClass]="getStatusBadgeClass(contract.status)">
+                    {{ getStatusLabel(contract.status) }}
+                  </span>
+                </td>
+                <td class="text-right">
+                  @if (contract.totalAmount !== null && contract.totalAmount !== undefined) {
+                    <span class="amount-value">{{ formatCurrency(contract.totalAmount, contract.currencyCode) }}</span>
+                  } @else {
+                    <span class="restricted-financial" title="Không có quyền xem chi phí tài chính (contracts.read)">
+                      🔒 Bảo mật
+                    </span>
+                  }
+                </td>
+                <td>
+                  <div class="items-summary">
+                    <span class="item-count-badge">{{ contract.items.length }} hạng mục</span>
+                  </div>
+                </td>
+                <td class="text-center" (click)="$event.stopPropagation()">
+                  <button type="button" class="btn btn-sm btn-outline" (click)="viewDetail(contract.id)" title="Xem chi tiết & Phân bổ">
+                    👁️ Chi tiết
+                  </button>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination Footer -->
+    @if (totalCount() > 0) {
+      <div class="pagination-bar">
+        <span class="total-info">Tổng cộng: <strong>{{ totalCount() }}</strong> hợp đồng</span>
+        <div class="pagination-controls">
+          <button
+            type="button"
+            class="btn btn-sm"
+            [disabled]="page() <= 1"
+            (click)="page.set(page() - 1); loadContracts()"
+          >
+            Trước
+          </button>
+          <span class="page-number">Trang {{ page() }}</span>
+          <button
+            type="button"
+            class="btn btn-sm"
+            [disabled]="page() * pageSize() >= totalCount()"
+            (click)="page.set(page() + 1); loadContracts()"
+          >
+            Sau
+          </button>
+        </div>
+      </div>
+    }
+  </div>
+</div>
+
+<!-- Modal Thêm Hợp Đồng -->
+@if (isCreateModalOpen()) {
+  <div class="modal-backdrop" (click)="closeCreateModal()">
+    <div class="modal-card" (click)="$event.stopPropagation()">
+      <div class="modal-header">
+        <h2>Thêm Hợp Đồng Mua Sắm / Thuê Bản Quyền Mới</h2>
+        <button type="button" class="close-btn" (click)="closeCreateModal()">✕</button>
+      </div>
+
+      <form [formGroup]="createForm" (ngSubmit)="submitCreate()">
+        <div class="modal-body">
+          @if (modalError()) {
+            <div class="alert alert-danger">
+              {{ modalError() }}
+            </div>
+          }
+
+          <div class="form-grid">
+            <div class="form-group col-span-2">
+              <label>Số hiệu Hợp đồng <span class="required">*</span></label>
+              <input type="text" formControlName="contractNo" placeholder="VD: HD-01/2026/STTTT-VNPT" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label>Đơn vị Quản lý / Sở hữu <span class="required">*</span></label>
+              <select formControlName="owningOrganizationId" class="form-control">
+                <option value="">-- Chọn đơn vị --</option>
+                @for (org of organizations(); track org.id) {
+                  <option [value]="org.id">{{ org.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Nhà cung cấp / Đối tác <span class="required">*</span></label>
+              <select formControlName="vendorId" class="form-control">
+                <option value="">-- Chọn nhà cung cấp --</option>
+                @for (vendor of vendors(); track vendor.id) {
+                  <option [value]="vendor.id">{{ vendor.name }}</option>
+                }
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Trạng thái <span class="required">*</span></label>
+              <select formControlName="status" class="form-control">
+                <option value="Active">Đang hiệu lực (Active)</option>
+                <option value="Draft">Dự thảo (Draft)</option>
+                <option value="Expired">Hết hiệu lực (Expired)</option>
+                <option value="Terminated">Đã chấm dứt (Terminated)</option>
+              </select>
+            </div>
+
+            <div class="form-group">
+              <label>Ngày ký <span class="required">*</span></label>
+              <input type="date" formControlName="signedDate" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label>Ngày bắt đầu hiệu lực <span class="required">*</span></label>
+              <input type="date" formControlName="startDate" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label>Ngày kết thúc hiệu lực <span class="required">*</span></label>
+              <input type="date" formControlName="endDate" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label>Tổng giá trị hợp đồng (VNĐ) <span class="required">*</span></label>
+              <input type="number" formControlName="totalAmount" class="form-control" min="0" />
+            </div>
+
+            <div class="form-group">
+              <label>Loại tiền tệ</label>
+              <input type="text" formControlName="currencyCode" class="form-control" readonly />
+            </div>
+
+            <div class="form-group">
+              <label>Bắt đầu bảo trì / hỗ trợ</label>
+              <input type="date" formControlName="maintenanceStartDate" class="form-control" />
+            </div>
+
+            <div class="form-group">
+              <label>Kết thúc bảo trì / hỗ trợ</label>
+              <input type="date" formControlName="maintenanceEndDate" class="form-control" />
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" (click)="closeCreateModal()" [disabled]="isSubmitting()">
+            Hủy
+          </button>
+          <button type="submit" class="btn btn-primary" [disabled]="isSubmitting() || createForm.invalid">
+            @if (isSubmitting()) {
+              <span>Đang lưu...</span>
+            } @else {
+              <span>Lưu & Tiếp tục</span>
+            }
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+}

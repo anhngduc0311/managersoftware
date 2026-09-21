@@ -34,6 +34,11 @@ public static class DependencyInjection
         services.AddScoped<IBackgroundJobService, LaoCai.SoftwareManagement.Application.Services.BackgroundJobService>();
         services.AddScoped<INotificationService, LaoCai.SoftwareManagement.Application.Services.NotificationService>();
         services.AddScoped<IDeploymentService, LaoCai.SoftwareManagement.Application.Services.DeploymentService>();
+        services.AddScoped<IContractService, LaoCai.SoftwareManagement.Application.Services.ContractService>();
+        services.AddScoped<ILicenseAllocationService, LaoCai.SoftwareManagement.Application.Services.LicenseAllocationService>();
+        services.AddSingleton<IFileStorage, PhysicalFileStorage>();
+        services.AddSingleton<IFileScanner, RuleBasedFileScanner>();
+        services.AddScoped<IDocumentService, LaoCai.SoftwareManagement.Application.Services.DocumentService>();
 
         return services;
     }

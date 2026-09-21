@@ -3,7 +3,9 @@ using LaoCai.SoftwareManagement.Application.Common.Interfaces;
 using LaoCai.SoftwareManagement.Domain.Common;
 using LaoCai.SoftwareManagement.Domain.Entities.Audit;
 using LaoCai.SoftwareManagement.Domain.Entities.Catalog;
+using LaoCai.SoftwareManagement.Domain.Entities.Contracts;
 using LaoCai.SoftwareManagement.Domain.Entities.Deployments;
+using LaoCai.SoftwareManagement.Domain.Entities.Documents;
 using LaoCai.SoftwareManagement.Domain.Entities.Iam;
 using LaoCai.SoftwareManagement.Domain.Entities.Jobs;
 using LaoCai.SoftwareManagement.Domain.Entities.Notifications;
@@ -58,6 +60,16 @@ public class AppDbContext : DbContext, IAppDbContext
 
     // Notifications Schema
     public DbSet<Notification> Notifications => Set<Notification>();
+
+    // Contracts Schema
+    public DbSet<Contract> Contracts => Set<Contract>();
+    public DbSet<ContractItem> ContractItems => Set<ContractItem>();
+    public DbSet<LicenseEntitlement> LicenseEntitlements => Set<LicenseEntitlement>();
+    public DbSet<LicenseAllocation> LicenseAllocations => Set<LicenseAllocation>();
+
+    // Documents Schema
+    public DbSet<Document> Documents => Set<Document>();
+    public DbSet<DocumentAttachment> DocumentAttachments => Set<DocumentAttachment>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -381,6 +393,122 @@ public class AppDbContext : DbContext, IAppDbContext
                 .WithMany()
                 .HasForeignKey(n => n.RecipientUserId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Contracts Schema Configurations
+        modelBuilder.Entity<Contract>(builder =>
+        {
+            builder.ToTable("contracts", "contracts");
+            builder.HasKey(c => c.Id);
+            builder.Property(c => c.ContractNo).HasMaxLength(100).IsRequired();
+            builder.Property(c => c.Status).HasMaxLength(30).HasDefaultValue("Active").IsRequired();
+            builder.Property(c => c.TotalAmount).HasPrecision(18, 2);
+            builder.Property(c => c.CurrencyCode).HasMaxLength(3).HasDefaultValue("VND").IsRequired();
+            builder.Property(c => c.Version).IsConcurrencyToken();
+
+            builder.HasIndex(c => c.ContractNo);
+            builder.HasIndex(c => new { c.OwningOrganizationId, c.Status });
+            builder.HasIndex(c => new { c.VendorId, c.Status });
+
+            builder.HasOne(c => c.OwningOrganization)
+                .WithMany()
+                .HasForeignKey(c => c.OwningOrganizationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(c => c.Vendor)
+                .WithMany()
+                .HasForeignKey(c => c.VendorId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(c => c.Items)
+                .WithOne(i => i.Contract)
+                .HasForeignKey(i => i.ContractId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ContractItem>(builder =>
+        {
+            builder.ToTable("contract_items", "contracts");
+            builder.HasKey(ci => ci.Id);
+            builder.Property(ci => ci.Description).HasMaxLength(500);
+            builder.Property(ci => ci.Amount).HasPrecision(18, 2);
+
+            builder.HasOne(ci => ci.Software)
+                .WithMany()
+                .HasForeignKey(ci => ci.SoftwareId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(ci => ci.Entitlements)
+                .WithOne(e => e.ContractItem)
+                .HasForeignKey(e => e.ContractItemId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<LicenseEntitlement>(builder =>
+        {
+            builder.ToTable("license_entitlements", "contracts");
+            builder.HasKey(le => le.Id);
+            builder.Property(le => le.LicenseType).HasMaxLength(50).IsRequired();
+
+            builder.HasMany(le => le.Allocations)
+                .WithOne(a => a.Entitlement)
+                .HasForeignKey(a => a.EntitlementId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<LicenseAllocation>(builder =>
+        {
+            builder.ToTable("license_allocations", "contracts");
+            builder.HasKey(la => la.Id);
+
+            builder.HasIndex(la => new { la.EntitlementId, la.DeploymentId }).IsUnique();
+
+            builder.HasOne(la => la.Deployment)
+                .WithMany()
+                .HasForeignKey(la => la.DeploymentId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Documents Schema Configurations
+        modelBuilder.Entity<Document>(builder =>
+        {
+            builder.ToTable("documents", "documents");
+            builder.HasKey(d => d.Id);
+            builder.Property(d => d.StorageKey).HasMaxLength(255).IsRequired();
+            builder.HasIndex(d => d.StorageKey).IsUnique();
+
+            builder.Property(d => d.OriginalName).HasMaxLength(255).IsRequired();
+            builder.Property(d => d.ContentType).HasMaxLength(100).IsRequired();
+            builder.Property(d => d.ChecksumSha256).HasMaxLength(64).IsRequired();
+            builder.Property(d => d.ScanStatus).HasMaxLength(30).HasDefaultValue("Pending").IsRequired();
+
+            builder.HasIndex(d => d.ScanStatus);
+            builder.HasIndex(d => d.CreatedAt);
+
+            builder.HasOne(d => d.UploadedByUser)
+                .WithMany()
+                .HasForeignKey(d => d.UploadedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasMany(d => d.Attachments)
+                .WithOne(a => a.Document)
+                .HasForeignKey(a => a.DocumentId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<DocumentAttachment>(builder =>
+        {
+            builder.ToTable("document_attachments", "documents");
+            builder.HasKey(da => da.Id);
+            builder.Property(da => da.EntityType).HasMaxLength(50).IsRequired();
+
+            builder.HasIndex(da => new { da.DocumentId, da.EntityType, da.EntityId }).IsUnique();
+            builder.HasIndex(da => new { da.EntityType, da.EntityId });
+
+            builder.HasOne(da => da.AttachedByUser)
+                .WithMany()
+                .HasForeignKey(da => da.AttachedByUserId)
+                .OnDelete(DeleteBehavior.Restrict);
         });
     }
 

@@ -58,6 +58,16 @@ export const routes: Routes = [
         loadComponent: () => import('@features/deployments/deployment-detail.component').then(m => m.DeploymentDetailComponent)
       },
       {
+        path: 'contracts',
+        canActivate: [permissionGuard('contracts.read', 'contracts.write', 'licenses.allocate')],
+        loadComponent: () => import('@features/contracts/contract-list.component').then(m => m.ContractListComponent)
+      },
+      {
+        path: 'contracts/:id',
+        canActivate: [permissionGuard('contracts.read', 'contracts.write', 'licenses.allocate')],
+        loadComponent: () => import('@features/contracts/contract-detail.component').then(m => m.ContractDetailComponent)
+      },
+      {
         path: 'admin/users',
         canActivate: [permissionGuard('access.manage')],
         loadComponent: () => import('@features/admin/users/user-list.component').then(m => m.UserListComponent)

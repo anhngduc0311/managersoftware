@@ -153,6 +153,15 @@
           </a>
         }
 
+        <!-- Hợp đồng & Bản quyền (Giai đoạn 4) -->
+        @if (authService.hasPermission('contracts.read') || authService.hasPermission('contracts.write') || authService.hasPermission('licenses.allocate')) {
+          <div class="nav-section-title" *ngIf="isSidebarOpen">HỢP ĐỒNG & BẢN QUYỀN</div>
+          <a routerLink="/contracts" routerLinkActive="active" class="nav-item">
+            <span class="nav-icon">📜</span>
+            <span class="nav-label" *ngIf="isSidebarOpen">Hợp đồng & License</span>
+          </a>
+        }
+
         @if (authService.hasPermission('organizations.read')) {
           <div class="nav-section-title" *ngIf="isSidebarOpen">TỔ CHỨC & ĐƠN VỊ</div>
           <a routerLink="/organizations" routerLinkActive="active" class="nav-item">
