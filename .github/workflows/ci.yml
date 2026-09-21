@@ -20,13 +20,13 @@ jobs:
           dotnet-version: '10.0.x'
 
       - name: Restore Dependencies
-        run: dotnet restore backend/LaoCai.SoftwareManagement.sln
+        run: dotnet restore backend/LaoCai.SoftwareManagement.slnx
 
       - name: Build Solution
-        run: dotnet build backend/LaoCai.SoftwareManagement.sln --no-restore --configuration Release
+        run: dotnet build backend/LaoCai.SoftwareManagement.slnx --no-restore --configuration Release
 
       - name: Run Unit & Integration Tests
-        run: dotnet test backend/LaoCai.SoftwareManagement.sln --no-build --configuration Release --verbosity normal
+        run: dotnet test backend/LaoCai.SoftwareManagement.slnx --no-build --configuration Release --verbosity normal
 
   frontend-ci:
     name: Frontend Lint & Build (Angular 22)
