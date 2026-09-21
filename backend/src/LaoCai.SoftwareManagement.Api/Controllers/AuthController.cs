@@ -44,7 +44,7 @@ public class AuthController : BaseApiController
         Response.Cookies.Append("XSRF-TOKEN", tokens.RequestToken ?? "", new CookieOptions
         {
             HttpOnly = false,
-            Secure = true,
+            Secure = HttpContext.Request.IsHttps,
             SameSite = SameSiteMode.Lax,
             Path = "/"
         });
