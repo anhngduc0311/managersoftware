@@ -16,6 +16,9 @@ builder.Services.AddScoped<ICurrentUserService, WorkerCurrentUserService>();
 // Register Handlers
 builder.Services.AddScoped<IJobHandler, WorkflowNotificationJobHandler>();
 builder.Services.AddScoped<IJobHandler, DocumentScanJobHandler>();
+builder.Services.AddScoped<IJobHandler, DeploymentImportValidateJobHandler>();
+builder.Services.AddScoped<IJobHandler, DeploymentExportJobHandler>();
+builder.Services.AddScoped<IJobHandler, ExpirationReminderJobHandler>();
 
 // Register Worker as HostedService
 builder.Services.AddSingleton<BackgroundJobWorker>();

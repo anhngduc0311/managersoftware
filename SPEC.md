@@ -622,28 +622,28 @@ Tập dữ liệu kiểm chứng tối thiểu gồm hai đơn vị độc lập
 
 | ID | Vai trò | Việc làm và đầu ra cụ thể | Phụ thuộc | Hoàn thành khi |
 | --- | --- | --- | --- | --- |
-| T-10.1 | BE | [ ] Migration/API cấu hình coverage eligibility có khoảng hiệu lực | T-01.4, T-04.5 | Không overlap; quyền quản lý rõ; mẫu số dùng đúng tập theo asOf |
-| T-10.2 | BE/QA | [ ] Query overview hiện tại/asOf, tách hợp đồng và các currency, áp scope | T-10.1, T-06.4, T-08.2 | Fixture nhiều revision/hạng mục cho đúng số; đơn vị đổi tên vẫn đúng lịch sử; mẫu số 0 không chia lỗi |
-| T-10.3 | FE | [ ] Dashboard KPI/ECharts/filter URL, mô tả công thức và thời điểm báo cáo | T-10.2, T-04.6 | Không hiện chỉ số tài chính trái quyền; official/pending riêng; chart lazy và màn hình nhỏ dùng được |
+| T-10.1 | BE | [x] Migration/API cấu hình coverage eligibility có khoảng hiệu lực | T-01.4, T-04.5 | Không overlap; quyền quản lý rõ; mẫu số dùng đúng tập theo asOf |
+| T-10.2 | BE/QA | [x] Query overview hiện tại/asOf, tách hợp đồng và các currency, áp scope | T-10.1, T-06.4, T-08.2 | Fixture nhiều revision/hạng mục cho đúng số; đơn vị đổi tên vẫn đúng lịch sử; mẫu số 0 không chia lỗi |
+| T-10.3 | FE | [x] Dashboard KPI/ECharts/filter URL, mô tả công thức và thời điểm báo cáo | T-10.2, T-04.6 | Không hiện chỉ số tài chính trái quyền; official/pending riêng; chart lazy và màn hình nhỏ dùng được |
 
 ### 4.12. T-11 — Nhập/xuất Excel
 
 | ID | Vai trò | Việc làm và đầu ra cụ thể | Phụ thuộc | Hoàn thành khi |
 | --- | --- | --- | --- | --- |
-| T-11.1 | BE | [ ] Tạo template endpoint, batch/error/staging schema và parser ClosedXML | T-01.4, T-09.1, T-07.1 | Tệp template round-trip đọc được; chặn formula, quá 5.000 dòng và ngày mơ hồ |
-| T-11.2 | BE | [ ] Job validate import kiểm tra catalog/scope/trùng/ngày và lỗi theo dòng | T-11.1, T-06.2, T-07.2 | Ready chỉ khi không lỗi; lỗi không lộ bản ghi ngoài scope; tệp chưa Clean không xử lý |
-| T-11.3 | BE/QA | [ ] Commit import all-or-nothing, kiểm tra lại quyền/dữ liệu và khóa batch | T-11.2, T-03.3 | Một lỗi ghi 0 dòng; retry/commit song song không trùng; dữ liệu chỉ Draft |
-| T-11.4 | BE | [ ] Job export theo batch, snapshot bộ lọc, cột quyền, text an toàn, TTL/manifest | T-10.2, T-07.2, T-09.1 | File chỉ công bố sau hoàn tất; công thức thành text; tiền/ngày đúng; file tạm lỗi được dọn |
-| T-11.5 | BE/QA | [ ] Download export kiểm tra manifest/quyền hiện tại và hết hạn | T-11.4 | Thu hồi một phần scope chặn toàn file; không có URL public; >24 giờ bị chặn theo cấu hình |
-| T-11.6 | FE | [ ] UI tải mẫu/upload/xem lỗi/confirm commit/export/tiến độ và link kết quả | T-11.3, T-11.5, T-07.4 | E2E import lỗi → sửa file → commit → duyệt → export đúng scope |
+| T-11.1 | BE | [x] Tạo template endpoint, batch/error/staging schema và parser ClosedXML | T-01.4, T-09.1, T-07.1 | Tệp template round-trip đọc được; chặn formula, quá 5.000 dòng và ngày mơ hồ |
+| T-11.2 | BE | [x] Job validate import kiểm tra catalog/scope/trùng/ngày và lỗi theo dòng | T-11.1, T-06.2, T-07.2 | Ready chỉ khi không lỗi; lỗi không lộ bản ghi ngoài scope; tệp chưa Clean không xử lý |
+| T-11.3 | BE/QA | [x] Commit import all-or-nothing, kiểm tra lại quyền/dữ liệu và khóa batch | T-11.2, T-03.3 | Một lỗi ghi 0 dòng; retry/commit song song không trùng; dữ liệu chỉ Draft |
+| T-11.4 | BE | [x] Job export theo batch, snapshot bộ lọc, cột quyền, text an toàn, TTL/manifest | T-10.2, T-07.2, T-09.1 | File chỉ công bố sau hoàn tất; công thức thành text; tiền/ngày đúng; file tạm lỗi được dọn |
+| T-11.5 | BE/QA | [x] Download export kiểm tra manifest/quyền hiện tại và hết hạn | T-11.4 | Thu hồi một phần scope chặn toàn file; không có URL public; >24 giờ bị chặn theo cấu hình |
+| T-11.6 | FE | [x] UI tải mẫu/upload/xem lỗi/confirm commit/export/tiến độ và link kết quả | T-11.3, T-11.5, T-07.4 | E2E import lỗi → sửa file → commit → duyệt → export đúng scope |
 
 ### 4.13. T-12 — Nhắc hạn và audit UI
 
 | ID | Vai trò | Việc làm và đầu ra cụ thể | Phụ thuộc | Hoàn thành khi |
 | --- | --- | --- | --- | --- |
-| T-12.1 | BE | [ ] Job nhắc 30/15/7 ngày cho hợp đồng/license/bảo trì, quyền recipient và catch-up | T-08.2, T-07.3 | Test đúng ngày địa phương, đổi ngày hết hạn, downtime và dedupe; không thông báo trái quyền |
-| T-12.2 | BE/FE | [ ] API/UI audit có filter/scope/paging và correlation ID | T-03.3, T-04.3, T-04.6 | Auditor chỉ xem phạm vi cấp; không sửa/xóa; JSON nhạy cảm đã lọc |
-| T-12.3 | BE/OPS | [ ] Tách DB role runtime/migration, áp quyền audit append-only | T-12.2, T-03.1 | Runtime INSERT audit được nhưng UPDATE/DELETE bị DB từ chối; migration vẫn chạy có kiểm soát |
+| T-12.1 | BE | [x] Job nhắc 30/15/7 ngày cho hợp đồng/license/bảo trì, quyền recipient và catch-up | T-08.2, T-07.3 | Test đúng ngày địa phương, đổi ngày hết hạn, downtime và dedupe; không thông báo trái quyền |
+| T-12.2 | BE/FE | [x] API/UI audit có filter/scope/paging và correlation ID | T-03.3, T-04.3, T-04.6 | Auditor chỉ xem phạm vi cấp; không sửa/xóa; JSON nhạy cảm đã lọc |
+| T-12.3 | BE/OPS | [x] Tách DB role runtime/migration, áp quyền audit append-only | T-12.2, T-03.1 | Runtime INSERT audit được nhưng UPDATE/DELETE bị DB từ chối; migration vẫn chạy có kiểm soát |
 
 ### 4.14. T-13 — Bảo mật, E2E và hiệu năng
 

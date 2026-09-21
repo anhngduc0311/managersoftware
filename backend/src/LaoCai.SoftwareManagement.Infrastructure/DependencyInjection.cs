@@ -39,6 +39,10 @@ public static class DependencyInjection
         services.AddSingleton<IFileStorage, PhysicalFileStorage>();
         services.AddSingleton<IFileScanner, RuleBasedFileScanner>();
         services.AddScoped<IDocumentService, LaoCai.SoftwareManagement.Application.Services.DocumentService>();
+        services.AddScoped<IDashboardService, LaoCai.SoftwareManagement.Application.Services.DashboardService>();
+        services.AddScoped<IAuditService, LaoCai.SoftwareManagement.Application.Services.AuditService>();
+        services.AddScoped<IExpirationReminderService, LaoCai.SoftwareManagement.Application.Services.ExpirationReminderService>();
+        services.AddScoped<IExcelService, ExcelService>();
 
         return services;
     }

@@ -65,7 +65,7 @@ public static class DataSeeder
             ["SystemAdmin"] = (
                 "Quản trị viên Hệ thống",
                 "Quản lý tài khoản, phân quyền, cấu hình và tiến trình vận hành",
-                new[] { "access.manage", "settings.manage", "jobs.manage", "organizations.read", "organizations.manage", "catalog.read", "contracts.read", "contracts.write", "licenses.allocate" }
+                new[] { "access.manage", "settings.manage", "jobs.manage", "organizations.read", "organizations.manage", "catalog.read", "deployments.read", "deployments.read_drafts", "deployments.write", "deployments.approve", "contracts.read", "contracts.write", "licenses.allocate", "reports.read", "reports.export", "reports.import", "audit.read" }
             ),
             ["CatalogManager"] = (
                 "Quản trị Danh mục",
@@ -282,7 +282,8 @@ public static class DataSeeder
             ("coordinator", "Điều phối viên Sở TTTT", "Coordinator", "Global", null),
             ("editor_baothang", "Chuyên viên CNTT Huyện Bảo Thắng", "UnitEditor", "Organization", orgBaoThangId),
             ("approver_baothang", "Lãnh đạo UBND Huyện Bảo Thắng", "UnitApprover", "Organization", orgBaoThangId),
-            ("viewer_prov", "Cán bộ Giám sát Tỉnh", "Viewer", "Global", null)
+            ("viewer_prov", "Cán bộ Giám sát Tỉnh", "Viewer", "Global", null),
+            ("auditor", "Kiểm toán viên Nhà nước", "Auditor", "Global", null)
         };
 
         foreach (var u in usersToSeed)
@@ -644,6 +645,52 @@ public static class DataSeeder
 
                     context.ContractItems.Add(item2);
                     context.LicenseEntitlements.Add(ent2);
+                }
+            }
+        }
+
+        // 9. Seed Coverage Eligibility (Phase 5)
+        var covId1 = Guid.Parse("11111111-ce01-0000-0000-000000000001");
+        if (!await context.CoverageEligibilities.AnyAsync(ce => ce.Id == covId1))
+        {
+            var swIoffice = await context.Software.FirstOrDefaultAsync(s => s.Code == "VNPT_IOFFICE");
+            var swIgate = await context.Software.FirstOrDefaultAsync(s => s.Code == "VNPT_IGATE");
+
+            if (swIoffice != null)
+            {
+                var orgIds = new[] { orgStttId, orgBaoThangId, orgSaPaId, orgTpLaoCaiId };
+                foreach (var oId in orgIds)
+                {
+                    context.CoverageEligibilities.Add(new LaoCai.SoftwareManagement.Domain.Entities.Reports.CoverageEligibility
+                    {
+                        Id = Guid.NewGuid(),
+                        OrganizationId = oId,
+                        SoftwareId = swIoffice.Id,
+                        ValidFrom = new DateOnly(2024, 1, 1),
+                        ValidTo = null,
+                        IsEligible = true,
+                        Note = "Đơn vị bắt buộc triển khai hệ thống quản lý văn bản điện tử theo kế hoạch chuyển đổi số tỉnh.",
+                        CreatedAt = nowUtc
+                    });
+                }
+            }
+
+            if (swIgate != null)
+            {
+                var districtOrgIds = new[] { orgBaoThangId, orgSaPaId, orgTpLaoCaiId };
+                foreach (var oId in districtOrgIds)
+                {
+                    context.CoverageEligibilities.Add(new LaoCai.SoftwareManagement.Domain.Entities.Reports.CoverageEligibility
+                    {
+                        Id = Guid.NewGuid(),
+                        OrganizationId = oId,
+                        SoftwareId = swIgate.Id,
+                        ValidFrom = new DateOnly(2024, 1, 1),
+                        ValidTo = null,
+                        IsEligible = true,
+                        Note = "Bộ phận Một cửa cấp huyện/thị xã/thành phố.",
+                        CreatedAt = nowUtc
+                    });
                 }
             }
         }

@@ -7,6 +7,7 @@ using LaoCai.SoftwareManagement.Domain.Entities.Iam;
 using LaoCai.SoftwareManagement.Domain.Entities.Jobs;
 using LaoCai.SoftwareManagement.Domain.Entities.Notifications;
 using LaoCai.SoftwareManagement.Domain.Entities.Organizations;
+using LaoCai.SoftwareManagement.Domain.Entities.Reports;
 using Microsoft.EntityFrameworkCore;
 
 namespace LaoCai.SoftwareManagement.Application.Common.Interfaces;
@@ -53,6 +54,12 @@ public interface IAppDbContext
     // Documents Schema
     DbSet<Document> Documents { get; }
     DbSet<DocumentAttachment> DocumentAttachments { get; }
+
+    // Reports Schema (Phase 5)
+    DbSet<CoverageEligibility> CoverageEligibilities { get; }
+    DbSet<ImportBatch> ImportBatches { get; }
+    DbSet<ImportRowError> ImportRowErrors { get; }
+    DbSet<ExportRequest> ExportRequests { get; }
 
     Task<int> SaveChangesAsync(CancellationToken cancellationToken = default);
 }

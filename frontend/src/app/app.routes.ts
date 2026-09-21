@@ -53,6 +53,11 @@ export const routes: Routes = [
         loadComponent: () => import('@features/deployments/deployment-list.component').then(m => m.DeploymentListComponent)
       },
       {
+        path: 'deployments/excel',
+        canActivate: [permissionGuard('deployments.read', 'reports.export', 'reports.import')],
+        loadComponent: () => import('@features/deployments/excel-wizard.component').then(m => m.ExcelWizardComponent)
+      },
+      {
         path: 'deployments/:id',
         canActivate: [permissionGuard('deployments.read')],
         loadComponent: () => import('@features/deployments/deployment-detail.component').then(m => m.DeploymentDetailComponent)
@@ -81,6 +86,11 @@ export const routes: Routes = [
         path: 'admin/jobs',
         canActivate: [permissionGuard('jobs.manage')],
         loadComponent: () => import('@features/admin/jobs/job-list.component').then(m => m.JobListComponent)
+      },
+      {
+        path: 'admin/audit',
+        canActivate: [permissionGuard('audit.read', 'access.manage')],
+        loadComponent: () => import('@features/admin/audit/audit-log-list.component').then(m => m.AuditLogListComponent)
       }
     ]
   },

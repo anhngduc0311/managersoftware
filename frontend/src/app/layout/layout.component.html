@@ -147,9 +147,13 @@
         <!-- Quản lý Triển khai -->
         @if (authService.hasPermission('deployments.read')) {
           <div class="nav-section-title" *ngIf="isSidebarOpen">TRIỂN KHAI & CÀI ĐẶT</div>
-          <a routerLink="/deployments" routerLinkActive="active" class="nav-item">
+          <a routerLink="/deployments" routerLinkActive="active" [routerLinkActiveOptions]="{ exact: true }" class="nav-item">
             <span class="nav-icon">🚀</span>
             <span class="nav-label" *ngIf="isSidebarOpen">Hồ sơ Triển khai</span>
+          </a>
+          <a routerLink="/deployments/excel" routerLinkActive="active" class="nav-item">
+            <span class="nav-icon">📊</span>
+            <span class="nav-label" *ngIf="isSidebarOpen">Nhập / Xuất Excel</span>
           </a>
         }
 
@@ -170,8 +174,8 @@
           </a>
         }
 
-        <!-- Quản trị hệ thống (SystemAdmin) -->
-        @if (authService.hasPermission('access.manage') || authService.hasPermission('jobs.manage')) {
+        <!-- Quản trị hệ thống (SystemAdmin, Auditor) -->
+        @if (authService.hasPermission('access.manage') || authService.hasPermission('jobs.manage') || authService.hasPermission('audit.read')) {
           <div class="nav-section-title" *ngIf="isSidebarOpen">QUẢN TRỊ HỆ THỐNG</div>
           @if (authService.hasPermission('access.manage')) {
             <a routerLink="/admin/users" routerLinkActive="active" class="nav-item">
@@ -181,6 +185,12 @@
             <a routerLink="/admin/roles" routerLinkActive="active" class="nav-item">
               <span class="nav-icon">🛡️</span>
               <span class="nav-label" *ngIf="isSidebarOpen">Vai trò & Ma trận Quyền</span>
+            </a>
+          }
+          @if (authService.hasPermission('audit.read') || authService.hasPermission('access.manage')) {
+            <a routerLink="/admin/audit" routerLinkActive="active" class="nav-item">
+              <span class="nav-icon">🔍</span>
+              <span class="nav-label" *ngIf="isSidebarOpen">Nhật ký Kiểm toán</span>
             </a>
           }
           @if (authService.hasPermission('jobs.manage')) {

@@ -10,6 +10,7 @@ using LaoCai.SoftwareManagement.Domain.Entities.Iam;
 using LaoCai.SoftwareManagement.Domain.Entities.Jobs;
 using LaoCai.SoftwareManagement.Domain.Entities.Notifications;
 using LaoCai.SoftwareManagement.Domain.Entities.Organizations;
+using LaoCai.SoftwareManagement.Domain.Entities.Reports;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
@@ -70,6 +71,12 @@ public class AppDbContext : DbContext, IAppDbContext
     // Documents Schema
     public DbSet<Document> Documents => Set<Document>();
     public DbSet<DocumentAttachment> DocumentAttachments => Set<DocumentAttachment>();
+
+    // Reports Schema (Phase 5)
+    public DbSet<CoverageEligibility> CoverageEligibilities => Set<CoverageEligibility>();
+    public DbSet<ImportBatch> ImportBatches => Set<ImportBatch>();
+    public DbSet<ImportRowError> ImportRowErrors => Set<ImportRowError>();
+    public DbSet<ExportRequest> ExportRequests => Set<ExportRequest>();
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -510,6 +517,63 @@ public class AppDbContext : DbContext, IAppDbContext
                 .HasForeignKey(da => da.AttachedByUserId)
                 .OnDelete(DeleteBehavior.Restrict);
         });
+
+        // Reports Schema Configurations (Phase 5)
+        modelBuilder.Entity<CoverageEligibility>(builder =>
+        {
+            builder.ToTable("coverage_eligibility", "reports");
+            builder.HasKey(ce => ce.Id);
+
+            builder.HasIndex(ce => new { ce.OrganizationId, ce.SoftwareId, ce.ValidFrom });
+
+            builder.HasOne(ce => ce.Organization)
+                .WithMany()
+                .HasForeignKey(ce => ce.OrganizationId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.HasOne(ce => ce.Software)
+                .WithMany()
+                .HasForeignKey(ce => ce.SoftwareId)
+                .OnDelete(DeleteBehavior.Restrict);
+        });
+
+        modelBuilder.Entity<ImportBatch>(builder =>
+        {
+            builder.ToTable("import_batches", "reports");
+            builder.HasKey(b => b.Id);
+            builder.Property(b => b.Status).HasMaxLength(30).HasDefaultValue("Pending").IsRequired();
+
+            builder.HasIndex(b => b.Status);
+            builder.HasIndex(b => b.RequestedByUserId);
+
+            builder.HasMany(b => b.RowErrors)
+                .WithOne(re => re.Batch)
+                .HasForeignKey(re => re.BatchId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        modelBuilder.Entity<ImportRowError>(builder =>
+        {
+            builder.ToTable("import_row_errors", "reports");
+            builder.HasKey(re => re.Id);
+            builder.Property(re => re.ColumnName).HasMaxLength(100).IsRequired();
+            builder.Property(re => re.ErrorCode).HasMaxLength(100).IsRequired();
+            builder.Property(re => re.ErrorMessage).HasMaxLength(500).IsRequired();
+
+            builder.HasIndex(re => new { re.BatchId, re.RowIndex });
+        });
+
+        modelBuilder.Entity<ExportRequest>(builder =>
+        {
+            builder.ToTable("export_requests", "reports");
+            builder.HasKey(er => er.Id);
+            builder.Property(er => er.ExportType).HasMaxLength(50).IsRequired();
+            builder.Property(er => er.Status).HasMaxLength(30).HasDefaultValue("Queued").IsRequired();
+
+            builder.HasIndex(er => er.Status);
+            builder.HasIndex(er => er.RequestedByUserId);
+            builder.HasIndex(er => er.ExpiresAt);
+        });
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
@@ -539,6 +603,12 @@ public class AppDbContext : DbContext, IAppDbContext
             if (entry.Entity is IVersionedEntity versioned && entry.State == EntityState.Modified)
             {
                 versioned.Version += 1;
+            }
+
+            // Enforce append-only for AuditLog
+            if (entry.Entity is AuditLog && (entry.State == EntityState.Modified || entry.State == EntityState.Deleted))
+            {
+                throw new InvalidOperationException("Nhật ký kiểm toán (AuditLog) là dữ liệu chỉ ghi (Append-Only), không cho phép sửa hoặc xóa.");
             }
 
             // Create AuditLog entry for changes (except AuditLog itself)
