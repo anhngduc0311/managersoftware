@@ -1,0 +1,87 @@
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: laocai_prod_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-laocai_software_prod}
+      POSTGRES_USER: ${POSTGRES_USER:-laocai_app}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-Secured_Prod_Password_2026!}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+      - pg_wal_archive:/var/lib/postgresql/wal_archive
+    networks:
+      - internal_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-laocai_app} -d ${POSTGRES_DB:-laocai_software_prod}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  backend-api:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.api
+    container_name: laocai_prod_api
+    restart: unless-stopped
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=${POSTGRES_DB:-laocai_software_prod};Username=${POSTGRES_USER:-laocai_app};Password=${POSTGRES_PASSWORD:-Secured_Prod_Password_2026!}"
+      ASPNETCORE_ENVIRONMENT: "Production"
+      FileStorage__StorageDirectory: "/app/storage"
+    volumes:
+      - storage_clean:/app/storage/clean
+      - storage_quarantine:/app/storage/quarantine
+      - dataprotection_keys:/app/keys
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal_net
+
+  backend-worker:
+    build:
+      context: .
+      dockerfile: backend/Dockerfile.worker
+    container_name: laocai_prod_worker
+    restart: unless-stopped
+    environment:
+      ConnectionStrings__DefaultConnection: "Host=postgres;Port=5432;Database=${POSTGRES_DB:-laocai_software_prod};Username=${POSTGRES_USER:-laocai_app};Password=${POSTGRES_PASSWORD:-Secured_Prod_Password_2026!}"
+      DOTNET_ENVIRONMENT: "Production"
+      FileStorage__StorageDirectory: "/app/storage"
+    volumes:
+      - storage_clean:/app/storage/clean
+      - storage_quarantine:/app/storage/quarantine
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - internal_net
+
+  frontend-gateway:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: laocai_prod_gateway
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - backend-api
+    networks:
+      - internal_net
+
+volumes:
+  pgdata:
+    driver: local
+  pg_wal_archive:
+    driver: local
+  storage_clean:
+    driver: local
+  storage_quarantine:
+    driver: local
+  dataprotection_keys:
+    driver: local
+
+networks:
+  internal_net:
+    driver: bridge

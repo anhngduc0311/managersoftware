@@ -152,6 +152,7 @@ public class AppDbContext : DbContext, IAppDbContext
             builder.Property(a => a.EntityId).HasMaxLength(100).IsRequired();
             builder.Property(a => a.CorrelationId).HasMaxLength(100);
             builder.HasIndex(a => new { a.OrganizationId, a.OccurredAt });
+            builder.HasIndex(a => new { a.EntityType, a.EntityId, a.OccurredAt });
         });
 
         // Organizations Schema Configurations
@@ -319,6 +320,7 @@ public class AppDbContext : DbContext, IAppDbContext
             builder.HasIndex(r => new { r.DeploymentId, r.RevisionNo }).IsUnique();
             builder.HasIndex(r => new { r.WorkflowStatus, r.DeploymentId });
             builder.HasIndex(r => new { r.DeploymentId, r.ApprovedAt });
+            builder.HasIndex(r => new { r.OperationalStatus, r.ApprovedAt });
 
             // Partial unique index: at most one active revision (Draft or Submitted) per deployment
             builder.HasIndex(r => r.DeploymentId)
@@ -334,7 +336,7 @@ public class AppDbContext : DbContext, IAppDbContext
             builder.HasOne(r => r.ResponsibleUser)
                 .WithMany()
                 .HasForeignKey(r => r.ResponsibleUserId)
-                .OnDelete(DeleteBehavior.Restrict);
+                .OnDelete(DeleteBehavior.SetNull);
 
             builder.HasOne(r => r.SubmittedByUser)
                 .WithMany()
@@ -416,6 +418,7 @@ public class AppDbContext : DbContext, IAppDbContext
             builder.HasIndex(c => c.ContractNo);
             builder.HasIndex(c => new { c.OwningOrganizationId, c.Status });
             builder.HasIndex(c => new { c.VendorId, c.Status });
+            builder.HasIndex(c => new { c.Status, c.EndDate });
 
             builder.HasOne(c => c.OwningOrganization)
                 .WithMany()
@@ -456,6 +459,7 @@ public class AppDbContext : DbContext, IAppDbContext
             builder.ToTable("license_entitlements", "contracts");
             builder.HasKey(le => le.Id);
             builder.Property(le => le.LicenseType).HasMaxLength(50).IsRequired();
+            builder.HasIndex(le => new { le.ValidTo, le.LicenseType });
 
             builder.HasMany(le => le.Allocations)
                 .WithOne(a => a.Entitlement)

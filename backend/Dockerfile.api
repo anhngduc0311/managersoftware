@@ -1,0 +1,33 @@
+# syntax=docker/dockerfile:1
+FROM mcr.microsoft.com/dotnet/sdk:10.0-alpine AS build
+WORKDIR /src
+
+# Copy directory configuration files
+COPY Directory.Build.props Directory.Packages.props global.json ./
+COPY backend/src/LaoCai.SoftwareManagement.Domain/ ./backend/src/LaoCai.SoftwareManagement.Domain/
+COPY backend/src/LaoCai.SoftwareManagement.Application/ ./backend/src/LaoCai.SoftwareManagement.Application/
+COPY backend/src/LaoCai.SoftwareManagement.Infrastructure/ ./backend/src/LaoCai.SoftwareManagement.Infrastructure/
+COPY backend/src/LaoCai.SoftwareManagement.Api/ ./backend/src/LaoCai.SoftwareManagement.Api/
+
+WORKDIR /src/backend/src/LaoCai.SoftwareManagement.Api
+RUN dotnet publish -c Release -o /app/publish --no-restore /p:UseAppHost=false
+
+FROM mcr.microsoft.com/dotnet/aspnet:10.0-alpine AS final
+WORKDIR /app
+
+# Create non-root system user and secure storage directories
+RUN addgroup -S appgroup && adduser -S appuser -G appgroup && \
+    mkdir -p /app/storage/quarantine /app/storage/clean /app/keys && \
+    chown -R appuser:appgroup /app
+
+COPY --from=build /app/publish .
+
+USER appuser
+EXPOSE 8080
+ENV ASPNETCORE_URLS=http://+:8080
+ENV ASPNETCORE_ENVIRONMENT=Production
+
+HEALTHCHECK --interval=15s --timeout=5s --start-period=10s --retries=3 \
+  CMD wget --no-verbose --tries=1 --spider http://localhost:8080/healthz/live || exit 1
+
+ENTRYPOINT ["dotnet", "LaoCai.SoftwareManagement.Api.dll"]

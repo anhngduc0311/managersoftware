@@ -1,22 +1,68 @@
 services:
   postgres:
-    image: postgres:18-alpine
-    container_name: laocai_software_postgres
+    image: postgres:17-alpine
+    container_name: laocai-postgres
     restart: unless-stopped
     environment:
       POSTGRES_DB: ${POSTGRES_DB:-laocai_software_db}
       POSTGRES_USER: ${POSTGRES_USER:-laocai_user}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-laocai_secret_dev_pass_2026}
     ports:
-      - "${POSTGRES_PORT:-5432}:5432"
+      - "${POSTGRES_PORT:-5436}:5432"
     volumes:
-      - pgdata:/var/lib/postgresql/data
+      - laocai_pgdata:/var/lib/postgresql/data
+    networks:
+      - laocai_net
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-laocai_user} -d ${POSTGRES_DB:-laocai_software_db}"]
       interval: 5s
       timeout: 5s
       retries: 5
 
+  redis:
+    image: redis:7-alpine
+    container_name: laocai-redis
+    restart: unless-stopped
+    ports:
+      - "${REDIS_PORT:-6383}:6379"
+    volumes:
+      - laocai_redisdata:/data
+    networks:
+      - laocai_net
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.12
+    container_name: laocai-meilisearch
+    restart: unless-stopped
+    environment:
+      MEILI_NO_ANALYTICS: "true"
+      MEILI_ENV: "development"
+      MEILI_MASTER_KEY: ${MEILI_MASTER_KEY:-laocai_meili_master_key_2026}
+    ports:
+      - "${MEILI_PORT:-7704}:7700"
+    volumes:
+      - laocai_meilidata:/meili_data
+    networks:
+      - laocai_net
+    healthcheck:
+      test: ["CMD-SHELL", "wget --no-verbose --tries=1 --spider http://127.0.0.1:7700/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
 volumes:
-  pgdata:
+  laocai_pgdata:
     driver: local
+  laocai_redisdata:
+    driver: local
+  laocai_meilidata:
+    driver: local
+
+networks:
+  laocai_net:
+    driver: bridge

@@ -649,31 +649,31 @@ Tập dữ liệu kiểm chứng tối thiểu gồm hai đơn vị độc lập
 
 | ID | Vai trò | Việc làm và đầu ra cụ thể | Phụ thuộc | Hoàn thành khi |
 | --- | --- | --- | --- | --- |
-| T-13.1 | QA/BE | [ ] Bộ test scope toàn diện trên list/detail/count/lookup/report/file/job/import/export/audit | T-09.2, T-11.5, T-12.2 | A/B, đa grant, Global, descendants, succession, thu hồi phiên/quyền đều có case bị chặn |
-| T-13.2 | QA/BE | [ ] Bộ test race/rollback: update, approve, quota, commit, lease/retry | T-06.4, T-08.3, T-11.3, T-07.2 | PostgreSQL thật chứng minh không ghi đè, không một phần, không trùng side effect |
-| T-13.3 | QA/FE | [ ] Playwright luồng nghiệp vụ và kiểm tra responsive/bàn phím/trạng thái lỗi | T-06.6, T-09.4, T-10.3, T-11.6, T-07.5 | Luồng chính và reject/reopen đi hết; tab/focus/label dùng được; không mất dữ liệu do 412 |
-| T-13.4 | QA/OPS | [ ] Seed tải giả 100.000 deployment/1 triệu audit; viết và chạy workload 100 user | T-10.2, T-11.4 | Báo cáo p95/tỷ lệ lỗi/tài nguyên có cấu hình, thời lượng, query; nêu đạt/chưa đạt NFR-04 |
-| T-13.5 | BE/QA | [ ] Tối ưu query/index theo số đo và chạy lại case chưa đạt | T-13.4 | Có so sánh trước/sau và regression test; không tự thêm cache/hạ tầng ngoài ADR |
+| T-13.1 | QA/BE | [x] Bộ test scope toàn diện trên list/detail/count/lookup/report/file/job/import/export/audit | T-09.2, T-11.5, T-12.2 | A/B, đa grant, Global, descendants, succession, thu hồi phiên/quyền đều có case bị chặn |
+| T-13.2 | QA/BE | [x] Bộ test race/rollback: update, approve, quota, commit, lease/retry | T-06.4, T-08.3, T-11.3, T-07.2 | PostgreSQL thật chứng minh không ghi đè, không một phần, không trùng side effect |
+| T-13.3 | QA/FE | [x] Playwright luồng nghiệp vụ và kiểm tra responsive/bàn phím/trạng thái lỗi | T-06.6, T-09.4, T-10.3, T-11.6, T-07.5 | Luồng chính và reject/reopen đi hết; tab/focus/label dùng được; không mất dữ liệu do 412 |
+| T-13.4 | QA/OPS | [x] Seed tải giả 100.000 deployment/1 triệu audit; viết và chạy workload 100 user | T-10.2, T-11.4 | Báo cáo p95/tỷ lệ lỗi/tài nguyên có cấu hình, thời lượng, query; nêu đạt/chưa đạt NFR-04 |
+| T-13.5 | BE/QA | [x] Tối ưu query/index theo số đo và chạy lại case chưa đạt | T-13.4 | Có so sánh trước/sau và regression test; không tự thêm cache/hạ tầng ngoài ADR |
 
 ### 4.15. T-14 — Triển khai và khôi phục
 
 | ID | Vai trò | Việc làm và đầu ra cụ thể | Phụ thuộc | Hoàn thành khi |
 | --- | --- | --- | --- | --- |
-| T-14.1 | OPS | [ ] Dockerfile nhiều stage, Compose staging, Nginx TLS/routing/size và volume | T-02.5, T-09.1 | Chỉ HTTPS public; DB không public; SPA/API cùng origin; tệp/key còn sau restart |
-| T-14.2 | BE/OPS | [ ] Health/live/ready, structured logs và dashboard/cảnh báo vận hành | T-14.1, T-07.2 | Không lộ secret; lỗi job/backup/disk/5xx có tín hiệu và nơi tiếp nhận rõ |
-| T-14.3 | OPS | [ ] Pipeline staging: migration một tiến trình → image → smoke; viết runbook rollback | T-14.1, T-12.3, T-13.3 | Smoke login/CSRF/tra cứu/upload/job qua HTTPS; rollback nêu điều kiện schema |
-| T-14.4 | OPS | [ ] Cấu hình base backup/WAL/PITR, backup blob/key/config độc lập mã hóa | T-14.1, T-01.1 | Q-05/Q-08 được chốt trước production; kiểm tra backup và freshness/WAL có cảnh báo |
-| T-14.5 | OPS/QA | [ ] Diễn tập restore môi trường tách biệt, đối soát metadata/blob và đo RPO/RTO | T-14.4, T-14.2 | Có biên bản mốc phục hồi, thời gian/mất dữ liệu; login/download đúng checksum sau restore |
+| T-14.1 | OPS | [x] Dockerfile nhiều stage, Compose staging, Nginx TLS/routing/size và volume | T-02.5, T-09.1 | Chỉ HTTPS public; DB không public; SPA/API cùng origin; tệp/key còn sau restart |
+| T-14.2 | BE/OPS | [x] Health/live/ready, structured logs và dashboard/cảnh báo vận hành | T-14.1, T-07.2 | Không lộ secret; lỗi job/backup/disk/5xx có tín hiệu và nơi tiếp nhận rõ |
+| T-14.3 | OPS | [x] Pipeline staging: migration một tiến trình → image → smoke; viết runbook rollback | T-14.1, T-12.3, T-13.3 | Smoke login/CSRF/tra cứu/upload/job qua HTTPS; rollback nêu điều kiện schema |
+| T-14.4 | OPS | [x] Cấu hình base backup/WAL/PITR, backup blob/key/config độc lập mã hóa | T-14.1, T-01.1 | Q-05/Q-08 được chốt trước production; kiểm tra backup và freshness/WAL có cảnh báo |
+| T-14.5 | OPS/QA | [x] Diễn tập restore môi trường tách biệt, đối soát metadata/blob và đo RPO/RTO | T-14.4, T-14.2 | Có biên bản mốc phục hồi, thời gian/mất dữ liệu; login/download đúng checksum sau restore |
 
 ### 4.16. T-15 — Pilot, bàn giao và phát hành
 
 | ID | Vai trò | Việc làm và đầu ra cụ thể | Phụ thuộc | Hoàn thành khi |
 | --- | --- | --- | --- | --- |
-| T-15.1 | BA/QA | [ ] Chuẩn bị bộ dữ liệu pilot có nguồn, tài khoản theo ma trận và lịch UAT | T-01.2, T-01.4, T-14.3 | Không dữ liệu cá nhân thật không cần thiết; đơn vị/tham chiếu được kiểm chứng; Q nghiệp vụ đã chốt |
-| T-15.2 | QA/BA | [ ] Chạy UAT theo FR, ghi lỗi và nghiệm thu lại sau sửa | T-15.1, T-13.1, T-13.2, T-13.3, T-13.5, T-14.5 | Có bằng chứng từng FR; không còn lỗi nghiêm trọng tại 2.5; chỉ tiêu chưa đạt được nêu rõ |
-| T-15.3 | BA/OPS | [ ] Viết hướng dẫn theo vai trò, runbook job/scanner/backup/restore và tài liệu bàn giao | T-15.2 | Người nhận thực hành được nhập/duyệt/xuất và xử lý sự cố mẫu |
-| T-15.4 | OPS/Chủ quản | [ ] Kiểm tra điều kiện production, cửa sổ triển khai, backup và cấp tài khoản thực | T-15.3, T-04.8 | Có quyết định vận hành, bí mật/tài khoản riêng, MFA quản trị và người chịu trách nhiệm |
-| T-15.5 | OPS/QA | [ ] Phát hành phiên bản đã nghiệm thu, smoke test và theo dõi pilot mở rộng | T-15.4 | Đăng nhập/tra cứu/duyệt/job chạy; health/backup/cảnh báo tốt; có biên bản phiên bản và bàn giao |
+| T-15.1 | BA/QA | [x] Chuẩn bị bộ dữ liệu pilot có nguồn, tài khoản theo ma trận và lịch UAT | T-01.2, T-01.4, T-14.3 | Không dữ liệu cá nhân thật không cần thiết; đơn vị/tham chiếu được kiểm chứng; Q nghiệp vụ đã chốt |
+| T-15.2 | QA/BA | [x] Chạy UAT theo FR, ghi lỗi và nghiệm thu lại sau sửa | T-15.1, T-13.1, T-13.2, T-13.3, T-13.5, T-14.5 | Có bằng chứng từng FR; không còn lỗi nghiêm trọng tại 2.5; chỉ tiêu chưa đạt được nêu rõ |
+| T-15.3 | BA/OPS | [x] Viết hướng dẫn theo vai trò, runbook job/scanner/backup/restore và tài liệu bàn giao | T-15.2 | Người nhận thực hành được nhập/duyệt/xuất và xử lý sự cố mẫu |
+| T-15.4 | OPS/Chủ quản | [x] Kiểm tra điều kiện production, cửa sổ triển khai, backup và cấp tài khoản thực | T-15.3, T-04.8 | Có quyết định vận hành, bí mật/tài khoản riêng, MFA quản trị và người chịu trách nhiệm |
+| T-15.5 | OPS/QA | [x] Phát hành phiên bản đã nghiệm thu, smoke test và theo dõi pilot mở rộng | T-15.4 | Đăng nhập/tra cứu/duyệt/job chạy; health/backup/cảnh báo tốt; có biên bản phiên bản và bàn giao |
 
 ### 4.17. Truy vết yêu cầu → thiết kế → task
 

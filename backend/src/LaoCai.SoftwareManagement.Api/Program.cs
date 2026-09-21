@@ -100,6 +100,12 @@ builder.Services.AddCors(options =>
 // Configure Native OpenAPI for .NET 10
 builder.Services.AddOpenApi();
 
+// Configure Health Checks
+builder.Services.AddHealthChecks()
+    .AddCheck("self", () => Microsoft.Extensions.Diagnostics.HealthChecks.HealthCheckResult.Healthy("Tiến trình đang hoạt động bình thường."), tags: new[] { "live" })
+    .AddCheck<LaoCai.SoftwareManagement.Api.HealthChecks.DatabaseHealthCheck>("database", tags: new[] { "ready" })
+    .AddCheck<LaoCai.SoftwareManagement.Api.HealthChecks.StorageHealthCheck>("storage", tags: new[] { "ready" });
+
 var app = builder.Build();
 
 // Auto Migrate and Seed in Development
@@ -138,6 +144,37 @@ app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();
+
+// Map Health Check Probes
+app.MapHealthChecks("/healthz/live", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("live"),
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsJsonAsync(new
+        {
+            status = report.Status.ToString(),
+            checkedAt = DateTime.UtcNow,
+            probes = report.Entries.Select(e => new { name = e.Key, status = e.Value.Status.ToString(), description = e.Value.Description })
+        });
+    }
+});
+
+app.MapHealthChecks("/healthz/ready", new Microsoft.AspNetCore.Diagnostics.HealthChecks.HealthCheckOptions
+{
+    Predicate = check => check.Tags.Contains("ready"),
+    ResponseWriter = async (context, report) =>
+    {
+        context.Response.ContentType = "application/json";
+        await context.Response.WriteAsJsonAsync(new
+        {
+            status = report.Status.ToString(),
+            checkedAt = DateTime.UtcNow,
+            probes = report.Entries.Select(e => new { name = e.Key, status = e.Value.Status.ToString(), description = e.Value.Description })
+        });
+    }
+});
 
 app.MapControllers();
 
